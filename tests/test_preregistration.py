@@ -224,9 +224,45 @@ class TestTheSecondaryResultIsReported:
         difference means AUC is the wrong summary for choosing a scorer here.
         That is a defect in the project's own method selection and belongs in
         the write-up rather than in a footnote.
+
+        The pinned sentence changed once, and the reason is worth recording.
+        This test originally required the phrase "AUC is the wrong summary for
+        choosing between scorers here", and a README rewrite dropped it — not
+        by softening the claim but by generalising it, once two further
+        results said the same thing about AUC from different directions. The
+        test caught the loss, which is what it is for.
+
+        So it now pins the numbers and the broader claim rather than one
+        sentence. Pinning prose exactly makes a test fire on every rewording;
+        pinning the figures makes it fire only when the finding itself goes
+        missing.
         """
         t = " ".join((ROOT / "README.md").read_text().split())
-        assert "AUC is the wrong summary for choosing between scorers here" in t
+
+        # The evidence: nearly identical ordering, wildly different coverage.
+        assert "0.9644" in t and "0.9631" in t
+        assert "97.7%" in t and "74.8%" in t
+
+        # And the conclusion drawn from it, which must still be stated.
+        assert "AUC cannot see what this" in t, \
+            "the AUC defect must be stated as a conclusion, not left to the " \
+            "reader to infer from two numbers"
+
+    def test_all_three_auc_results_are_reported_together(self):
+        """
+        Three independent results now say AUC cannot see what this method
+        does, and they are only persuasive together.
+
+        The excluded scorer winning at an identical AUC; a strictly monotone
+        corruption leaving AUC unchanged to the floating-point bit; and every
+        income band above 0.93 while one absorbs 4.1x its share of the error
+        budget. Any one is a curiosity. The three are a claim about the
+        metric, so the write-up has to carry the count.
+        """
+        t = " ".join((ROOT / "README.md").read_text().split())
+        assert "third independent result" in t
+        assert "0.9976" in t, "the per-band AUC table is the third result"
+        assert "4.1" in t, "the concentration figure is what it is set against"
 
 
 class TestTheCaseAgainstLeadsWithTheRealLimit:
