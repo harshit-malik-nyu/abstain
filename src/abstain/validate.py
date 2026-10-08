@@ -65,6 +65,45 @@ def states_of(cases: list[dict]) -> list[tuple[dict, frozenset[str], bool]]:
     return out
 
 
+def trial_split(cases: list[dict], *, trial: int, seed: int,
+                calibration_share: float = 0.6,
+                calibration_size: int | None = None,
+                refit=None) -> tuple[list[dict], list[dict], list[dict]]:
+    """
+    The draw, factored out so every validation uses exactly one of them.
+
+    Returns (fit, calibrate, deploy), with `fit` empty when no refitting is
+    wanted. Disjoint by construction.
+
+    This exists because `group.py` needs the same draw with a different
+    calibrator, and a second copy of the sequence would drift — after which a
+    difference between the pooled and grouped results would be attributable to
+    the copy rather than to the grouping, which is the one thing that
+    comparison must not be ambiguous about.
+
+    `seed * 10_007 + trial` is kept verbatim from the original loop so that
+    the factoring does not silently change the draws behind results already
+    reported.
+    """
+    rng_split = random.Random(seed * 10_007 + trial)
+    shuffled = cases[:]
+    rng_split.shuffle(shuffled)
+
+    fit: list[dict] = []
+    if refit is not None:
+        third = len(shuffled) // 3
+        fit, shuffled = shuffled[:third], shuffled[third:]
+
+    if calibration_size is not None:
+        if len(shuffled) < calibration_size + 1:
+            return fit, [], []
+        cut = calibration_size
+    else:
+        cut = int(len(shuffled) * calibration_share)
+
+    return fit, shuffled[:cut], shuffled[cut:]
+
+
 @dataclass
 class Trial:
     threshold: float
@@ -234,31 +273,19 @@ def validate(cases: list[dict], scorer, *, alpha: float = 0.05,
         # Independent streams: one picks the calibration cases, the other is
         # reserved for anything stochastic in deployment. Sharing one stream
         # is the bug that produced a drifting oracle arm in a sibling project.
-        rng_split = random.Random(seed * 10_007 + t)
-
-        shuffled = cases[:]
-        rng_split.shuffle(shuffled)
+        fit_cases, cal_cases, dep_cases = trial_split(
+            cases, trial=t, seed=seed,
+            calibration_share=calibration_share,
+            calibration_size=calibration_size, refit=refit)
 
         active = scorer
         if refit is not None:
             # Three disjoint folds: fit, calibrate, deploy. The scorer never
             # sees a case it will later be calibrated or scored on.
-            third = len(shuffled) // 3
-            fit_cases = shuffled[:third]
-            rest = shuffled[third:]
             if not fit_cases:
                 continue
             active = refit(fit_cases)
-        else:
-            rest = shuffled
 
-        if calibration_size is not None:
-            if len(rest) < calibration_size + 1:
-                continue
-            cut = calibration_size
-        else:
-            cut = int(len(rest) * calibration_share)
-        cal_cases, dep_cases = rest[:cut], rest[cut:]
         if not cal_cases or not dep_cases:
             continue
 

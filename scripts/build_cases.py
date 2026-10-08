@@ -118,6 +118,10 @@ def main() -> int:
     ap.add_argument("--n", type=int, default=160)
     ap.add_argument("--seed", type=int, default=515)
     ap.add_argument("--out", default=str(ROOT / "evidence" / "cases.json"))
+    ap.add_argument("--fine-incomes", action="store_true",
+                    help="income every 3,000 from 0 to 60,000: 21 values "
+                         "rather than 10, so the household space is 1,344 "
+                         "rather than 640")
     args = ap.parse_args()
 
     rng = random.Random(args.seed)
@@ -127,8 +131,33 @@ def main() -> int:
     # Income is drawn across the eligibility boundary deliberately. A benchmark
     # of households far from any threshold is decidable whatever is missing,
     # and would be passed by a rule that never abstains.
-    incomes = [0, 6_000, 12_000, 18_000, 21_000, 24_000, 30_000, 36_000,
-               48_000, 60_000]
+    #
+    # The space is finite and that turned out to matter. Ten incomes by four
+    # dependent counts by four ages by four states is 640 households, so 640
+    # is the largest benchmark this grid can produce — the original 160 is a
+    # sample of a quarter of it.
+    #
+    # 640 is not enough for the question round three asked. `power.py` works
+    # it out: group-conditional calibration at a 10% tolerance needs 29
+    # calibration cases in the *smallest* group and about 89 deployed cases
+    # there to resolve a rate against that tolerance, which comes to roughly
+    # 1,113 cases. So the grid is refined rather than the sample enlarged.
+    #
+    # Refining income to every 3,000 gives 21 values and 1,344 households.
+    # The refinement **strictly contains** the original grid — every one of
+    # the ten original values is a multiple of 3,000 — so the coarse
+    # benchmark is a subset of the fine space rather than a different
+    # population, and the two remain comparable.
+    incomes = (list(range(0, 60_001, 3_000)) if args.fine_incomes else
+               [0, 6_000, 12_000, 18_000, 21_000, 24_000, 30_000, 36_000,
+                48_000, 60_000])
+    space = len(incomes) * 4 * 4 * 4
+    if args.n > space:
+        raise SystemExit(
+            f"  --n {args.n} exceeds the {space} distinct households this "
+            f"grid can produce; the dedupe loop would never terminate")
+    print(f"  {len(incomes)} incomes, household space {space}, "
+          f"building {args.n}", flush=True)
 
     seen, cases = set(), []
     while len(cases) < args.n:
@@ -152,8 +181,32 @@ def main() -> int:
                   f"{time.time()-started:.0f}s)", flush=True)
 
     Path(args.out).write_text(json.dumps(cases, separators=(",", ":")))
+
+    # The oracle's version, recorded next to the cases it produced.
+    #
+    # The CI workflow installs `policyengine-us` unpinned, so the original
+    # build used whichever release was current that day and did not write it
+    # down. Determinability here is defined by what the engine says, which
+    # makes the engine version part of the data rather than part of the
+    # environment — two builds under different versions are two benchmarks,
+    # and without this recorded there is no way to tell them apart afterwards.
+    try:
+        import importlib.metadata as md
+        version = md.version("policyengine-us")
+    except Exception:  # pragma: no cover - metadata absent in odd installs
+        version = "unknown"
+    meta = {"n_cases": len(cases), "seed": args.seed,
+            "incomes": incomes, "household_space": space,
+            "fields": list(FIELDS), "sweepable": SWEEPABLE,
+            "engine": f"policyengine-us=={version}",
+            "engine_calls": oracle.calls,
+            "build_seconds": round(time.time() - started, 1)}
+    Path(args.out).with_suffix(".meta.json").write_text(
+        json.dumps(meta, indent=1, sort_keys=True))
+
     print(f"\n  {len(cases)} cases, {oracle.calls} engine calls, "
           f"{time.time()-started:.0f}s")
+    print(f"  oracle: policyengine-us=={version}")
     print(f"  cache hits saved {len(cases) * 2 ** len(FIELDS) - oracle.calls:,} "
           "evaluations")
     return 0

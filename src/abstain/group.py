@@ -1,0 +1,474 @@
+"""
+One threshold per group, instead of one threshold.
+
+What this fixes
+---------------
+`conditional.py` measured where the error budget actually goes, and it does
+not go where the pooled number suggests. On dev at α = 0.20 the pooled unsafe
+rate is 5.6% and the lowest-income band's is 19.2% — 3.44 times its
+proportional share, while the band predicted to fail took none at all.
+
+The diagnosis is in `docs/preregistration-3.md` and is worth restating because
+it determines the fix. The scorer's *ordering* is nearly perfect inside every
+band (per-band AUC 0.93 to 0.998). What differs is where the score *levels*
+sit: undetermined states average 0.21 in `well-below` and 0.11 in
+`near-threshold`. One global threshold is a single horizontal line drawn
+across four vertically shifted distributions, so it cuts each one at a
+different quantile — tight where the distribution sits low, loose where it
+sits high.
+
+A better scorer does not fix that. A better-*ranking* scorer certainly does
+not. What fixes it is calibrating inside each group.
+
+Prior work, named
+-----------------
+This is **Mondrian conformal prediction** — Vovk and colleagues, mid-2000s —
+and group-conditional coverage has been studied in the conformal literature
+since. The construction is not a contribution of this repository and is not
+presented as one.
+
+What is contributed is the measurement: on a benchmark where the subgroup
+failure is real and has a distributional consequence, what does group
+conditioning cost, and at what calibration size does it become affordable?
+The second question has a closed-form answer and `minimum_calibration_size`
+below gives it, because that is the number an operator can act on.
+
+The cost, which is not small
+----------------------------
+Partitioning calibration data by group divides n by the number of groups, and
+a Clopper–Pearson bound with zero observed failures in n trials is still
+1 − δ^(1/n). So the tightest tolerance reachable at all, at δ = 0.05:
+
+    7 cases per group  ->  34.8%
+   10 cases per group  ->  25.9%
+   20 cases per group  ->  13.9%
+   29 cases per group  ->   9.9%
+
+Dev's 60% calibration fold is 47 cases, about 11 per band. Group conditioning
+at a 10% tolerance is arithmetically out of reach there, and no amount of
+implementation care changes it. That is the honest shape of this trade: the
+pooled rule is feasible and conditionally misleading, the group-conditional
+rule is conditionally honest and mostly infeasible, and the way out is more
+calibration data rather than a cleverer rule.
+
+Both are therefore reported, at the same tolerances, with the infeasibility
+rate in the same table as the coverage.
+"""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass, field
+
+from .conditional import BANDS, hardness
+from .rule import INFEASIBLE_THRESHOLD, clopper_pearson_upper, run_case
+
+# ---------------------------------------------------------------------------
+# Grouping schemes
+# ---------------------------------------------------------------------------
+
+
+def by_band(case: dict) -> str:
+    """Full group conditioning: the four income bands."""
+    return hardness(case)
+
+
+def pooled(case: dict) -> str:
+    """One group. The pooled rule, expressed in the same interface."""
+    return "all"
+
+
+def separate_well_below(case: dict) -> str:
+    """
+    Two groups: the band that failed, and everything else.
+
+    **Post-hoc.** `well-below` is separated because experiment C showed
+    `well-below` failing, which is selection on the outcome. A scheme chosen
+    after seeing which group fails is fitted to this benchmark and its
+    apparent success does not transfer to a deployment whose failing group is
+    different.
+
+    It is here because the comparison is informative — two groups cost half
+    the calibration data four groups cost — and it is labelled rather than
+    quietly reported next to the pre-specified schemes. `by_band` is the rule
+    a practitioner should use, because it requires no knowledge of which
+    group will fail.
+    """
+    return "well-below" if hardness(case) == "well-below" else "rest"
+
+
+SCHEMES = {"pooled": pooled, "by-band": by_band,
+           "separate-well-below": separate_well_below}
+
+POST_HOC = frozenset({"separate-well-below"})
+
+
+# ---------------------------------------------------------------------------
+# Calibration
+# ---------------------------------------------------------------------------
+
+def minimum_calibration_size(alpha: float, delta: float = 0.05) -> int:
+    """
+    Fewest calibration cases per group that can reach `alpha` at all.
+
+    Closed form, not a search. With zero observed failures in n the
+    Clopper–Pearson upper bound is 1 − δ^(1/n), so the requirement
+    1 − δ^(1/n) ≤ α rearranges to
+
+        n >= ln(delta) / ln(1 - alpha)
+
+    This is a hard floor and it is worth knowing before collecting data
+    rather than after: it depends on neither the scorer nor the benchmark,
+    only on the tolerance and the confidence level. An operator who wants a
+    10% tolerance per group at 95% confidence needs 29 calibration cases in
+    *every* group, whatever else they do.
+    """
+    if not 0.0 < alpha < 1.0:
+        raise ValueError(f"alpha must be in (0, 1), got {alpha}")
+    if not 0.0 < delta < 1.0:
+        raise ValueError(f"delta must be in (0, 1), got {delta}")
+    return math.ceil(math.log(delta) / math.log(1.0 - alpha))
+
+
+@dataclass
+class GroupCalibration:
+    """
+    A threshold per group, and whether every group got one.
+
+    `feasible` is **conjunctive**: if any group failed to find a threshold,
+    the whole calibration failed. A rule that holds the tolerance in three
+    groups and not the fourth does not hold the tolerance, and reporting it as
+    a partial success would reintroduce exactly the averaging this module
+    exists to remove.
+    """
+
+    alpha: float
+    delta: float
+    thresholds: dict[str, float] = field(default_factory=dict)
+    per_group: dict[str, dict] = field(default_factory=dict)
+    scheme: str = "by-band"
+
+    @property
+    def feasible(self) -> bool:
+        return bool(self.per_group) and all(
+            g["feasible"] for g in self.per_group.values())
+
+    @property
+    def groups_feasible(self) -> int:
+        return sum(1 for g in self.per_group.values() if g["feasible"])
+
+    def threshold_for(self, case: dict) -> float:
+        """
+        The deployed threshold for one case.
+
+        A group absent from calibration — no calibration case fell in it —
+        gets the refusal threshold, not the pooled one. Falling back to a
+        threshold calibrated on other groups is precisely the substitution
+        that produced the 19.2% band, and doing it silently in the module
+        written to fix that would be worse than not writing it.
+        """
+        return self.thresholds.get(SCHEMES[self.scheme](case),
+                                   INFEASIBLE_THRESHOLD)
+
+    def as_dict(self) -> dict:
+        return {"scheme": self.scheme, "alpha": self.alpha,
+                "delta": self.delta, "feasible": self.feasible,
+                "groups_feasible": self.groups_feasible,
+                "groups": len(self.per_group),
+                "thresholds": dict(self.thresholds),
+                "per_group": self.per_group,
+                "post_hoc": self.scheme in POST_HOC}
+
+
+def calibrate_by_group(cases: list[dict], scorer, *, scheme: str = "by-band",
+                       alpha: float = 0.05, delta: float = 0.05,
+                       grid: int = 101, budget: int = 4) -> GroupCalibration:
+    """
+    Run the trajectory calibration separately inside each group.
+
+    Same construction as `calibrate_on_trajectories` — the calibration unit
+    is the deployed unit, for the same reason — applied within each group's
+    own cases. Reusing that function rather than reimplementing the search is
+    deliberate: a difference between the pooled and grouped results should be
+    attributable to the grouping and not to two copies of a threshold sweep
+    drifting apart.
+
+    `delta` is **not** split across groups. Each group's bound is a separate
+    statement at level δ about that group, which is what group-conditional
+    validity means. A simultaneous statement over all groups at once would
+    need δ/|groups| and would be more conservative still; the per-group form
+    is the one the literature uses and the one an operator asking "is this
+    safe for this applicant" wants.
+    """
+    if scheme not in SCHEMES:
+        raise ValueError(f"unknown scheme: {scheme!r}")
+    key = SCHEMES[scheme]
+
+    buckets: dict[str, list[dict]] = {}
+    for c in cases:
+        buckets.setdefault(key(c), []).append(c)
+
+    cal = GroupCalibration(alpha=alpha, delta=delta, scheme=scheme)
+
+    for group, group_cases in sorted(buckets.items()):
+        # Imported here rather than at module scope: `rule` does not import
+        # this module and keeping it that way means the dependency runs one
+        # direction only.
+        from .rule import calibrate_on_trajectories
+        c = calibrate_on_trajectories(
+            group_cases, scorer,
+            lambda cs, sc, tau: run_case(cs, sc, tau, budget=budget),
+            alpha=alpha, delta=delta, grid=grid)
+        cal.thresholds[group] = c.threshold
+        cal.per_group[group] = c.as_dict() | {
+            "n_cases": len(group_cases),
+            "minimum_needed": minimum_calibration_size(alpha, delta),
+            "enough_data": len(group_cases) >= minimum_calibration_size(
+                alpha, delta)}
+
+    return cal
+
+
+# ---------------------------------------------------------------------------
+# Deployment
+# ---------------------------------------------------------------------------
+
+@dataclass
+class GroupResult:
+    scheme: str
+    alpha: float
+    n: int = 0
+    unsafe: int = 0
+    resolved: int = 0
+    abstained: int = 0
+    decidable: int = 0
+    questions: int = 0
+    by_group: dict[str, dict] = field(default_factory=dict)
+
+    @property
+    def unsafe_rate(self) -> float:
+        return self.unsafe / self.n if self.n else 0.0
+
+    @property
+    def coverage(self) -> float:
+        return self.resolved / self.decidable if self.decidable else 0.0
+
+    @property
+    def questions_per_case(self) -> float:
+        return self.questions / self.n if self.n else 0.0
+
+    @property
+    def worst_group_rate(self) -> float:
+        """
+        The highest unsafe rate in any deployed group.
+
+        The number this module exists to move. A pooled rate inside budget
+        with a group outside it is the failure being fixed, so the summary
+        carries the maximum rather than only the mean.
+        """
+        seen = [g for g in self.by_group.values() if g["deployed"]]
+        return max((g["unsafe"] / g["deployed"] for g in seen), default=0.0)
+
+    @property
+    def max_concentration(self) -> float:
+        """Highest ratio of a group's unsafe share to its deployed share."""
+        if not self.unsafe or not self.n:
+            return 0.0
+        out = 0.0
+        for g in self.by_group.values():
+            if not g["deployed"]:
+                continue
+            out = max(out, (g["unsafe"] / self.unsafe)
+                      / (g["deployed"] / self.n))
+        return out
+
+    def as_dict(self) -> dict:
+        return {"scheme": self.scheme, "alpha": self.alpha, "n": self.n,
+                "unsafe_rate": self.unsafe_rate, "coverage": self.coverage,
+                "questions_per_case": self.questions_per_case,
+                "worst_group_rate": self.worst_group_rate,
+                "max_concentration": self.max_concentration,
+                "by_group": self.by_group}
+
+
+def evaluate_by_group(cases: list[dict], scorer, cal: GroupCalibration,
+                      budget: int = 4) -> GroupResult:
+    """
+    Deploy, judging each case against its own group's threshold.
+
+    Outcome labels follow `evaluate.py` exactly — committed-while-undetermined
+    is unsafe, whatever verdict came out — so the two paths cannot disagree
+    about what "unsafe" means.
+    """
+    from .evaluate import OPENING, ever_decidable, final_truth
+
+    r = GroupResult(scheme=cal.scheme, alpha=cal.alpha, n=len(cases))
+    key = SCHEMES[cal.scheme]
+
+    for case in cases:
+        group = key(case)
+        g = r.by_group.setdefault(group, {
+            "deployed": 0, "unsafe": 0, "resolved": 0, "abstained": 0,
+            "decidable": 0, "threshold": cal.thresholds.get(
+                group, INFEASIBLE_THRESHOLD)})
+
+        g["deployed"] += 1
+        decidable = ever_decidable(case)
+        if decidable:
+            r.decidable += 1
+            g["decidable"] += 1
+
+        t = run_case(case, scorer, cal.threshold_for(case), budget=budget,
+                     opening=OPENING)
+        r.questions += t.questions
+        truth = final_truth(case, frozenset(set(OPENING) | set(t.asked)))
+
+        if not t.committed:
+            r.abstained += 1
+            g["abstained"] += 1
+        elif truth == "cannot_determine":
+            r.unsafe += 1
+            g["unsafe"] += 1
+        else:
+            r.resolved += 1
+            g["resolved"] += 1
+
+    return r
+
+
+# ---------------------------------------------------------------------------
+# Validation
+# ---------------------------------------------------------------------------
+
+@dataclass
+class GroupValidation:
+    """
+    Repeated calibrate-and-deploy under one grouping scheme.
+
+    Carries the same feasibility discipline as `Validation`: the guarantee is
+    conditional on calibration reporting feasible, so the headline rate is
+    computed over feasible trials and is `None` when there were none.
+    """
+
+    scheme: str
+    alpha: float
+    delta: float
+    trials: int = 0
+    feasible_trials: int = 0
+    violations: int = 0
+    violations_when_feasible: int = 0
+    group_violations: int = 0
+    coverage_sum: float = 0.0
+    questions_sum: float = 0.0
+    worst_sum: float = 0.0
+    concentration_sum: float = 0.0
+    post_hoc: bool = False
+
+    @property
+    def infeasible_rate(self) -> float:
+        return ((self.trials - self.feasible_trials) / self.trials
+                if self.trials else 0.0)
+
+    @property
+    def violation_rate_when_feasible(self) -> float | None:
+        if not self.feasible_trials:
+            return None
+        return self.violations_when_feasible / self.feasible_trials
+
+    @property
+    def group_violation_rate_when_feasible(self) -> float | None:
+        """
+        Share of feasible trials where **any group** exceeded alpha.
+
+        The quantity D1 is about, and strictly harder to satisfy than the
+        pooled rate: a trial passes only if every deployed group is inside
+        budget. The pooled rule is expected to fail this often while passing
+        the pooled check, which is the whole finding restated as a number.
+        """
+        if not self.feasible_trials:
+            return None
+        return self.group_violations / self.feasible_trials
+
+    def _mean(self, total: float) -> float:
+        return total / self.feasible_trials if self.feasible_trials else 0.0
+
+    def as_dict(self) -> dict:
+        return {
+            "scheme": self.scheme, "alpha": self.alpha, "delta": self.delta,
+            "trials": self.trials, "feasible_trials": self.feasible_trials,
+            "infeasible_rate": self.infeasible_rate,
+            "violation_rate_when_feasible": self.violation_rate_when_feasible,
+            "group_violation_rate_when_feasible":
+                self.group_violation_rate_when_feasible,
+            "mean_coverage": self._mean(self.coverage_sum),
+            "mean_questions": self._mean(self.questions_sum),
+            "mean_worst_group_rate": self._mean(self.worst_sum),
+            "mean_max_concentration": self._mean(self.concentration_sum),
+            "post_hoc": self.post_hoc,
+        }
+
+
+def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
+                    alpha: float = 0.05, delta: float = 0.05,
+                    trials: int = 150, seed: int = 23,
+                    calibration_share: float = 0.6,
+                    calibration_size: int | None = None) -> GroupValidation:
+    """
+    The same experiment as `validate`, with the grouping scheme varied.
+
+    Uses `validate.trial_split` rather than its own draw, so the pooled and
+    grouped arms see **identical** calibration and deployment sets in every
+    trial. That makes the comparison paired: a difference between schemes
+    cannot be a difference in which cases they happened to get, which at 79
+    cases and four bands would otherwise be a real possibility.
+    """
+    from .validate import trial_split
+
+    v = GroupValidation(scheme=scheme, alpha=alpha, delta=delta,
+                        post_hoc=scheme in POST_HOC)
+
+    for t in range(trials):
+        _, cal_cases, dep_cases = trial_split(
+            cases, trial=t, seed=seed,
+            calibration_share=calibration_share,
+            calibration_size=calibration_size)
+        if not cal_cases or not dep_cases:
+            continue
+
+        cal = calibrate_by_group(cal_cases, scorer, scheme=scheme,
+                                 alpha=alpha, delta=delta)
+        res = evaluate_by_group(dep_cases, scorer, cal)
+
+        v.trials += 1
+        if res.unsafe_rate > alpha:
+            v.violations += 1
+        if not cal.feasible:
+            continue
+
+        v.feasible_trials += 1
+        if res.unsafe_rate > alpha:
+            v.violations_when_feasible += 1
+        if res.worst_group_rate > alpha:
+            v.group_violations += 1
+        v.coverage_sum += res.coverage
+        v.questions_sum += res.questions_per_case
+        v.worst_sum += res.worst_group_rate
+        v.concentration_sum += res.max_concentration
+
+    return v
+
+
+def reachable_alpha(n_per_group: int, delta: float = 0.05) -> float:
+    """
+    Tightest tolerance `n_per_group` cases can certify, at zero failures.
+
+    The inverse of `minimum_calibration_size`, kept because it is the form
+    that answers "I have this much data, what can I promise?" — which is the
+    question an operator with a fixed dataset actually has.
+    """
+    if n_per_group <= 0:
+        return 1.0
+    return clopper_pearson_upper(0, n_per_group, delta)
+
+
+assert BANDS, "grouping schemes depend on conditional.BANDS being populated"
