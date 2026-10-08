@@ -613,9 +613,12 @@ AUC identical to the bit; every group ranks above 0.93 while one absorbs 4.1×
 its share of the budget. Compare candidate scorers on the deployed metric at
 the deployed tolerance, not on a ranking summary.
 
-**3. Calibrate per group if you can afford it.** On this benchmark it was not
-a safety–coverage trade — safer in every group, higher coverage, fewer
-questions. The cost is sample size, and it is a hard floor:
+**3. Calibrate per group if you can afford it, and do not expect recalibrating
+to substitute.** On this benchmark conditioning was not a safety–coverage
+trade — safer in every group, higher coverage, fewer questions. And a freshly
+recalibrated single threshold still ran the worst group at 45.1% against a 20%
+budget, essentially unchanged from a stale one: **recalibration fixes a
+different failure.** The cost is sample size, and it is a hard floor —
 `1 − δ^(1/n) ≤ α` must hold **in your smallest group**, which is 29
 calibration cases for a 10% tolerance at 95% confidence, whatever your scorer.
 
@@ -635,7 +638,8 @@ pooling it with real trials hides the difference between "held", "broke" and
 calibration data. When the population shifted here, the reported bound stayed
 at 0.175 while violations went from 0.7% to 98%. **An operator monitoring the
 guarantee would have seen nothing.** If you can only monitor one number,
-monitor the realised rate on recent decisions.
+monitor the realised rate on recent decisions — broken out by group, because
+the pooled realised rate is the number that was already hiding a 45% group.
 
 And the thing that most needs doing next and is not done here: **run it on a
 language model's own confidence.** The corruption study brackets the answer —

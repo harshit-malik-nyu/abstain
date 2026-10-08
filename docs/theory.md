@@ -165,6 +165,27 @@ feasibility in *every* group at once, so the smallest group binds. At α = 0.10
 on 672 cases it is feasible in 7 trials out of 400, exactly as
 [`power.py`](../src/abstain/power.py) predicted before the run.
 
+### And recalibration does not substitute for it
+
+The obvious alternative to conditioning is to recalibrate when the population
+moves. Measured, with the calibration fold reweighted to the deployment mix,
+at the natural band mix:
+
+| | pooled rate | worst band | concentration | hides a subgroup |
+|---|---:|---:|---:|:--:|
+| stale threshold | 11.1% | 45.7% | 4.12 | yes |
+| **freshly recalibrated** | 11.2% | **45.1%** | **4.03** | **yes** |
+
+Recalibration restores the **marginal** guarantee — violations at a full shift
+fall from 98.0% to 9.3% — and moves the conditional failure by less than a
+point. **The thing it fixes is not the thing that was broken**, because the
+concentration was never a staleness artefact: it is what one threshold does to
+groups whose score distributions sit at different levels, and a freshly
+computed single threshold is still a single threshold.
+
+**Status: measured.** It also means the practical recommendation cannot be
+softened to "recalibrate often", which would have been the cheaper advice.
+
 ### What conditioning does not fix
 
 It is validity conditional on **the groups you chose**. A subgroup that cuts

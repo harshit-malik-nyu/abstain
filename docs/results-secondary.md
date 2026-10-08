@@ -590,3 +590,73 @@ At α = 0.10 `by-band` is feasible in **12 of 400 trials**. Its figures are not
 interpretable and are not interpreted — which is what
 [`power.py`](../src/abstain/power.py) said before the run, having computed
 that 890 cases were needed and 672 were available.
+
+---
+
+## The addendum — "just recalibrate"
+
+Round five holds calibration at the natural mix throughout, which models the
+*onset* of a shift and invites a one-line rebuttal: of course the pooled rule
+fails, it was never allowed to recalibrate. If that holds, the recommendation
+from this project collapses to *recalibrate when your population moves* —
+easier, and already standard practice. [Pre-registered as G1–G3](preregistration-5.md#addendum--the-objection-round-five-invites)
+before the code existed, then run.
+
+Same sweep, calibration fold reweighted to the deployment mix. 300 trials,
+α = 0.20.
+
+| `well-below` share | violations, stale | violations, **recalibrated** | worst band | concentration | hides a subgroup |
+|---:|---:|---:|---:|---:|:--:|
+| 14.3% *(natural)* | 0.7% | 0.7% | **45.1%** | **4.03** | **yes** |
+| 25% | 17.0% | 2.0% | 30.8% | 2.86 | **yes** |
+| 40% | 65.3% | 2.3% | 22.1% | 2.02 | **yes** |
+| 60% | 92.3% | 8.0% | 17.2% | 1.48 | no |
+| 80% | 95.3% | 12.7% | 14.1% | 1.19 | no |
+| 100% | 98.0% | 9.3% | 12.7% | 1.00 | no |
+
+### G3 held, and it is the answer
+
+At the mix an operator actually faces, a **freshly recalibrated** pooled rule
+still runs the lowest-income band at **45.1%** against a 20% budget, at
+**4.03×** its share. The stale rule's figures are 45.7% and 4.12×. The
+difference is under a point.
+
+> Recalibration fixes the **marginal** failure and leaves the **conditional**
+> one exactly where it was. The fix is *calibrate per group*, not
+> *recalibrate often.*
+
+That is not an argument against recalibrating. It is an argument that
+recalibrating answers a different question, and that the cheaper
+recommendation is not available.
+
+The concentration does fall at the right of the table, for a reason that is
+not reassuring: once one band is 80% of the cases there is barely a disparity
+left to have, and at 100% the figure is 1.00 by definition.
+
+### G1 missed
+
+The prediction was that recalibration would return violations to at or below
+δ = 0.05 **at every** shift level. It does at the first three and not the last
+three — 8.0%, 12.7%, 9.3%.
+
+The likely cause is the harness rather than the method. Forcing a band that
+holds 96 distinct cases up to 80% of a fold requires resampling with
+replacement, so the calibration fold at those points is built from few distinct
+cases and its exchangeability with deployment is weakened by the resampling
+itself rather than by the shift. **That is an explanation and not an excuse**,
+and a test pins the miss so that a future run meeting δ everywhere forces the
+write-up to stop calling it one.
+
+### G2 held, and shrank the claim it was testing
+
+Group conditioning's coverage advantage falls from **+38.4 points** against a
+stale threshold to a steady **+3.7 to +4.0** against a fresh one. Most of the
+larger number was staleness, and reporting the smaller one is more useful than
+keeping the headline.
+
+Two sanity checks sit inside that result. At a 100% share the two schemes come
+out **identical** — 87.3% each — because one band is one group, which is what
+a correct implementation must do. And at an 80% share group conditioning is
+infeasible in **all 300 trials**; a mean coverage over no feasible trial is
+0.0, and printing that as zero coverage would read as *resolved nothing* when
+it means *never certified*. Opposite implications, so it reports `n/a`.
