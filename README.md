@@ -16,15 +16,18 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; nine pre-registered predictions that missed; and one result that
+it was; eleven pre-registered predictions that missed; and one result that
 changes what the method is for.** The guarantee it delivers is not the
 guarantee its own README advertised for four rounds, and the gap is not small
 — and the strongest form of the claim that replaced it was refuted by its own
 pre-registered test, two rounds later.
 
 Everything below is measured. Every figure is checked against the file that
-produced it by a test, every miss has a test pinning it as a miss, and every
-pre-fix run is kept in `evidence/` beside the fix.
+produced it by a test, every pre-fix run is kept in `evidence/` beside the
+fix, and **[all forty-four predictions are listed with their
+outcomes](docs/predictions.md)** — a test parses that table and requires the
+count above to match it, because the opening said "five" for a while and was
+wrong.
 
 ---
 
