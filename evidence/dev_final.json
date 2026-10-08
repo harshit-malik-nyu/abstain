@@ -1,0 +1,42 @@
+{
+  "0.2": {
+    "alpha": 0.2,
+    "delta": 0.05,
+    "trials": 150,
+    "violation_rate": 0.02,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.7239583333333334,
+    "mean_questions": 2.204375,
+    "holds": true
+  },
+  "0.15": {
+    "alpha": 0.15,
+    "delta": 0.05,
+    "trials": 150,
+    "violation_rate": 0.013333333333333334,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.733125,
+    "mean_questions": 2.2872916666666665,
+    "holds": true
+  },
+  "0.1": {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 150,
+    "violation_rate": 0.013333333333333334,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.6995833333333333,
+    "mean_questions": 2.3470833333333334,
+    "holds": true
+  },
+  "0.05": {
+    "alpha": 0.05,
+    "delta": 0.05,
+    "trials": 150,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true
+  }
+}
