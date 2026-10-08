@@ -27,14 +27,18 @@ Where to start, in the order the work happened
                   asserted.
     power         how much data any of the above needs, in closed form,
                   before collecting it rather than after.
+    model         a scorer backed by a language model. Tested against a
+                  scripted transport and NEVER RUN against a model -- no
+                  number here comes from it. It exists because the gap it
+                  fills should be a key rather than a design.
 
 The one thing to read first
 ---------------------------
 `docs/theory.md` separates what is proved from what is measured from what is
 only empirically supported, and §4 is the finding that most changes what the
-method is for: the guarantee is marginal, and on this benchmark the gap
-between marginal and conditional is the difference between a 98.5% pass rate
-and a 98.2% failure rate.
+method is for: the guarantee is marginal, and on held-out data the gap between
+marginal and conditional is the difference between honouring the budget in
+100% of trials and breaking it for an income band in 99.8% of them.
 
 Nothing is re-exported from here. Every module's docstring carries its own
 argument, and importing from `abstain.group` rather than `abstain` keeps a
@@ -47,6 +51,7 @@ __all__ = [
     "conditional",
     "evaluate",
     "group",
+    "model",
     "power",
     "robustness",
     "rule",
