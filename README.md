@@ -169,6 +169,22 @@ other direction: I predicted the fitted scorer's pooled rate would be at or
 below the handcrafted one's, and it is higher at both tolerances, because it
 commits far more often while resolving twelve points more.
 
+### The fix works on the learned scorer too
+
+**H4 held.** Group-conditional calibration, measured on the same bands, with
+the fitted scorer refit per trial:
+
+| scorer, α = 0.20 | violations per band | worst band | coverage |
+|---|---:|---:|---:|
+| handcrafted, one threshold | 99.0% | 45.8% | 76.0% |
+| handcrafted, **per band** | **2.6%** | **13.0%** | **80.3%** |
+| fitted, one threshold | 86.5% | 38.9% | 88.1% |
+| fitted, **per band** | **7.0%** | **12.1%** | **92.0%** |
+
+Pareto again, on a scorer the fix was never designed around: safer in every
+band and four points more coverage. The feasibility cost is the same one —
+186 of 200 trials at α = 0.20, 93 of 200 at α = 0.15.
+
 ### A fourth result about AUC, and this one points backwards
 
 Look at the first two columns of that table together. **The scorer with the

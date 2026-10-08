@@ -660,3 +660,90 @@ a correct implementation must do. And at an 80% share group conditioning is
 infeasible in **all 300 trials**; a mean coverage over no feasible trial is
 0.0, and printing that as zero coverage would read as *resolved nothing* when
 it means *never certified*. Opposite implications, so it reports `n/a`.
+
+---
+
+## Addenda two and three — how much of this is the scorer?
+
+The subgroup finding rested on one hand-built scorer, and the mechanism
+diagnosis blames one hand-written feature. I claimed the concentration was a
+property of **using one threshold** rather than of that feature, and
+[pre-registered two tests](preregistration-5.md) of it. 200 trials,
+`fine_dev`, α = 0.20, each learned scorer refit per trial on a fold disjoint
+from calibration and deployment.
+
+| scorer | AUC | pooled unsafe | coverage | worst band | its rate | concentration | hides a subgroup |
+|---|---:|---:|---:|---|---:|---:|:--:|
+| handcrafted | **0.9555** | 11.1% | 76.0% | `well-below` | **45.9%** | **4.13** | **yes** |
+| fitted, same features | 0.9252 | 11.8% | 88.1% | `well-below` | 39.2% | **3.31** | **yes** |
+| **fitted, no distance feature** | **0.8888** | **7.3%** | **92.7%** | `well-below` | **12.5%** | **1.72** | **no** |
+
+### The strong claim is refuted
+
+**J1 failed.** Removing the one feature the mechanism blames cuts the
+concentration from 4.13 to **1.72** and brings every band inside budget. The
+claim that the concentration is a property of single-threshold calibration
+*rather than* of the score does not survive.
+
+What does survive:
+
+> The concentration is driven **primarily by a score feature that is
+> systematically wrong for one group**, and a single threshold cannot absorb
+> that. It is not an artifact of the hand-built functional form — learning the
+> weights over the same features still leaves 3.31. Remove the feature and the
+> disparity shrinks 2.4×; it does **not** vanish, and the same band is still
+> worst at 1.72× its share.
+
+Had the prediction not been written down first, "a single threshold
+concentrates harm" is exactly the kind of claim that survives on two
+confirming arms and never meets the third.
+
+The practical reading is more useful than the claim it replaces: **a feature
+that is directionally wrong for a group is the first thing to look for**, and
+removing it beat every other intervention measured here while improving pooled
+safety and coverage at the same time.
+
+### Four predictions, three missed
+
+**J2 held** — the same band is worst under all three scorers.
+
+**J1, J3 and J4 all missed, in the same direction.** J3 predicted the crippled
+scorer's coverage would fall below 60%; it is **92.7%**, the highest of the
+three. J4 predicted its AUC below 0.80; it is 0.8888. I badly underestimated
+how much signal the known-field pattern alone carries.
+
+**H3 missed** in the other direction: I predicted the fitted scorer's pooled
+unsafe rate would be at or below the handcrafted one's, and it is higher at
+both tolerances — it commits far more often, so it commits wrongly more often
+in absolute terms while resolving twelve points more.
+
+### H4 held, and the arm that tested it had to be rewritten first
+
+The first version of this experiment passed `handcrafted_scorer` to every row
+of the H4 table, because `validate_groups` had no way to refit. It printed a
+table that looked like an answer to "does conditioning fix the *learned*
+scorer" and was a duplicate of round four's scheme comparison. Nothing failed
+and nothing warned — **a missing capability that quietly changes which
+question is being answered is worse than one that raises an error.**
+
+With refit added:
+
+| scorer, α = 0.20 | violations per band | worst band | coverage |
+|---|---:|---:|---:|
+| handcrafted, one threshold | 99.0% | 45.8% | 76.0% |
+| handcrafted, **per band** | **2.6%** | **13.0%** | **80.3%** |
+| fitted, one threshold | 86.5% | 38.9% | 88.1% |
+| fitted, **per band** | **7.0%** | **12.1%** | **92.0%** |
+
+Pareto again, on a scorer the fix was never designed around.
+
+### The fourth AUC result, and the only one that points backwards
+
+Read the first two columns of the scorer table together. **The scorer with the
+worst AUC has the lowest pooled unsafe rate and the highest coverage.** 0.8888
+against 0.9555, better on both axes the method actually optimises.
+
+The earlier three showed AUC failing to *discriminate*. This one shows it
+ranking three scorers in exactly the wrong order. A ranking metric scores a
+scorer on pairs it will never be asked about; a threshold-local rule is judged
+on one cut.

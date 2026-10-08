@@ -6,10 +6,11 @@
   "well-above"
  ],
  "calibration_share": 0.3,
- "elapsed_seconds": 1068.0,
+ "elapsed_seconds": 3406.3,
  "fitted": [
   {
    "alpha": 0.2,
+   "auc": 0.9251946990825222,
    "bands": [
     {
      "abstained": 0,
@@ -69,6 +70,7 @@
   },
   {
    "alpha": 0.15,
+   "auc": 0.9251946990825222,
    "bands": [
     {
      "abstained": 0,
@@ -127,9 +129,132 @@
    "worst_band": "well-below"
   }
  ],
+ "fitted-no-distance": [
+  {
+   "alpha": 0.2,
+   "auc": 0.8888282034148952,
+   "bands": [
+    {
+     "abstained": 0,
+     "band": "well-below",
+     "coverage": 0.8752234137622877,
+     "decidable": 8952,
+     "deployed": 8952,
+     "resolved": 7835,
+     "unsafe": 1117,
+     "unsafe_rate": 0.12477658623771225
+    },
+    {
+     "abstained": 0,
+     "band": "near-threshold",
+     "coverage": 0.9481639050604568,
+     "decidable": 17864,
+     "deployed": 17864,
+     "resolved": 16938,
+     "unsafe": 926,
+     "unsafe_rate": 0.05183609493954321
+    },
+    {
+     "abstained": 0,
+     "band": "above",
+     "coverage": 0.9163343303423064,
+     "decidable": 12036,
+     "deployed": 12036,
+     "resolved": 11029,
+     "unsafe": 1007,
+     "unsafe_rate": 0.08366566965769359
+    },
+    {
+     "abstained": 0,
+     "band": "well-above",
+     "coverage": 0.9371555035911141,
+     "decidable": 23948,
+     "deployed": 23948,
+     "resolved": 22443,
+     "unsafe": 1505,
+     "unsafe_rate": 0.06284449640888592
+    }
+   ],
+   "concentration": {
+    "above": 1.1535025366637006,
+    "near-threshold": 0.7146666876406835,
+    "well-above": 0.8664400383047279,
+    "well-below": 1.7203006840237822
+   },
+   "feasible_trials": 200,
+   "hides_a_subgroup": false,
+   "mean_coverage": 0.9274681528662421,
+   "pooled_unsafe_rate": 0.07253184713375796,
+   "scorer": "fitted-no-distance",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-below"
+  },
+  {
+   "alpha": 0.15,
+   "auc": 0.8888282034148952,
+   "bands": [
+    {
+     "abstained": 0,
+     "band": "well-below",
+     "coverage": 0.8834897229669347,
+     "decidable": 8952,
+     "deployed": 8952,
+     "resolved": 7909,
+     "unsafe": 1043,
+     "unsafe_rate": 0.11651027703306524
+    },
+    {
+     "abstained": 0,
+     "band": "near-threshold",
+     "coverage": 0.9519144648454994,
+     "decidable": 17864,
+     "deployed": 17864,
+     "resolved": 17005,
+     "unsafe": 859,
+     "unsafe_rate": 0.048085535154500675
+    },
+    {
+     "abstained": 0,
+     "band": "above",
+     "coverage": 0.9221502160186108,
+     "decidable": 12036,
+     "deployed": 12036,
+     "resolved": 11099,
+     "unsafe": 937,
+     "unsafe_rate": 0.07784978398138917
+    },
+    {
+     "abstained": 0,
+     "band": "well-above",
+     "coverage": 0.9412894604977451,
+     "decidable": 23948,
+     "deployed": 23948,
+     "resolved": 22542,
+     "unsafe": 1406,
+     "unsafe_rate": 0.05871053950225488
+    }
+   ],
+   "concentration": {
+    "above": 1.151699984459656,
+    "near-threshold": 0.7113714034635199,
+    "well-above": 0.8685563912229933,
+    "well-below": 1.7236384917965835
+   },
+   "feasible_trials": 200,
+   "hides_a_subgroup": false,
+   "mean_coverage": 0.9324044585987261,
+   "pooled_unsafe_rate": 0.06759554140127388,
+   "scorer": "fitted-no-distance",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-below"
+  }
+ ],
  "handcrafted": [
   {
    "alpha": 0.2,
+   "auc": 0.9555349084493348,
    "bands": [
     {
      "abstained": 0,
@@ -189,6 +314,7 @@
   },
   {
    "alpha": 0.15,
+   "auc": 0.9555349084493348,
    "bands": [
     {
      "abstained": 0,
@@ -247,6 +373,10 @@
    "worst_band": "well-below"
   }
  ],
+ "no_distance_excludes": [
+  "log_distance",
+  "income_known"
+ ],
  "schemes": [
   {
    "alpha": 0.2,
@@ -300,6 +430,7 @@
    "min_band_coverage": 0.5408048980810871,
    "post_hoc": false,
    "scheme": "pooled",
+   "scorer": "handcrafted",
    "trials": 200,
    "violation_rate_when_feasible": 0.01,
    "worst_band": "well-below"
@@ -356,6 +487,7 @@
    "min_band_coverage": 0.6760970631590884,
    "post_hoc": false,
    "scheme": "by-band",
+   "scorer": "handcrafted",
    "trials": 200,
    "violation_rate_when_feasible": 0.0,
    "worst_band": "well-above"
@@ -412,6 +544,7 @@
    "min_band_coverage": 0.6580523513753327,
    "post_hoc": false,
    "scheme": "pooled",
+   "scorer": "handcrafted",
    "trials": 200,
    "violation_rate_when_feasible": 0.0,
    "worst_band": "well-below"
@@ -468,6 +601,235 @@
    "min_band_coverage": 0.6019426631459827,
    "post_hoc": false,
    "scheme": "by-band",
+   "scorer": "handcrafted",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-above"
+  },
+  {
+   "alpha": 0.2,
+   "bands": [
+    {
+     "abstention_rate": 0.0,
+     "band": "above",
+     "coverage": 0.9163343303423064,
+     "deployed": 12036,
+     "questions_per_case": 2.0,
+     "unsafe": 1007,
+     "unsafe_rate": 0.08366566965769359
+    },
+    {
+     "abstention_rate": 0.0007277205553067622,
+     "band": "near-threshold",
+     "coverage": 0.9200067174205105,
+     "deployed": 17864,
+     "questions_per_case": 1.9831504702194358,
+     "unsafe": 1416,
+     "unsafe_rate": 0.07926556202418271
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-above",
+     "coverage": 0.9371555035911141,
+     "deployed": 23948,
+     "questions_per_case": 1.7977701686988474,
+     "unsafe": 1505,
+     "unsafe_rate": 0.06284449640888592
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.6083556747095621,
+     "deployed": 8952,
+     "questions_per_case": 1.7331322609472744,
+     "unsafe": 3506,
+     "unsafe_rate": 0.3916443252904379
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 200,
+   "group_violation_rate_when_feasible": 0.865,
+   "infeasible_rate": 0.0,
+   "mean_coverage": 0.8814171974522291,
+   "mean_max_concentration": 3.2005904911540797,
+   "mean_questions": 1.8800477707006382,
+   "mean_worst_group_rate": 0.3893273311782543,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.6083556747095621,
+   "post_hoc": false,
+   "scheme": "pooled",
+   "scorer": "fitted",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.035,
+   "worst_band": "well-below"
+  },
+  {
+   "alpha": 0.2,
+   "bands": [
+    {
+     "abstention_rate": 0.03636526090064331,
+     "band": "above",
+     "coverage": 0.9149392423159399,
+     "deployed": 11192,
+     "questions_per_case": 2.3540028591851323,
+     "unsafe": 545,
+     "unsafe_rate": 0.048695496783416725
+    },
+    {
+     "abstention_rate": 0.005843021504728631,
+     "band": "near-threshold",
+     "coverage": 0.9235588217577254,
+     "deployed": 16601,
+     "questions_per_case": 2.031202939581953,
+     "unsafe": 1172,
+     "unsafe_rate": 0.07059815673754594
+    },
+    {
+     "abstention_rate": 0.0010308354248834708,
+     "band": "well-above",
+     "coverage": 0.9029221943348871,
+     "deployed": 22312,
+     "questions_per_case": 1.3933757619218359,
+     "unsafe": 2143,
+     "unsafe_rate": 0.09604697024022947
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.9683094348716713,
+     "deployed": 8299,
+     "questions_per_case": 2.2348475719966263,
+     "unsafe": 263,
+     "unsafe_rate": 0.03169056512832871
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 186,
+   "group_violation_rate_when_feasible": 0.06989247311827956,
+   "infeasible_rate": 0.07,
+   "mean_coverage": 0.9203821656050961,
+   "mean_max_concentration": 1.745214485603371,
+   "mean_questions": 1.8783302513526465,
+   "mean_worst_group_rate": 0.12076886246460151,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.9029221943348871,
+   "post_hoc": false,
+   "scheme": "by-band",
+   "scorer": "fitted",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-above"
+  },
+  {
+   "alpha": 0.15,
+   "bands": [
+    {
+     "abstention_rate": 0.0013293452974410102,
+     "band": "above",
+     "coverage": 0.9171651711532071,
+     "deployed": 12036,
+     "questions_per_case": 2.02600531738119,
+     "unsafe": 981,
+     "unsafe_rate": 0.08150548354935194
+    },
+    {
+     "abstention_rate": 0.0030228392297357814,
+     "band": "near-threshold",
+     "coverage": 0.9403828929690998,
+     "deployed": 17864,
+     "questions_per_case": 2.0256941334527543,
+     "unsafe": 1011,
+     "unsafe_rate": 0.056594267801164354
+    },
+    {
+     "abstention_rate": 0.0003758142642391849,
+     "band": "well-above",
+     "coverage": 0.9375730749958243,
+     "deployed": 23948,
+     "questions_per_case": 1.9013278770669784,
+     "unsafe": 1486,
+     "unsafe_rate": 0.06205111073993653
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.7556970509383378,
+     "deployed": 8952,
+     "questions_per_case": 1.88047363717605,
+     "unsafe": 2187,
+     "unsafe_rate": 0.2443029490616622
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 200,
+   "group_violation_rate_when_feasible": 0.705,
+   "infeasible_rate": 0.0,
+   "mean_coverage": 0.9085350318471341,
+   "mean_max_concentration": 2.5795266611161423,
+   "mean_questions": 1.9576273885350322,
+   "mean_worst_group_rate": 0.2440925300664741,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.7556970509383378,
+   "post_hoc": false,
+   "scheme": "pooled",
+   "scorer": "fitted",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.045,
+   "worst_band": "well-below"
+  },
+  {
+   "alpha": 0.15,
+   "bands": [
+    {
+     "abstention_rate": 0.06755300035932447,
+     "band": "above",
+     "coverage": 0.9081925979159181,
+     "deployed": 5566,
+     "questions_per_case": 2.6552281710384475,
+     "unsafe": 135,
+     "unsafe_rate": 0.024254401724757457
+    },
+    {
+     "abstention_rate": 0.01556699796431565,
+     "band": "near-threshold",
+     "coverage": 0.9349778469644354,
+     "deployed": 8351,
+     "questions_per_case": 2.134834151598611,
+     "unsafe": 413,
+     "unsafe_rate": 0.04945515507124895
+    },
+    {
+     "abstention_rate": 0.009069085089357162,
+     "band": "well-above",
+     "coverage": 0.9329599004178892,
+     "deployed": 11247,
+     "questions_per_case": 1.7764737263270205,
+     "unsafe": 652,
+     "unsafe_rate": 0.057971014492753624
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.9774640911342248,
+     "deployed": 4038,
+     "questions_per_case": 2.2662209014363546,
+     "unsafe": 91,
+     "unsafe_rate": 0.022535908865775136
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 93,
+   "group_violation_rate_when_feasible": 0.06451612903225806,
+   "infeasible_rate": 0.535,
+   "mean_coverage": 0.9349702075200333,
+   "mean_max_concentration": 2.0041100596766044,
+   "mean_questions": 2.1141702623108003,
+   "mean_worst_group_rate": 0.08520977502172379,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.9081925979159181,
+   "post_hoc": false,
+   "scheme": "by-band",
+   "scorer": "fitted",
    "trials": 200,
    "violation_rate_when_feasible": 0.0,
    "worst_band": "well-above"

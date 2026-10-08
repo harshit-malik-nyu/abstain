@@ -1116,3 +1116,43 @@ def test_j3_and_j4_are_recorded_as_misses(readme, fitted_cond):
     assert blind["auc"] > 0.80, "J4 predicted under 0.80"
     text = (ROOT / "README.md").read_text()
     assert "J1, J3 and J4 all missed" in text
+
+
+def test_conditioning_fixes_the_learned_scorer_too(readme, fitted_cond):
+    """
+    H4, which the first version of the experiment never actually measured.
+
+    `validate_groups` had no refit, so that arm passed the handcrafted scorer
+    to every row and printed a duplicate of an earlier result. This asserts
+    the fitted arm exists and that conditioning helps it on both axes.
+    """
+    rows = [r for r in fitted_cond.get("schemes", [])
+            if r.get("scorer") == "fitted" and r["alpha"] == 0.20]
+    if not rows:
+        pytest.skip("this run predates the fitted scheme arm")
+
+    pooled = next(r for r in rows if r["scheme"] == "pooled")
+    band = next(r for r in rows if r["scheme"] == "by-band")
+
+    assert band["group_violation_rate_when_feasible"] < \
+        pooled["group_violation_rate_when_feasible"] / 5
+    assert band["mean_worst_group_rate"] < pooled["mean_worst_group_rate"] / 2
+    assert band["mean_coverage"] > pooled["mean_coverage"], \
+        "the Pareto improvement has to hold for the learned scorer as well"
+
+    for value in (pct(pooled["group_violation_rate_when_feasible"]),
+                  pct(band["group_violation_rate_when_feasible"]),
+                  pct(band["mean_worst_group_rate"]),
+                  pct(band["mean_coverage"])):
+        assert value in readme, value
+
+
+def test_both_scorers_appear_in_the_scheme_arm(fitted_cond):
+    """
+    The guard against the bug that made H4 meaningless: if only one scorer
+    is present, the arm is comparing a scorer with itself again.
+    """
+    rows = fitted_cond.get("schemes", [])
+    if not rows:
+        pytest.skip("no scheme arm in this run")
+    assert {r.get("scorer") for r in rows} == {"handcrafted", "fitted"}
