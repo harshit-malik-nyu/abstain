@@ -42,6 +42,14 @@ safe and becomes close to useless**, and the only way to know which side a
 real model falls on is to run one. That is still the thing to do next, and it
 is still not done here.
 
+What *is* here is the harness: [`src/abstain/model.py`](../src/abstain/model.py),
+which implements the same `(case, known) -> float` contract every other scorer
+satisfies, with the prompt as a reviewable artefact rather than a footnote —
+what you ask a model for determines what its confidence is worth. It is tested
+against a scripted transport and has never been run against a model, and a
+test asserts no evidence file claims otherwise. That does not answer objection
+1. It reduces it from a project to a key.
+
 ## 2. The guarantee is supported, not proved
 
 Calibration searches 101 thresholds and reports a bound valid for a threshold

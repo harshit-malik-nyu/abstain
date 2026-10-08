@@ -731,6 +731,18 @@ the pooled realised rate is the number that was already hiding a 45% group.
 And the thing that most needs doing next and is not done here: **run it on a
 language model's own confidence.** The corruption study brackets the answer —
 safe but possibly useless — and brackets are not measurements.
+[`src/abstain/model.py`](src/abstain/model.py) is the harness for it, tested
+against a scripted transport and never run against a model, so what is missing
+is a key rather than a design.
+
+It encodes one requirement that is easy to get wrong and fatal if you do:
+**the score has to be a function.** The rule evaluates the same state more
+than once — the question selector looks ahead, then the stopping rule scores
+where it landed — so a scorer that calls the API each time returns different
+numbers for the same state, and any violation is then attributable to the
+non-determinism rather than to the score. Every call is cached on the state,
+and the cache is what makes it a function; `temperature=0` is set too and is
+the weaker guarantee, since providers do not promise determinism at zero.
 
 ## The case against
 
