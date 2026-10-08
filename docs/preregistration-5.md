@@ -294,3 +294,81 @@ at least half. The fix should not care which scorer produced the levels.
 
 One run on `fine_dev`, written to `evidence/fitted_conditional.json`. Neither
 holdout is touched. Misses reported as misses, pinned by test.
+
+---
+
+# Addendum three — a scorer that cannot see the boundary
+
+Written before `FittedScorer.fit` grows an `exclude` parameter. The git
+history shows it.
+
+## The limit this closes
+
+Addendum two showed a learned scorer concentrating on the same band at 3.31×.
+That separates the finding from the handcrafted *functional form* — and not
+from the *feature basis*, because `FittedScorer` learns weights over the same
+features, `log_distance` among them. The write-up says so. This closes it.
+
+Fit the same model with **`log_distance` and `income_known` removed**. What is
+left is only which fields the agent knows: `n_unknown` and the four
+`knows_*` indicators. Such a scorer cannot represent distance from the
+eligibility boundary at all, so if the concentration were a property of that
+feature it must disappear.
+
+It will be a much weaker scorer, and that is the point. The question is not
+whether it performs well; it is whether a single threshold over *any* score
+spends its budget unevenly when the groups differ.
+
+## Why it should still concentrate, if the mechanism is what I say
+
+Without distance, the only signal is how many fields are missing — and the
+bands differ sharply in how often a given knowledge state is undecidable:
+
+| band | share of reachable states undetermined |
+|---|---:|
+| well-below | **76.6%** |
+| near-threshold | 75.3% |
+| above | 64.7% |
+| well-above | **31.9%** |
+
+A score that cannot tell the bands apart gets one threshold calibrated to the
+pooled mixture, which is too permissive for the bands above the average and
+too strict for those below it. That is the same mechanism arriving by a
+different route: not "the feature is blind in one direction" but "the feature
+cannot see the groups at all".
+
+## Predictions
+
+**J1.** The no-distance scorer will **still concentrate** — some band above
+**2×** its share, `hides_a_subgroup` true, at α = 0.20.
+
+**J2.** The worst band will be **`well-below` or `near-threshold`**, the two
+with the highest undetermined share, and **not** `well-above`. The interval is
+two bands wide because 76.6% and 75.3% are not meaningfully apart.
+
+**J3.** Its coverage will be **far below** both other scorers — under 60% at
+α = 0.20 — because it has almost no ordering to work with.
+
+**J4.** Its AUC will be **below 0.80**, against 0.9489 for the handcrafted
+scorer on this benchmark. If it is not, the removed features were carrying
+less than claimed and J1 is a weaker test than intended.
+
+## What would falsify the mechanism
+
+**J1 fails.** A scorer with no distance feature does not concentrate, which
+would mean the concentration really does come from that feature rather than
+from single-threshold calibration. The README's generalisation would come out
+and the finding would be restated as being about scorers that encode
+distance-from-boundary — still a real result, and a narrower one.
+
+## What would not falsify it
+
+**J2 landing on `above`.** The ordering of middling bands is not the claim.
+
+**J3 or J4 missing.** Both are statements about how weak the crippled scorer
+is, not about what one threshold does to it.
+
+## Analysis plan
+
+One run on `fine_dev`, 200 trials, seed 53, appended to
+`evidence/fitted_conditional.json` as a third arm. Neither holdout is touched.
