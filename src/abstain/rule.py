@@ -216,7 +216,8 @@ def calibrate(samples: list[tuple[float, bool]], alpha: float = 0.05,
 
 def calibrate_on_trajectories(cases: list[dict], scorer, run, *,
                               alpha: float = 0.05, delta: float = 0.05,
-                              grid: int = 101) -> Calibration:
+                              grid: int = 101,
+                              correct_for_search: bool = False) -> Calibration:
     """
     Calibrate on what the rule actually does, not on the state population.
 
@@ -248,9 +249,32 @@ def calibrate_on_trajectories(cases: list[dict], scorer, run, *,
     Cost: a full pass over the calibration cases per grid point, so the grid
     is coarser than the state-level version. That is the price of matching
     the unit, and it is worth paying.
+
+    The selection problem, stated rather than glossed
+    ------------------------------------------------
+    This searches `grid` thresholds and reports the Clopper-Pearson bound at
+    whichever one it stops on. That bound is valid **marginally** — for a
+    threshold fixed in advance — and the threshold here is chosen using the
+    same data the bound is computed on.
+
+    So the guarantee is not proved by the construction. What supports it is
+    the empirical validation in `validate.py`, which draws fresh calibration
+    and deployment sets repeatedly and finds the violation rate at or below
+    delta. That is evidence, not a theorem, and the difference is worth
+    keeping visible.
+
+    `correct_for_search=True` applies a union bound over the grid, testing
+    each candidate at delta/grid. That restores a valid simultaneous
+    statement at the cost of a more conservative threshold, and measuring
+    what it costs is the point of having both.
     """
     if not cases:
         return Calibration(1.0, alpha, delta, 0, 0.0, 1.0, 0.0, False)
+
+    # Union bound over the candidates when a simultaneous statement is
+    # wanted. Conservative by construction: a grid of 101 tests each at
+    # delta/101 rather than delta.
+    level = delta / grid if correct_for_search else delta
 
     for i in range(grid):
         tau = i / (grid - 1)
@@ -269,10 +293,10 @@ def calibrate_on_trajectories(cases: list[dict], scorer, run, *,
             continue
         if unsafe / committed > alpha:
             continue
-        bound = clopper_pearson_upper(unsafe, committed, delta)
+        bound = clopper_pearson_upper(unsafe, committed, level)
         if bound <= alpha:
             return Calibration(
-                threshold=tau, alpha=alpha, delta=delta, n=len(cases),
+                threshold=tau, alpha=alpha, delta=level, n=len(cases),
                 empirical_unsafe=unsafe / committed, bound_unsafe=bound,
                 coverage=committed / len(cases), feasible=True)
 

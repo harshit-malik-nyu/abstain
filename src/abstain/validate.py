@@ -131,7 +131,8 @@ class Validation:
 def validate(cases: list[dict], scorer, *, alpha: float = 0.05,
              delta: float = 0.05, trials: int = 200,
              calibration_share: float = 0.6, seed: int = 0,
-             refit=None, unit: str = "trajectory") -> Validation:
+             refit=None, unit: str = "trajectory",
+             correct_for_search: bool = False) -> Validation:
     """
     Repeatedly calibrate and deploy on disjoint halves, counting violations.
 
@@ -190,7 +191,8 @@ def validate(cases: list[dict], scorer, *, alpha: float = 0.05,
             cal = calibrate_on_trajectories(
                 cal_cases, active,
                 lambda c, sc, tau: run_case(c, sc, tau, budget=4),
-                alpha=alpha, delta=delta)
+                alpha=alpha, delta=delta,
+                correct_for_search=correct_for_search)
         else:
             samples = [(active(c, k), not determinable)
                        for c, k, determinable in states_of(cal_cases)]

@@ -1,0 +1,68 @@
+[
+  {
+    "alpha": 0.2,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.01,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.7203125,
+    "mean_questions": 2.2109375,
+    "holds": true,
+    "corrected": false
+  },
+  {
+    "alpha": 0.15,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.01,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.73,
+    "mean_questions": 2.29625,
+    "holds": true,
+    "corrected": false
+  },
+  {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.01,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.6946875,
+    "mean_questions": 2.3521875,
+    "holds": true,
+    "corrected": false
+  },
+  {
+    "alpha": 0.2,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.0,
+    "infeasible_rate": 0.55,
+    "mean_coverage": 0.6652777777777777,
+    "mean_questions": 2.359722222222222,
+    "holds": true,
+    "corrected": true
+  },
+  {
+    "alpha": 0.15,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "corrected": true
+  },
+  {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "corrected": true
+  }
+]

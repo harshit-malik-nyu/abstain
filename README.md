@@ -131,10 +131,39 @@ At α = 0.10, against the two degenerate policies on the same 81 cases:
 its development set degrades on unseen data. This did not, which is the
 clearest evidence available that the holdout stayed shut.
 
+## What is guaranteed, and on what basis
+
+Three claims, resting on different things. [`docs/theory.md`](docs/theory.md)
+separates them.
+
+**The Clopper–Pearson bound is exact** for a threshold fixed in advance. Not
+novel, not in doubt.
+
+**The calibration unit must match the deployment unit** — measured, with the
+mechanism identified.
+
+**The deployed rule holds its tolerance — empirically supported, not proved.**
+Calibration searches 101 thresholds and reports the bound at whichever it
+stops on, and that bound is valid marginally for a threshold fixed in advance.
+The construction does not deliver the statement; repeated validation does, and
+the difference is worth keeping visible.
+
+A union bound over the grid restores a provable simultaneous statement and is
+**unaffordable here** — 100% infeasible at α = 0.10, because the data
+requirement roughly triples:
+
+| Target α | Marginal | Simultaneous |
+|---:|---:|---:|
+| 0.10 | 29 cases | **73** |
+| 0.05 | 59 cases | **149** |
+
+The calibration fold is 47. **`correct_for_search=True` turns the proof on for
+anyone with three times the data.**
+
 ## Status
 
-Built, validated, and tested once on held-out data. The result stands as
-reported.
+Built, validated, pre-registered, and tested once on held-out data. The result
+stands as reported.
 
 ## The holdout is locked before the method exists
 
