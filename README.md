@@ -117,37 +117,68 @@ feature's relationship to determinability is at least stable.
 > Which generalises past this benchmark: **a confidence feature encoding
 > "far from the decision boundary along dimension X" is systematically
 > overconfident on exactly the cases where a different dimension decides** —
-> and systematic, group-correlated overconfidence is the one kind a single
+> and systematic, group-correlated overconfidence is the kind a single
 > threshold cannot absorb.
 
-### A learned scorer concentrates too
+How much of the concentration is *this feature* rather than *any* single
+threshold is measured two sections below, and the answer is "most of it".
+Removing the feature cuts the disparity from 4.13× to 1.72×. I predicted it
+would not, and wrote that prediction down first.
+
+### How much of this is the scorer? I predicted "none of it" and was wrong
 
 Everything above rests on one hand-built scorer, and the mechanism blames one
-hand-written feature. Stated that way it is a story about a toy, so the
-obvious test is a scorer that **learns** — logistic regression, weights by
-gradient descent, refit every trial on a fold disjoint from both calibration
-and deployment.
+hand-written feature. I claimed the concentration was a property of **using one
+threshold**, not of that feature, and pre-registered two tests of it: a scorer
+that *learns* its weights over the same features, and a scorer that **cannot
+see distance from the boundary at all**. Both refit every trial on a fold
+disjoint from calibration and deployment.
 
-| scorer | pooled | coverage | worst band | its rate | concentration | hides a subgroup |
-|---|---:|---:|---|---:|---:|:--:|
-| handcrafted | 11.1% | 76.0% | `well-below` | **45.9%** | **4.13** | **yes** |
-| **fitted** | 11.8% | **88.1%** | `well-below` | **39.2%** | **3.31** | **yes** |
+α = 0.20, 200 trials, `fine_dev`:
 
-**Same band, same shape, twelve points more coverage.** The concentration
-survives learning the weights and survives being a much better scorer by every
-pooled measure.
+| scorer | AUC | pooled unsafe | coverage | worst band | its rate | concentration | hides a subgroup |
+|---|---:|---:|---:|---|---:|---:|:--:|
+| handcrafted | **0.9555** | 11.1% | 76.0% | `well-below` | **45.9%** | **4.13** | **yes** |
+| fitted | 0.9252 | 11.8% | 88.1% | `well-below` | 39.2% | **3.31** | **yes** |
+| **fitted, no distance feature** | **0.8888** | **7.3%** | **92.7%** | `well-below` | **12.5%** | **1.72** | **no** |
 
-**H3 missed.** I predicted the fitted scorer's pooled unsafe rate would be at
-or *below* the handcrafted one's, since it is better on every pooled
-measure. It is higher at both tolerances — 11.8% against 11.1%, 9.0% against
-7.3% — because it commits far more often, so it commits wrongly more often in
-absolute terms while resolving twelve points more. Both stay inside budget.
+**The strong claim is refuted.** Dropping the one feature the mechanism blames
+cuts the concentration from 4.13 to **1.72** and brings every band inside the
+budget. Had I not written the prediction down, "a single threshold concentrates
+harm" is exactly the kind of claim that survives on two confirming arms.
 
-**One limit on what this shows, stated rather than skipped.** The fitted
-scorer learns *weights* over the same feature basis, distance-from-boundary
-included. So it separates "the hand-built functional form" from "the feature
-basis or the single threshold" — and does not yet separate those last two from
-each other.
+What survives is narrower and still worth having:
+
+> The concentration is driven **primarily by a score feature that is
+> systematically wrong for one group**, and a single threshold cannot absorb
+> that. It is not an artifact of the hand-built functional form — learning the
+> weights over the same features leaves 3.31. Remove the feature and the
+> disparity shrinks 2.4×; it does **not** vanish. The same band is still worst
+> at 1.72× its share.
+
+So a single threshold contributes, and here it is not the dominant term. The
+practical reading is more useful than the claim it replaces: **a feature that
+is directionally wrong for a group is the thing to look for first**, and
+removing it beat every alternative.
+
+**J1, J3 and J4 all missed, in the same direction: I badly underestimated the
+crippled scorer.** J3 predicted its coverage would fall below 60% — it is
+**92.7%**, the highest of the three. J4 predicted AUC below 0.80 — it is
+0.8888. **J2 held**: the same band is still worst. **H3 missed** too, in the
+other direction: I predicted the fitted scorer's pooled rate would be at or
+below the handcrafted one's, and it is higher at both tolerances, because it
+commits far more often while resolving twelve points more.
+
+### A fourth result about AUC, and this one points backwards
+
+Look at the first two columns of that table together. **The scorer with the
+worst AUC has the lowest pooled unsafe rate and the highest coverage.** 0.8888
+against 0.9555, and it is better on both axes the method actually optimises.
+
+That is the fourth independent result here that AUC cannot see what this method
+does, and the first where it points in the wrong direction rather than merely
+failing to discriminate. A ranking metric scores a scorer on pairs it will
+never be asked about; a threshold-local rule is judged on one cut.
 
 ### It is the stopping rule, not the asking rule
 
@@ -566,10 +597,11 @@ the two score almost identically on ordering — **AUC 0.9644 against 0.9631.** 
 one-point AUC difference producing twenty-three points of coverage means the
 ordering that matters is entirely local to the threshold.
 
-**That is now the third independent result here saying AUC cannot see what this
+**That is one of four independent results here saying AUC cannot see what this
 method does.** The second: the `sharpen` corruption leaves AUC identical to the
 floating-point bit. The third: every band above 0.93 while one absorbs 4.1× its
-share of the budget.
+share of the budget. The fourth is the sharpest — the scorer with the *worst*
+AUC of three turns out to have the best pooled safety *and* the best coverage.
 
 ---
 
@@ -627,7 +659,7 @@ data was split.
 
 ## If you are building one of these
 
-Six things this project measured that would have changed how I built it, in
+Seven things this project measured that would have changed how I built it, in
 the order they would bite.
 
 **1. Check whether your error budget is spent evenly before you ship the
@@ -635,14 +667,19 @@ number.** It takes one breakdown by whatever groups your deployment actually
 has. Here the pooled rate was inside budget in 98.5% of trials and some group
 was outside it in 98.2%, and nothing in the headline number hinted at that.
 
-**2. Do not pick the scorer by AUC.** Three independent results here show it
-cannot see what a threshold-local rule does: a scorer with a 0.0013 AUC
-advantage had 23 points more coverage; a strictly monotone transform leaves
-AUC identical to the bit; every group ranks above 0.93 while one absorbs 4.1×
-its share of the budget. Compare candidate scorers on the deployed metric at
-the deployed tolerance, not on a ranking summary.
+**2. Do not pick the scorer by AUC.** Four independent results here show it
+cannot see what a threshold-local rule does, and one of them has it pointing
+backwards: of three scorers, the one with the **worst** AUC had the lowest
+unsafe rate and the highest coverage. Compare candidates on the deployed metric
+at the deployed tolerance, not on a ranking summary.
 
-**3. Calibrate per group if you can afford it, and do not expect recalibrating
+**3. Look for a feature that is directionally wrong for a group before you
+reach for anything else.** Dropping the one feature that read "far below the
+income limit" as "safe to answer" cut the subgroup disparity from 4.13× to
+1.72× — and improved pooled safety and coverage at the same time. It beat every
+other intervention here, and it is cheaper than all of them.
+
+**4. Calibrate per group if you can afford it, and do not expect recalibrating
 to substitute.** On this benchmark conditioning was not a safety–coverage
 trade — safer in every group, higher coverage, fewer questions. And a freshly
 recalibrated single threshold still ran the worst group at 45.1% against a 20%
@@ -651,19 +688,19 @@ different failure.** The cost is sample size, and it is a hard floor —
 `1 − δ^(1/n) ≤ α` must hold **in your smallest group**, which is 29
 calibration cases for a 10% tolerance at 95% confidence, whatever your scorer.
 
-**4. Size the deployment fold, not just the calibration fold.** The default
+**5. Size the deployment fold, not just the calibration fold.** The default
 60/40 split is tuned for a pooled check. A per-group rate has to be
 *resolvable* in every group, and that requirement grows much faster — the
 wrong split cost 1.7× the cases here, and a rate measured on 8 cases cannot
 answer whether a group exceeded 10%.
 
-**5. Make "infeasible" actually infeasible, and report it as its own
+**6. Make "infeasible" actually infeasible, and report it as its own
 outcome.** The refusal threshold has to be outside the score's range, not at
 the top of it. And a declined calibration is neither a pass nor a failure:
 pooling it with real trials hides the difference between "held", "broke" and
 "never certified".
 
-**6. Watch the deployed rate, not the certificate.** The bound is computed on
+**7. Watch the deployed rate, not the certificate.** The bound is computed on
 calibration data. When the population shifted here, the reported bound stayed
 at 0.175 while violations went from 0.7% to 98%. **An operator monitoring the
 guarantee would have seen nothing.** If you can only monitor one number,

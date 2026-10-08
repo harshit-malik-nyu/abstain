@@ -1000,6 +1000,15 @@ def fitted_cond():
 
 
 def arm(payload: dict, scorer: str, alpha: float) -> dict:
+    """
+    One arm's breakdown, skipping cleanly when the run predates it.
+
+    The evidence file grew a third arm after the first two were already
+    committed, so a checkout carrying the older file should skip rather than
+    raise — an absent arm is "not measured here", not a failure.
+    """
+    if scorer not in payload:
+        pytest.skip(f"this run predates the {scorer!r} arm")
     return next(r for r in payload[scorer] if r["alpha"] == alpha)
 
 
@@ -1042,7 +1051,8 @@ def test_h3_is_recorded_as_a_miss(readme, fitted_cond):
         arm(fitted_cond, "handcrafted", a)["pooled_unsafe_rate"]
         for a in (0.20, 0.15))
     assert worse_somewhere, "H3 now holds; the write-up must stop calling it a miss"
-    assert "**H3 missed.**" in (ROOT / "README.md").read_text()
+    assert "**H3** missed" in (ROOT / "README.md").read_text() or \
+        "H3 missed" in (ROOT / "README.md").read_text()
 
 
 def test_the_worst_band_rates_quoted_are_the_measured_ones(readme,
@@ -1054,10 +1064,55 @@ def test_the_worst_band_rates_quoted_are_the_measured_ones(readme,
         assert f"{d['concentration'][d['worst_band']]:.2f}" in readme, scorer
 
 
-def test_the_feature_basis_limitation_is_stated(readme):
+def test_the_strong_claim_is_reported_as_refuted(readme, fitted_cond):
     """
-    The fitted scorer shares the handcrafted one's features, so this test
-    separates the functional form from the feature basis and not the feature
-    basis from the threshold. Claiming more would be overclaiming.
+    J1 failed, and the README must say so rather than quietly narrowing.
+
+    I claimed the concentration was a property of using one threshold rather
+    than of the score's features, and pre-registered that a no-distance
+    scorer failing to concentrate would refute it. It does fail to
+    concentrate — 1.72x, every band inside budget — so the claim is narrowed
+    in the text and the refutation is named.
     """
-    assert "feature basis" in readme
+    blind = arm(fitted_cond, "fitted-no-distance", 0.20)
+    hand = arm(fitted_cond, "handcrafted", 0.20)
+
+    assert blind["hides_a_subgroup"] is False
+    blind_conc = blind["concentration"][blind["worst_band"]]
+    hand_conc = hand["concentration"][hand["worst_band"]]
+    assert blind_conc < hand_conc / 2, (blind_conc, hand_conc)
+
+    text = (ROOT / "README.md").read_text()
+    assert "strong claim is refuted" in text
+    assert f"{blind_conc:.2f}" in readme
+    # And the narrowed claim must still be stated, not merely withdrawn.
+    assert "does **not** vanish" in text
+
+
+def test_the_worst_auc_scorer_wins_on_both_deployed_axes(readme,
+                                                         fitted_cond):
+    """
+    The fourth AUC result, and the only one pointing backwards.
+
+    If a future run reverses this, the README's "worst AUC, best on both
+    axes" sentence is wrong and must change.
+    """
+    arms = {a: arm(fitted_cond, a, 0.20)
+            for a in ("handcrafted", "fitted", "fitted-no-distance")}
+    worst_auc = min(arms.values(), key=lambda d: d["auc"])
+
+    assert worst_auc["scorer"] == "fitted-no-distance"
+    assert all(worst_auc["pooled_unsafe_rate"] <= d["pooled_unsafe_rate"]
+               for d in arms.values())
+    assert all(worst_auc["mean_coverage"] >= d["mean_coverage"]
+               for d in arms.values())
+    assert f"{worst_auc['auc']:.4f}" in readme
+    assert "four independent results" in readme.lower()
+
+
+def test_j3_and_j4_are_recorded_as_misses(readme, fitted_cond):
+    blind = arm(fitted_cond, "fitted-no-distance", 0.20)
+    assert blind["mean_coverage"] > 0.60, "J3 predicted under 60%"
+    assert blind["auc"] > 0.80, "J4 predicted under 0.80"
+    text = (ROOT / "README.md").read_text()
+    assert "J1, J3 and J4 all missed" in text

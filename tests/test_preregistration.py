@@ -277,19 +277,24 @@ class TestTheSecondaryResultIsReported:
             "the AUC defect must be stated as a conclusion, not left to the " \
             "reader to infer from two numbers"
 
-    def test_all_three_auc_results_are_reported_together(self):
+    def test_all_the_auc_results_are_reported_together(self):
         """
-        Three independent results now say AUC cannot see what this method
+        Four independent results now say AUC cannot see what this method
         does, and they are only persuasive together.
 
-        The excluded scorer winning at an identical AUC; a strictly monotone
-        corruption leaving AUC unchanged to the floating-point bit; and every
-        income band above 0.93 while one absorbs 4.1x its share of the error
-        budget. Any one is a curiosity. The three are a claim about the
-        metric, so the write-up has to carry the count.
+        The excluded scorer winning at a near-identical AUC; a strictly
+        monotone corruption leaving AUC unchanged to the floating-point bit;
+        every income band above 0.93 while one absorbs 4.1x its share of the
+        budget; and -- the one that points backwards rather than merely
+        failing to discriminate -- the scorer with the WORST AUC of three
+        beating both others on pooled safety and on coverage.
+
+        Any one is a curiosity. Together they are a claim about the metric,
+        so the write-up has to carry the count. It said "third" until the
+        fourth arrived, which is the kind of number that goes stale silently.
         """
         t = " ".join((ROOT / "README.md").read_text().split())
-        assert "third independent result" in t
+        assert "four independent results" in t.lower()
         assert "0.9976" in t, "the per-band AUC table is the third result"
         assert "4.1" in t, "the concentration figure is what it is set against"
 
