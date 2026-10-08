@@ -31,4 +31,9 @@ jobs:
         with: { python-version: "3.12" }
       - run: pip install -e ".[dev]" pyflakes
       - run: python -m pyflakes src/abstain tests scripts
-      - run: pytest -q --cov=abstain --cov-report=term --cov-fail-under=70
+      # 90, not 70. The floor was 70 while the suite sat at 96, which is a
+      # floor that cannot catch anything: shift.py -- the module behind the
+      # most dramatic result here -- was at 0% and CI was green, because the
+      # evidence-coupling tests compare prose to a JSON file and would pass
+      # unchanged if a refactor broke the harness underneath it.
+      - run: pytest -q --cov=abstain --cov-report=term --cov-fail-under=90
