@@ -524,3 +524,69 @@ Five predictions missed across the four rounds: **A2** (monotonicity in
 calibration size), **C1** and **C2** (the wrong band, twice), **C3** (which
 was right and unmeasurable at 79 cases), and **E6** (coverage cost, which was
 a coverage gain). Each is recorded as a miss with a test pinning it.
+
+---
+
+## Round four, confirmatory — the fine holdout, opened once
+
+672 cases this method was never developed against. Same code path, same seed,
+same trial count, `fine_dev` swapped for `fine_holdout`.
+
+**The run was interrupted partway through** by the session it was running in,
+after the replication and concentration tables had printed. It was relaunched
+rather than re-designed, and the claim that this is one draw rather than two
+looks is checked rather than asserted:
+[`scripts/verify_resumed_run.py`](../scripts/verify_resumed_run.py) requires
+every numeric row the interrupted log printed to reappear character for
+character in the completed one. **All 36 do.** The interrupted log was
+committed before the relaunch so it could not be edited to match, and tests
+assert both that ordering and that `run_round4.py` was unmodified between the
+two.
+
+### E1 and E2 — the guarantee
+
+| α | feasible | violations | coverage | questions/case |
+|---:|---:|---:|---:|---:|
+| 0.20 | 400 | **0.0%** | 75.1% | 2.04 |
+| 0.15 | 400 | **1.8%** | 77.1% | 2.17 |
+| 0.10 *(exploratory)* | 400 | **0.0%** | 77.8% | 2.27 |
+
+### E3 and E8 — the concentration is worse here than on dev
+
+| α | pooled | worst band | its rate | concentration | hides a subgroup |
+|---:|---:|---|---:|---:|:--:|
+| 0.20 | 11.5% | `well-below` | **49.0%** | **4.24** | **yes** |
+| 0.15 | 7.3% | `well-below` | 31.9% | **4.35** | **yes** |
+| 0.10 | 4.1% | `well-below` | 13.9% | 3.44 | **yes** |
+
+Against dev's 45.7% and 4.12 at α = 0.20. **A result that degrades from dev to
+holdout is the usual signature of tuning; one that gets worse against the
+method cannot be.**
+
+### E4–E7 — the schemes
+
+| α = 0.20 | feasible | violations (per band) | worst band | coverage | questions |
+|---|---:|---:|---:|---:|---:|
+| pooled | 400 | **99.8%** | **48.8%** | 75.1% | 2.04 |
+| **by-band** | 370 | **3.5%** | **12.8%** | **78.0%** | **1.90** |
+| separate-well-below *(post-hoc)* | 400 | 69.5% | 24.8% | 78.6% | 1.91 |
+
+| α = 0.15 | feasible | violations (per band) | worst band | coverage |
+|---|---:|---:|---:|---:|
+| pooled | 400 | 82.5% | 31.7% | 77.1% |
+| **by-band** | 163 | **5.5%** | **9.7%** | **78.5%** |
+| separate-well-below *(post-hoc)* | 393 | 39.4% | 13.8% | 80.7% |
+
+**E5 replicates, and so does E6's reversal** — conditioning is safer per band,
+resolves more, and asks fewer questions, on data it was never developed
+against.
+
+**E7 replicates, and the post-hoc warning lands.** The two-group scheme sits
+at 69.5% subgroup violations against the full scheme's 3.5%. A scheme fitted
+to the group you watched fail does not protect the groups you did not check,
+and that was written down before it was measured.
+
+At α = 0.10 `by-band` is feasible in **12 of 400 trials**. Its figures are not
+interpretable and are not interpreted — which is what
+[`power.py`](../src/abstain/power.py) said before the run, having computed
+that 890 cases were needed and 672 were available.

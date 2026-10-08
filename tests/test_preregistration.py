@@ -142,7 +142,10 @@ class TestItPrecededTheHoldout:
                    # Names the holdout's evidence files only to check that
                    # the interrupted and resumed runs agree. A verifier is
                    # not a reader, same as the build workflow above.
-                   "scripts/verify_resumed_run.py"}
+                   "scripts/verify_resumed_run.py",
+                   # And the write-up reports the result, which is the
+                   # point of having opened it.
+                   "docs/results-secondary.md"}
         unexpected = self._readers("fine_holdout") - allowed
         assert not unexpected, f"extra readers of the fine holdout: {unexpected}"
 
