@@ -102,6 +102,43 @@ class ShiftPoint:
     bound_sum: float = 0.0
     distinct_sum: int = 0
     deployed_sum: int = 0
+    bands: dict[str, dict] = field(default_factory=dict)
+    """
+    Per-band counts, pooled over feasible trials.
+
+    Needed for G3, which asks whether a RECALIBRATED pooled rule still
+    concentrates. Recalibration restores the marginal guarantee; whether it
+    evens out the budget is a different question, and the violation rate
+    alone cannot answer it.
+    """
+
+    def tally(self, band: str) -> dict:
+        if band not in self.bands:
+            self.bands[band] = {"deployed": 0, "unsafe": 0}
+        return self.bands[band]
+
+    @property
+    def worst_band_rate(self) -> float:
+        seen = [b for b in self.bands.values() if b["deployed"]]
+        return max((b["unsafe"] / b["deployed"] for b in seen), default=0.0)
+
+    @property
+    def max_concentration(self) -> float:
+        total_d = sum(b["deployed"] for b in self.bands.values())
+        total_u = sum(b["unsafe"] for b in self.bands.values())
+        if not total_u or not total_d:
+            return 0.0
+        return max(((b["unsafe"] / total_u) / (b["deployed"] / total_d))
+                   for b in self.bands.values() if b["deployed"])
+
+    @property
+    def hides_a_subgroup(self) -> bool:
+        """Pooled rate inside budget while some band is outside it."""
+        total_d = sum(b["deployed"] for b in self.bands.values())
+        total_u = sum(b["unsafe"] for b in self.bands.values())
+        if not total_d or (total_u / total_d) > self.alpha:
+            return False
+        return self.worst_band_rate > self.alpha
 
     @property
     def violation_rate(self) -> float | None:
@@ -145,13 +182,19 @@ class ShiftPoint:
                 "mean_unsafe_rate": self._mean(self.unsafe_sum),
                 "mean_coverage": self._mean(self.coverage_sum),
                 "mean_reported_bound": self.mean_reported_bound,
-                "distinct_fraction": self.distinct_fraction}
+                "distinct_fraction": self.distinct_fraction,
+                "worst_band_rate": self.worst_band_rate,
+                "max_concentration": self.max_concentration,
+                "hides_a_subgroup": self.hides_a_subgroup,
+                "bands": {k: dict(v) for k, v in sorted(self.bands.items())}}
 
 
 @dataclass
 class ShiftSweep:
     band: str
     points: list[ShiftPoint] = field(default_factory=list)
+    shift_calibration: bool = False
+    """Whether the operator was allowed to recalibrate on the shifted mix."""
 
     def for_scheme(self, scheme: str, alpha: float) -> list[ShiftPoint]:
         return [p for p in self.points
@@ -166,6 +209,7 @@ class ShiftSweep:
 
     def as_dict(self) -> dict:
         return {"band": self.band,
+                "shift_calibration": self.shift_calibration,
                 "points": [p.as_dict() for p in self.points]}
 
 
@@ -176,17 +220,36 @@ def sweep_shift(cases: list[dict], scorer, *, band: str = "well-below",
                 alphas: tuple[float, ...] = (0.20, 0.15),
                 trials: int = 300, seed: int = 41,
                 calibration_share: float = 0.30,
-                delta: float = 0.05) -> ShiftSweep:
+                delta: float = 0.05,
+                shift_calibration: bool = False) -> ShiftSweep:
     """
-    Calibrate unshifted, deploy shifted, count violations.
+    Calibrate, deploy shifted, count violations.
 
     Both schemes see the **same** calibration fold and the **same** reweighted
     deployment fold in every trial, drawn from `validate.trial_split` and a
     per-trial stream that depends only on the trial index. So the comparison
     between pooled and group-conditional is paired, and a difference between
     them is not a difference in which cases they happened to get.
+
+    `shift_calibration` and the objection it answers
+    ------------------------------------------------
+    Left false, calibration stays at the natural mix however far deployment
+    moves. That is the right model for the *onset* of a shift — the operator
+    does not know it is coming — and the wrong one afterwards, which leaves
+    the whole round open to a one-line rebuttal: of course the pooled rule
+    fails, it was never allowed to recalibrate.
+
+    Set true, the calibration fold is reweighted to the same share as the
+    deployment fold. The operator now knows the mix and has recalibrated on
+    it, and the question becomes the one a practitioner actually faces:
+
+        is the fix "calibrate per group", or just "recalibrate often"?
+
+    The second is easier and already standard practice, so if recalibration
+    alone restores both validity and an even error budget, the recommendation
+    from this repository is the weaker one and should say so.
     """
-    sweep = ShiftSweep(band=band)
+    sweep = ShiftSweep(band=band, shift_calibration=shift_calibration)
 
     for scheme in schemes:
         for alpha in alphas:
@@ -210,7 +273,19 @@ def sweep_shift(cases: list[dict], scorer, *, band: str = "well-below",
                     if not shifted:
                         continue
 
-                    cal = calibrate_by_group(cal_cases, scorer, scheme=scheme,
+                    fold = cal_cases
+                    if shift_calibration:
+                        # A separate stream, so the calibration fold's
+                        # resampling is not the deployment fold's draw
+                        # repeated -- that would make the two folds share
+                        # cases in the same order and the split stop being
+                        # disjoint in effect.
+                        cal_rng = random.Random(seed * 104_729 + t)
+                        fold = reweight(cal_cases, band, share, cal_rng)
+                        if not fold:
+                            continue
+
+                    cal = calibrate_by_group(fold, scorer, scheme=scheme,
                                              alpha=alpha, delta=delta)
                     pt.trials += 1
                     if not cal.feasible:
@@ -231,6 +306,10 @@ def sweep_shift(cases: list[dict], scorer, *, band: str = "well-below",
                     # moment a copy was introduced.
                     pt.distinct_sum += len({c["id"] for c in shifted})
                     pt.deployed_sum += len(shifted)
+                    for name, g in res.by_group.items():
+                        t = pt.tally(name)
+                        t["deployed"] += g["deployed"]
+                        t["unsafe"] += g["unsafe"]
 
                 sweep.points.append(pt)
 
