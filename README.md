@@ -120,6 +120,35 @@ feature's relationship to determinability is at least stable.
 > and systematic, group-correlated overconfidence is the one kind a single
 > threshold cannot absorb.
 
+### A learned scorer concentrates too
+
+Everything above rests on one hand-built scorer, and the mechanism blames one
+hand-written feature. Stated that way it is a story about a toy, so the
+obvious test is a scorer that **learns** — logistic regression, weights by
+gradient descent, refit every trial on a fold disjoint from both calibration
+and deployment.
+
+| scorer | pooled | coverage | worst band | its rate | concentration | hides a subgroup |
+|---|---:|---:|---|---:|---:|:--:|
+| handcrafted | 11.1% | 76.0% | `well-below` | **45.9%** | **4.13** | **yes** |
+| **fitted** | 11.8% | **88.1%** | `well-below` | **39.2%** | **3.31** | **yes** |
+
+**Same band, same shape, twelve points more coverage.** The concentration
+survives learning the weights and survives being a much better scorer by every
+pooled measure.
+
+**H3 missed.** I predicted the fitted scorer's pooled unsafe rate would be at
+or *below* the handcrafted one's, since it is better on every pooled
+measure. It is higher at both tolerances — 11.8% against 11.1%, 9.0% against
+7.3% — because it commits far more often, so it commits wrongly more often in
+absolute terms while resolving twelve points more. Both stay inside budget.
+
+**One limit on what this shows, stated rather than skipped.** The fitted
+scorer learns *weights* over the same feature basis, distance-from-boundary
+included. So it separates "the hand-built functional form" from "the feature
+basis or the single threshold" — and does not yet separate those last two from
+each other.
+
 ### It is the stopping rule, not the asking rule
 
 The rule does two things — decides **when** to stop asking, and **what** to

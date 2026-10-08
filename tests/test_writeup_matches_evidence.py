@@ -985,3 +985,79 @@ def test_an_all_infeasible_point_is_not_reported_as_zero_coverage(readme,
     p = rpoint(recal, "recalibrated", "by-band", 0.80)
     assert p["feasible_trials"] == 0
     assert "never certified" in readme
+
+
+# ---------------------------------------------------------------------------
+# Does the mechanism survive a learned scorer?
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def fitted_cond():
+    p = ROOT / "evidence" / "fitted_conditional.json"
+    if not p.exists():
+        pytest.skip("the fitted-scorer run has not happened")
+    return json.loads(p.read_text())
+
+
+def arm(payload: dict, scorer: str, alpha: float) -> dict:
+    return next(r for r in payload[scorer] if r["alpha"] == alpha)
+
+
+def test_a_learned_scorer_also_concentrates(readme, fitted_cond):
+    """
+    H1 and H2, which are what make the central finding more than a story
+    about one hand-built feature.
+
+    If a scorer that learns its weights did NOT concentrate, the mechanism
+    would be a property of the handcrafted distance feature and the README's
+    generalisation would have to come out.
+    """
+    for alpha in (0.20, 0.15):
+        f = arm(fitted_cond, "fitted", alpha)
+        assert f["hides_a_subgroup"] is True, alpha
+        assert f["worst_band"] == "well-below", alpha
+        assert f["concentration"][f["worst_band"]] > 2.0, alpha
+
+
+def test_the_learned_scorer_is_genuinely_better_on_pooled_measures(
+        readme, fitted_cond):
+    """
+    Otherwise "it concentrates even though it is better" is not established —
+    it might simply be a worse scorer failing in a familiar way.
+    """
+    hand = arm(fitted_cond, "handcrafted", 0.20)
+    fit = arm(fitted_cond, "fitted", 0.20)
+    assert fit["mean_coverage"] > hand["mean_coverage"] + 0.05
+    assert pct(fit["mean_coverage"]) in readme
+    assert pct(hand["mean_coverage"]) in readme
+
+
+def test_h3_is_recorded_as_a_miss(readme, fitted_cond):
+    """
+    It predicted the fitted scorer's pooled rate would be at or below the
+    handcrafted one's. It is higher at both tolerances.
+    """
+    worse_somewhere = any(
+        arm(fitted_cond, "fitted", a)["pooled_unsafe_rate"] >
+        arm(fitted_cond, "handcrafted", a)["pooled_unsafe_rate"]
+        for a in (0.20, 0.15))
+    assert worse_somewhere, "H3 now holds; the write-up must stop calling it a miss"
+    assert "**H3 missed.**" in (ROOT / "README.md").read_text()
+
+
+def test_the_worst_band_rates_quoted_are_the_measured_ones(readme,
+                                                           fitted_cond):
+    for scorer in ("handcrafted", "fitted"):
+        d = arm(fitted_cond, scorer, 0.20)
+        row = next(b for b in d["bands"] if b["band"] == d["worst_band"])
+        assert pct(row["unsafe_rate"]) in readme, scorer
+        assert f"{d['concentration'][d['worst_band']]:.2f}" in readme, scorer
+
+
+def test_the_feature_basis_limitation_is_stated(readme):
+    """
+    The fitted scorer shares the handcrafted one's features, so this test
+    separates the functional form from the feature basis and not the feature
+    basis from the threshold. Claiming more would be overclaiming.
+    """
+    assert "feature basis" in readme
