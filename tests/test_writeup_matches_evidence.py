@@ -562,3 +562,71 @@ def test_the_figure_colours_survive_a_renderer_that_ignores_css():
         "no colour in the body may depend on a CSS custom property"
     assert body.count('fill="#') > 10
     assert 'stroke="#d8dee4"' in body, "gridlines need a literal light value"
+
+
+# ---------------------------------------------------------------------------
+# The mechanism, and the hypothesis that was rejected
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def mechanism():
+    p = ROOT / "evidence" / "mechanism.json"
+    if not p.exists():
+        pytest.skip("the mechanism diagnosis has not been run")
+    return json.loads(p.read_text())
+
+
+def test_the_rejected_hypothesis_is_still_rejected(mechanism):
+    """
+    The explanation I expected, pinned as rejected.
+
+    If `well-below` were dominated by amount-only undeterminacy — clearly
+    eligible households whose award still swings — the README's mechanism
+    would be wrong. It is not dominated by it, and the band with the largest
+    share of it takes none of the error budget.
+
+    Asserted rather than narrated, so that a regenerated benchmark which
+    *did* make the hypothesis true would fail here instead of leaving a wrong
+    explanation standing.
+    """
+    crit = mechanism["criterion_split"]
+
+    def amount_share(band: str) -> float:
+        d = crit[band]
+        return d["amount_only"] / (d["flip"] + d["amount_only"])
+
+    assert amount_share("well-below") < 0.5, \
+        "well-below would then be an amount-only story after all"
+    assert amount_share("near-threshold") > amount_share("well-below"), \
+        "the band taking none of the budget has the most amount-only states"
+
+
+def test_the_failing_band_never_scores_zero(mechanism, readme):
+    """
+    The sharp fact the mechanism rests on.
+
+    Every other band has undetermined states the scorer rates at zero — it
+    knows it cannot tell. In `well-below` there are none, and the median is
+    the highest of any band.
+    """
+    prof = mechanism["score_profile"]
+    wb = prof["well-below"]
+    assert wb["share_scoring_zero"] == 0.0
+    assert all(wb["median_score"] >= prof[b]["median_score"]
+               for b in prof), "well-below must have the highest median"
+    assert all(wb["mean_log_distance"] >= prof[b]["mean_log_distance"]
+               for b in prof), "and the largest distance-from-boundary"
+
+    assert f"{wb['median_score']:.4f}" in readme
+    assert f"{wb['mean_log_distance']:.4f}" in readme
+
+
+def test_eligibility_really_does_flip_for_the_failing_band(mechanism, readme):
+    """
+    Without this, "the scorer is wrong about them" has no content: the states
+    could be undetermined for a reason the scorer is not claiming to see.
+    """
+    d = mechanism["criterion_split"]["well-below"]
+    flip_share = d["flip"] / (d["flip"] + d["amount_only"])
+    assert flip_share > 0.5
+    assert f"{flip_share:.0%}" in readme

@@ -60,6 +60,53 @@ it cuts each band at a different quantile.
 > within every subgroup. Conditional validity needs conditional
 > *calibration*, not conditional ranking.**
 
+### Why those levels are shifted
+
+"Shifted levels" is a description, not a cause. The cause is specific, and the
+explanation I expected was wrong.
+
+Determinability here fires on two conditions: the eligibility verdict flips
+across the unknown fields, **or** the benefit amount moves materially while
+the verdict is stable. The natural story was that `well-below` is dominated by
+the second — households obviously eligible on income whose *award* still
+swings with household size — and that a scorer measuring distance from the
+*eligibility* boundary is blind to that by construction.
+
+Reconstructed from the complete enumeration, the share of undetermined states
+that are amount-only is `well-below` **31%**, `near-threshold` **42%**,
+`above` 15%, `well-above` 14%. **`well-below` is not dominated by it, and the
+band with the most of it takes none of the budget.** Hypothesis rejected, and
+recorded in [`scripts/diagnose_mechanism.py`](scripts/diagnose_mechanism.py)
+rather than quietly dropped.
+
+What is actually happening, over undetermined states where income is known:
+
+| band | undetermined states | share scoring **0** | median score | mean distance-from-boundary |
+|---|---:|---:|---:|---:|
+| **well-below** | 588 | **0%** | **0.3767** | **0.8759** |
+| near-threshold | 1,159 | 34% | 0.2884 | 0.5115 |
+| above | 663 | 77% | 0.0000 | 0.1849 |
+| well-above | 667 | 19% | 0.3073 | 0.6382 |
+
+**Not one undetermined `well-below` state scores zero**, and their median score
+is the highest of any band. The scorer's one real feature is distance from the
+eligibility boundary, which is *maximal* for households far **below** the
+income limit — while eligibility still flips for **69%** of their undetermined
+states, because household size moves both the limit and the award.
+
+So the failure is not bad ranking. It is that the scorer's structural
+assumption — far from the boundary implies determinable — is **false in one
+direction, and false consistently rather than noisily.** A single global
+threshold cannot correct a bias that is systematic within a group and
+different between groups. A per-group threshold can, because inside a band the
+feature's relationship to determinability is at least stable.
+
+> Which generalises past this benchmark: **a confidence feature encoding
+> "far from the decision boundary along dimension X" is systematically
+> overconfident on exactly the cases where a different dimension decides** —
+> and systematic, group-correlated overconfidence is the one kind a single
+> threshold cannot absorb.
+
 ### The rule never abstains on the band it fails
 
 Under one global threshold, `well-below`'s abstention rate is **0.0%**.
