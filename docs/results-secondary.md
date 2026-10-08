@@ -359,3 +359,168 @@ The partitions are now separate arguments; the measurement partition is the
 bands regardless of how calibration was grouped; and the pre-fix run is kept
 in `evidence/round4-dev-prefix-run.txt`. A comparison between schemes is only
 a comparison if every scheme is scored against the same partition.
+
+### E4–E7 — what group conditioning costs, once measured right
+
+`fine_dev`, 400 trials, paired on identical draws, measured on bands under
+every scheme.
+
+| α = 0.20 | feasible | violations (pooled) | violations (per band) | worst band | coverage | questions |
+|---|---:|---:|---:|---:|---:|---:|
+| pooled | 400 | 1.5% | **98.2%** | **45.6%** | 76.0% | 2.06 |
+| **by-band** | 389 | 0.0% | **3.3%** | **12.9%** | **81.0%** | **1.89** |
+| separate-well-below *(post-hoc)* | 400 | 0.2% | 62.3% | 24.1% | 79.0% | 1.92 |
+
+| α = 0.15 | feasible | violations (per band) | worst band | coverage |
+|---|---:|---:|---:|---:|
+| pooled | 400 | 88.5% | 28.8% | 78.4% |
+| **by-band** | 264 | **5.3%** | **8.6%** | **80.3%** |
+| separate-well-below *(post-hoc)* | 393 | 44.5% | 13.4% | 80.7% |
+
+**E4 held** — feasible in 389/400 trials at α = 0.20. **E5 held
+emphatically.** **E7 held**, and sharpened its own warning: the two-group
+scheme sits between, but far nearer the pooled rule on the subgroup measure
+(62.3% against 3.3%). **Separating the band you know fails leaves the bands
+you did not check sharing a threshold, and one of them then exceeds budget.**
+That is the argument for the full version over a scheme fitted to this
+benchmark, and the pre-registration made it before it was measured.
+
+At α = 0.10 `by-band` is feasible in **7 of 400 trials**. That is not a
+finding; it is the power requirement, which said 890 cases were needed and 672
+were available. The 7-trial figures are not interpretable and are reported as
+such.
+
+### E6 missed, and the miss is the most useful thing in the round
+
+I pre-registered that group conditioning would **cost coverage** — four
+conservative thresholds abstain more than one. It is safer per band, resolves
+**more**, and asks **fewer** questions.
+
+Per band at α = 0.20:
+
+| band | unsafe (pooled → by-band) | coverage | abstains | questions |
+|---|---|---|---|---|
+| **well-below** | **45.7% → 5.6%** | **54.3% → 92.4%** | 0.0% → 2.0% | 1.67 → 2.15 |
+| near-threshold | 5.2% → 4.1% | 75.4% → 75.9% | 19.4% → 20.0% | 2.28 → 2.29 |
+| above | 5.6% → 6.2% | 68.3% → 70.8% | 26.1% → 22.9% | 2.41 → 2.26 |
+| well-above | 5.4% → **10.8%** | 88.4% → 85.8% | 6.2% → 3.4% | 1.85 → 1.31 |
+
+Three things fall out of that table.
+
+**The pooled rule never abstains on the band it fails.** `well-below`'s
+abstention rate is **0.0%**, and 54.3% coverage plus 45.7% unsafe is 100%: it
+commits on every case. That band's undecidable states carry the highest score
+levels of any band, so they clear a globally-set threshold immediately — and
+the abstention mechanism, the whole point of the method, is inactive precisely
+where it is most needed.
+
+**The mechanism is question allocation, not risk allocation.** The global
+threshold asks **1.67** questions of the band running at 45.7% unsafe and
+**1.85** of a band at 5.4%. It is not under-asking uniformly; it is
+under-asking in exactly the wrong direction. Conditioning moves half a
+question from `well-above` to `well-below` and the **total falls** — 1.89
+against 2.06.
+
+> A single global threshold mis-allocates questions. It under-asks of the
+> applicants whose answers are least determined, and over-asks of everyone
+> else.
+
+**Which is why safety and coverage move together.** `well-below`'s abstention
+rises only from 0.0% to 2.0%, so the gain is not from abstaining. It is one
+more question, after which the case is decidable and a blind commitment
+becomes an informed resolution. An 8× reduction in unsafe commitments and 38
+points of coverage, for half a question.
+
+The cost lands on `well-above`: 5.4% → 10.8%, still well inside a 20% budget.
+It was over-protected by a threshold set for another band and now spends its
+own. At α = 0.15 the least-served band is marginally worse for the same reason
+(65.4% → 63.2%).
+
+---
+
+## Round five — the assumption, priced
+
+[Pre-registered here.](preregistration-5.md) Calibrate on the natural band
+mix; deploy on a mix where `well-below`'s share is forced upward. 300 trials
+per point, `fine_dev`.
+
+| `well-below` share | pooled | **by-band** | bound the rule reported | distinct cases |
+|---:|---:|---:|---:|---:|
+| **α = 0.20** | | | | |
+| 14.3% *(natural)* | 0.7% | 0.0% | 0.175 | 63.3% |
+| 25% | 17.0% | 0.0% | 0.175 | 61.9% |
+| 40% | 65.3% | 0.0% | 0.175 | 56.7% |
+| 60% | 92.3% | 0.0% | 0.175 | 46.0% |
+| 80% | 95.3% | 0.0% | 0.175 | 32.1% |
+| **100%** | **98.0%** | **0.7%** | **0.175** | 14.3% |
+| **α = 0.15** | | | | |
+| 14.3% | 0.0% | 0.0% | 0.127 | 63.3% |
+| 25% | 13.0% | 0.0% | 0.127 | 61.9% |
+| 40% | 27.0% | 0.0% | 0.127 | 56.7% |
+| 60% | 79.3% | 0.5% | 0.127 | 46.0% |
+| 80% | 89.3% | 1.5% | 0.127 | 32.1% |
+| **100%** | **91.3%** | **2.4%** | **0.127** | 14.3% |
+
+**All five predictions held.**
+
+**F1** — the control sits at 0.7% and 0.0%, matching the ordinary validation
+path. **F2** — monotone at both tolerances. **F3** — 98.0% at full shift,
+against a predicted 80%.
+
+**F4, the prediction worth the round, held.** Group conditioning stays inside
+δ at every shift level and is **140× better at full shift**. Not a lucky
+robustness property but the construction: re-weighting groups calibrated
+separately changes *which* thresholds get used, not *what any threshold is.*
+The guarantee was never a statement about the mixture.
+
+> So the fairness finding and the robustness finding are the same finding. The
+> subgroup that absorbs the error budget is exactly the subgroup whose
+> over-representation breaks the pooled rule, and one threshold per group
+> fixes both at once.
+
+**F5 held, and it is the most damning column in this document.** The reported
+bound is **0.175 at every shift level** — identical, while the deployed
+violation rate climbs from 0.7% to 98.0%. The bound is computed on calibration
+data and calibration data is unshifted, so the certificate the method issues is
+the same whether it is honouring its budget or breaking it 98% of the time.
+**An operator watching the reported bound would see nothing wrong.**
+
+### What round five does not show
+
+That the method is safe under shift. It is not, and the table is how unsafe.
+
+And group conditioning's invariance is narrow. It covers a shift in the
+**proportions** of groups that were calibrated separately. A shift *within* a
+band, a band calibration never saw, or a change in the relationship between
+score and determinability breaks it exactly as they break the pooled rule.
+`group.threshold_for` refuses to serve a group calibration never saw rather
+than borrowing another group's threshold, which is honest behaviour and not a
+solution. Weighted conformal methods for covariate shift exist; none is
+implemented here.
+
+One limitation of the harness: forcing a 14.3% band to 80% of the fold
+requires resampling with replacement, so the high-shift rows rest on fewer
+distinct cases — the last column, down to 14.3% at full shift. Reported per
+row rather than left to the reader.
+
+---
+
+## The pattern across all four rounds
+
+Three bugs were found by scrutiny, and **every one made the method look better
+than it was**:
+
+| bug | what it hid | how it survived |
+|---|---|---|
+| refusal threshold of `1.0` | the rule committing blind after declining to certify itself | the one scorer ever used tops out at 0.9718; a passing test asserted the wrong value |
+| one parameter for calibration and measurement partitions | the pooled rule's real worst-band rate, 45.7% reported as 11.1% | the pooled scheme has one group, so the breakdown was trivially flat |
+| violation rate pooled over declined trials | the difference between "held", "failed" and "never certified" | every condition was feasible until corruptions made them not |
+
+None was found by the experiment meant to validate the method. All three were
+found by experiments built to attack it, and two were found only because the
+corruption study ran scorers the primary experiment never would have.
+
+Five predictions missed across the four rounds: **A2** (monotonicity in
+calibration size), **C1** and **C2** (the wrong band, twice), **C3** (which
+was right and unmeasurable at 79 cases), and **E6** (coverage cost, which was
+a coverage gain). Each is recorded as a miss with a test pinning it.
