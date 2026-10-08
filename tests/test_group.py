@@ -450,3 +450,36 @@ def test_measure_by_rejects_an_unknown_partition(dev):
     with pytest.raises(ValueError):
         evaluate_by_group(dev[40:], handcrafted_scorer, cal,
                           measure_by="not-a-scheme")
+
+
+def test_questions_are_tracked_per_band(dev):
+    """
+    The central mechanistic claim is measurable only if this is recorded.
+
+    "A single global threshold mis-allocates questions, not just risk" was
+    inferred from safety and coverage moving together, which is weaker than
+    measuring it. Per-band questions-per-case is what measures it, and the
+    measurement is in the README: the global threshold asks 1.67 questions of
+    the band running at 45.7% unsafe and 1.86 of a band at 5.4%.
+    """
+    cal = calibrate_by_group(dev[:40], handcrafted_scorer, scheme="pooled",
+                             alpha=0.35)
+    res = evaluate_by_group(dev[40:], handcrafted_scorer, cal)
+    assert sum(g["questions"] for g in res.by_group.values()) == res.questions
+
+    v = validate_groups(dev, handcrafted_scorer, scheme="pooled", alpha=0.35,
+                        trials=5, seed=31)
+    rows = v.as_dict()["bands"]
+    assert rows and all("questions_per_case" in r for r in rows)
+    assert all(0.0 <= r["questions_per_case"] <= 4.0 for r in rows)
+
+
+def test_the_readme_reports_the_question_allocation(dev):
+    """
+    Pinned because it is the finding, and a rewrite that drops it would be
+    dropping the mechanism rather than a phrasing.
+    """
+    t = " ".join((ROOT / "README.md").read_text().split())
+    assert "mis-allocates questions" in t
+    assert "1.67" in t and "2.15" in t
+    assert "0.0%" in t, "the zero abstention rate on the failing band"

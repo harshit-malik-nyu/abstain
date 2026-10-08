@@ -60,6 +60,52 @@ it cuts each band at a different quantile.
 > within every subgroup. Conditional validity needs conditional
 > *calibration*, not conditional ranking.**
 
+### The rule never abstains on the band it fails
+
+Under one global threshold, `well-below`'s abstention rate is **0.0%**.
+Coverage 54.3% plus unsafe 45.7% is 100%: it commits on every single case.
+
+That band's undecidable states carry the highest score levels of any band, so
+they clear a globally-set threshold immediately — and the abstention mechanism,
+which is the entire point of the method, is **inactive exactly where it is
+most needed**.
+
+### A global threshold mis-allocates questions, not just risk
+
+This is the mechanism, and it is measured rather than inferred. Questions per
+case, per band, α = 0.20:
+
+| band | one global threshold | one per band | Δ |
+|---|---:|---:|---:|
+| **well-below** *(45.7% unsafe)* | **1.67** | **2.15** | **+0.48** |
+| near-threshold | 2.28 | 2.29 | +0.01 |
+| above | 2.41 | 2.26 | −0.16 |
+| well-above | 1.86 | 1.30 | **−0.56** |
+
+**The global threshold asks the fewest questions of the applicants whose
+answers are least determined**, and the most of a band that barely needs them.
+Per-band calibration moves half a question from `well-above` to `well-below`
+and the total *falls* — 1.89 against 2.06.
+
+So this is not a safety–coverage trade. Raising `well-below`'s threshold
+raises its abstention only from 0.0% to 2.0%; what it mostly buys is **one
+more question**, after which the case is decidable and a blind commitment
+becomes an informed resolution:
+
+| `well-below`, α = 0.20 | unsafe | coverage | abstains | questions |
+|---|---:|---:|---:|---:|
+| one global threshold | **45.7%** | 54.3% | 0.0% | 1.67 |
+| one per band | **5.6%** | **92.4%** | 2.0% | 2.15 |
+
+An **8× reduction in unsafe commitments and 38 points more coverage**, for
+half a question. The least-served band across the whole benchmark rises from
+54.3% to 70.8%.
+
+The cost lands on `well-above`: 5.4% → 10.8% unsafe, still well inside a 20%
+budget, coverage 88.4% → 85.8%. It was being over-protected by a threshold set
+for someone else and now spends its own budget. At α = 0.15 the least-served
+band is marginally worse for the same reason (65.4% → 63.2%).
+
 ### The fix is not a trade-off
 
 Group-conditional calibration — one threshold per band, which is Mondrian

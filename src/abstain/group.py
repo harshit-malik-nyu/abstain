@@ -345,7 +345,7 @@ def evaluate_by_group(cases: list[dict], scorer, cal: GroupCalibration,
         group = key(case)
         g = r.by_group.setdefault(group, {
             "deployed": 0, "unsafe": 0, "resolved": 0, "abstained": 0,
-            "decidable": 0,
+            "decidable": 0, "questions": 0,
             # The threshold this case was actually judged against, which comes
             # from the CALIBRATION partition. Looking it up by the measurement
             # group would be wrong whenever the two differ.
@@ -360,6 +360,11 @@ def evaluate_by_group(cases: list[dict], scorer, cal: GroupCalibration,
         t = run_case(case, scorer, cal.threshold_for(case), budget=budget,
                      opening=OPENING)
         r.questions += t.questions
+        # Per band, because the central mechanistic claim is that a single
+        # global threshold mis-allocates QUESTIONS and not only risk. That
+        # claim was inferred from safety and coverage moving together; this
+        # is what measures it.
+        g["questions"] += t.questions
         truth = final_truth(case, frozenset(set(OPENING) | set(t.asked)))
 
         if not t.committed:
@@ -422,7 +427,8 @@ class GroupValidation:
     def tally(self, band: str) -> dict:
         if band not in self.bands:
             self.bands[band] = {"deployed": 0, "unsafe": 0, "resolved": 0,
-                                "abstained": 0, "decidable": 0}
+                                "abstained": 0, "decidable": 0,
+                                "questions": 0}
         return self.bands[band]
 
     @property
@@ -440,6 +446,8 @@ class GroupValidation:
                              if t["decidable"] else 0.0),
                 "abstention_rate": (t["abstained"] / t["deployed"]
                                     if t["deployed"] else 0.0),
+                "questions_per_case": (t["questions"] / t["deployed"]
+                                       if t["deployed"] else 0.0),
             })
         return out
 
@@ -567,7 +575,7 @@ def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
         for band, g in res.by_group.items():
             t = v.tally(band)
             for k in ("deployed", "unsafe", "resolved", "abstained",
-                      "decidable"):
+                      "decidable", "questions"):
                 t[k] += g[k]
 
     return v
