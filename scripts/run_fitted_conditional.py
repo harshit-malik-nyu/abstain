@@ -39,6 +39,25 @@ SEED = 53
 CALIBRATION_SHARE = 0.30
 
 
+NO_DISTANCE = ("log_distance", "income_known")
+
+
+def refit_no_distance(fit_cases: list[dict]):
+    """
+    The same model with distance from the eligibility boundary removed.
+
+    What remains is only which fields the agent knows. Such a scorer cannot
+    represent the feature the mechanism diagnosis blames, so if the
+    concentration came from that feature it must disappear here. It is a much
+    weaker scorer and that is the point: the question is whether one threshold
+    over ANY score spends its budget unevenly when the groups differ.
+    """
+    samples = [(c, k, determinable) for c, k, determinable
+               in states_of(fit_cases)]
+    return FittedScorer().fit(samples, epochs=250, lr=0.5,
+                              exclude=NO_DISTANCE)
+
+
 def refit(fit_cases: list[dict]):
     """
     Train on every knowledge state of the fitting fold.
@@ -51,14 +70,35 @@ def refit(fit_cases: list[dict]):
     return FittedScorer().fit(samples, epochs=250, lr=0.5)
 
 
+def ordering(cases: list[dict], scorer, refit_fn) -> float:
+    """
+    AUC of the arm's scorer, fit and evaluated on disjoint folds.
+
+    Reported beside each breakdown so the concentration can be read against
+    how good the ordering is. J4 is a claim about this number, and a claim
+    about a number nobody computed is not a prediction.
+    """
+    from abstain.scorer import auc
+    if refit_fn is None:
+        active = scorer
+        held = cases
+    else:
+        third = len(cases) // 3
+        active, held = refit_fn(cases[:third]), cases[third:]
+    return auc([(active(c, k), d) for c, k, d in states_of(held)])
+
+
 def measure(cases: list[dict], scorer, label: str, refit_fn=None) -> list[dict]:
+    auc_value = ordering(cases, scorer, refit_fn)
+    print(f"\n  {label}: AUC {auc_value:.4f} (fit and scored on disjoint "
+          f"folds)")
     out = []
     for alpha in ALPHAS:
         bd = Breakdown(alpha=alpha)
         v = validate(cases, scorer, alpha=alpha, trials=TRIALS, seed=SEED,
                      calibration_share=CALIBRATION_SHARE, refit=refit_fn,
                      on_trial=collector(bd))
-        d = bd.as_dict() | {"scorer": label,
+        d = bd.as_dict() | {"scorer": label, "auc": auc_value,
                             "mean_coverage": v.mean_coverage,
                             "violation_rate_when_feasible":
                                 v.violation_rate_when_feasible,
@@ -126,22 +166,27 @@ def main() -> int:
     t0 = time.time()
     hand = measure(cases, handcrafted_scorer, "handcrafted")
     fitted = measure(cases, None, "fitted", refit_fn=refit)
+    blind = measure(cases, None, "fitted-no-distance",
+                    refit_fn=refit_no_distance)
     schemes = conditioning_helps(cases)
 
-    print("\n  H1/H2 — side by side at alpha = 0.20")
-    print(f"  {'scorer':>14} {'pooled':>8} {'coverage':>9} "
+    print("\n  H1/H2/J1/J2 — side by side at alpha = 0.20")
+    print(f"  {'scorer':>19} {'pooled':>8} {'coverage':>9} "
           f"{'worst band':>15} {'its rate':>9} {'conc':>7}")
-    for rows in (hand, fitted):
+    for rows in (hand, fitted, blind):
         d = next(r for r in rows if r["alpha"] == 0.20)
         w = next(b for b in d["bands"] if b["band"] == d["worst_band"])
-        print(f"  {d['scorer']:>14} {d['pooled_unsafe_rate']:>7.1%} "
+        print(f"  {d['scorer']:>19} {d['pooled_unsafe_rate']:>7.1%} "
               f"{d['mean_coverage']:>8.1%} {str(d['worst_band']):>15} "
               f"{w['unsafe_rate']:>8.1%} "
               f"{d['concentration'][d['worst_band']]:>7.2f}")
 
     payload = {"set": "fine_dev", "trials": TRIALS, "seed": SEED,
                "calibration_share": CALIBRATION_SHARE, "bands": list(BANDS),
-               "handcrafted": hand, "fitted": fitted, "schemes": schemes,
+               "handcrafted": hand, "fitted": fitted,
+               "fitted-no-distance": blind,
+               "no_distance_excludes": list(NO_DISTANCE),
+               "schemes": schemes,
                "elapsed_seconds": round(time.time() - t0, 1)}
     dest = ROOT / "evidence" / "fitted_conditional.json"
     dest.write_text(json.dumps(payload, indent=1, sort_keys=True))

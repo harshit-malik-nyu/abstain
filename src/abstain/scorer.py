@@ -163,19 +163,47 @@ class FittedScorer:
     bias: float = 0.0
     trained_on: int = 0
 
+    excluded: tuple[str, ...] = ()
+    """
+    Features withheld from fitting, and why that is an experiment.
+
+    The subgroup finding was first measured with a hand-built scorer whose
+    only real feature is distance from the eligibility boundary, and the
+    mechanism diagnosis blames that feature. Learning the weights over the
+    same features — which is what this class normally does — rules out the
+    hand-built *functional form* and leaves the *feature basis* untested.
+
+    Fitting with `log_distance` and `income_known` excluded leaves only which
+    fields the agent knows. Such a scorer cannot represent distance from the
+    boundary at all, so if the concentration came from that feature it must
+    disappear. It is a much weaker scorer, and that is the point: the question
+    is not whether it performs well but whether one threshold over *any* score
+    spends its budget unevenly when the groups differ.
+    """
+
     def __call__(self, case: dict, known: frozenset[str]) -> float:
         f = features(case, known)
-        z = self.bias + sum(self.weights.get(k, 0.0) * v for k, v in f.items())
+        z = self.bias + sum(self.weights.get(k, 0.0) * v for k, v in f.items()
+                            if k not in self.excluded)
         return 1.0 / (1.0 + math.exp(-max(-30.0, min(30.0, z))))
 
     def fit(self, samples: list[tuple[dict, frozenset[str], bool]], *,
-            epochs: int = 400, lr: float = 0.5, l2: float = 1e-3) -> "FittedScorer":
+            epochs: int = 400, lr: float = 0.5, l2: float = 1e-3,
+            exclude: tuple[str, ...] = ()) -> "FittedScorer":
         """
         `samples` are (case, known, is_determinable). Label is what the
         oracle said about that state, which is legitimate supervision on
         past cases and would be unavailable at decision time.
+
+        `exclude` names features to withhold. They are dropped from fitting
+        **and** recorded on the instance so `__call__` drops them too — a
+        feature excluded during training and then read at inference would be
+        multiplied by a zero weight and look excluded while quietly changing
+        the arithmetic if the weight ever drifted off zero.
         """
-        keys = sorted(features(samples[0][0], samples[0][1]))
+        self.excluded = tuple(exclude)
+        keys = [k for k in sorted(features(samples[0][0], samples[0][1]))
+                if k not in self.excluded]
         self.weights = {k: 0.0 for k in keys}
         self.bias = 0.0
         n = len(samples)
@@ -201,7 +229,8 @@ class FittedScorer:
 
     def as_dict(self) -> dict:
         return {"bias": self.bias, "weights": self.weights,
-                "trained_on": self.trained_on}
+                "trained_on": self.trained_on,
+                "excluded": list(self.excluded)}
 
 
 # ---------------------------------------------------------------------------
