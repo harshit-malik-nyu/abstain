@@ -372,3 +372,81 @@ is, not about what one threshold does to it.
 
 One run on `fine_dev`, 200 trials, seed 53, appended to
 `evidence/fitted_conditional.json` as a third arm. Neither holdout is touched.
+
+---
+
+# Addendum four — does the baseline still fail at scale?
+
+Written before any script runs the plug-in on the fine benchmark.
+
+## The claim being checked
+
+Round two justified the method's extra machinery by beating a plug-in
+threshold: accept the smallest τ whose *empirical* calibration rate is within
+α, with no finite-sample correction. On 79 cases the plug-in violated in
+16.7–20.7% of trials where the conformal rule violated in 0.7–3.3%. That table
+is the answer to "why not just pick a threshold?" and it is the reason the
+Clopper–Pearson bound is in the method at all.
+
+**It was only ever run on the coarse benchmark**, with 40–50 calibration
+cases. The correction it justifies is a *finite-sample* correction: the
+empirical rate converges on the truth as n grows, and the gap between a point
+estimate and an upper bound shrinks with it. So the comparison may be an
+artefact of a small calibration fold, and the honest version of the claim may
+be "below some n" rather than "in general".
+
+The fine benchmark gives 202 calibration cases at the 0.30 share — four times
+what round two had. If the plug-in holds δ there, the method is
+over-engineered at that scale and the README has to say so.
+
+## The design
+
+| | |
+|---|---|
+| **Set** | `evidence/fine_dev.json`, 672 cases |
+| **Arms** | conformal · plug-in, paired per trial |
+| **Calibration sizes** | 25, 50, 100, 200, 400 — a sweep, not one point |
+| **α** | 0.20, 0.10 |
+| **Trials** | 300 |
+| **Seed** | 61 |
+
+A sweep rather than a single size, because the interesting output is not a
+verdict but **the n at which the correction stops earning its keep**. That is
+the number a practitioner needs, and round two could not produce it from two
+points on a 79-case pool.
+
+## Predictions
+
+**K1.** The plug-in's violation rate will **fall as calibration grows**, and
+be below its round-two figures at every size above 50.
+
+**K2.** At the largest size (400 calibration cases) the plug-in will hold
+**δ = 0.05** at α = 0.20. The correction should stop mattering somewhere, and
+if it never does I have misunderstood why it works.
+
+**K3.** At the smallest size (25) the plug-in will violate in **more than 15%**
+of trials while the conformal rule holds δ. Round two's result should
+reproduce on the new benchmark at a comparable calibration size.
+
+**K4.** The conformal rule will hold δ at **every** size, including 25, where
+it will instead report infeasible often.
+
+## What this would change
+
+If **K2 holds**, the README's "why not just pick a threshold?" section gains a
+qualifier it does not currently have: the plug-in fails at small calibration
+folds and is adequate at large ones, and the crossover is reported. That is a
+narrower claim than the section currently makes.
+
+If **K2 fails** — the plug-in still violating at 400 calibration cases — the
+correction matters at every scale tested and the current claim stands as
+written.
+
+**K3 failing** would be the serious one: round two's central comparison not
+reproducing on a different benchmark at a comparable size would mean the
+justification for the whole method rests on one small pool.
+
+## Analysis plan
+
+One run on `fine_dev`, written to `evidence/plugin_scale.json`. Neither
+holdout is touched.
