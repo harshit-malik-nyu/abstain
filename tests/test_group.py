@@ -360,3 +360,93 @@ def test_the_best_share_makes_both_constraints_bind():
         assert n == r.calibration_total + r.deployment_total
         assert s * n == pytest.approx(r.calibration_total)
         assert (1 - s) * n == pytest.approx(r.deployment_total)
+
+
+# ---------------------------------------------------------------------------
+# The measurement partition, and the comparison it inverted
+# ---------------------------------------------------------------------------
+
+def test_the_pooled_scheme_is_still_measured_on_bands(dev):
+    """
+    The defect that inverted round four's headline comparison.
+
+    `evaluate_by_group` used one parameter for two jobs: which threshold a
+    case is judged against, and how the results are broken down. Under
+    `scheme="pooled"` there is a single calibration group, so bucketing
+    results by it gave one bucket — `worst_group_rate` returned the pooled
+    rate and `max_concentration` was 1.00 by construction.
+
+    The reported numbers at alpha = 0.20 were a worst group of 11.1% and a
+    concentration of 1.00 for the pooled rule, against 12.9% and 1.80 for the
+    grouped one. That reads as group conditioning making things worse on the
+    exact axis it was built to improve, and it was an artefact of measuring
+    the two schemes against different partitions.
+    """
+    cal = calibrate_by_group(dev[:40], handcrafted_scorer, scheme="pooled",
+                             alpha=0.20)
+    res = evaluate_by_group(dev[40:], handcrafted_scorer, cal)
+
+    assert cal.scheme == "pooled"
+    assert res.measured_by == "by-band"
+    assert len(res.by_group) > 1, (
+        "a pooled calibration must still be broken down by band, or the "
+        "comparison between schemes is not a comparison")
+
+
+def test_concentration_is_not_trivially_one_for_the_pooled_scheme(dev):
+    """
+    Concentration over a single bucket is 1.00 by definition and says nothing.
+
+    If this ever reads exactly 1.00 again for the pooled scheme while unsafe
+    commitments exist, the partitions have been collapsed back together.
+    """
+    cal = calibrate_by_group(dev[:40], handcrafted_scorer, scheme="pooled",
+                             alpha=0.20)
+    res = evaluate_by_group(dev[40:], handcrafted_scorer, cal)
+    if res.unsafe:
+        assert res.max_concentration != 1.0
+
+
+def test_every_scheme_is_scored_against_the_same_partition(dev):
+    """
+    The property that makes the scheme comparison meaningful.
+
+    Deployment counts per band must be identical across schemes on the same
+    cases — only the thresholds differ. If the per-band denominators move
+    between schemes, the rates are not comparable.
+    """
+    deployed = {}
+    for scheme in ("pooled", "by-band", "separate-well-below"):
+        cal = calibrate_by_group(dev[:40], handcrafted_scorer, scheme=scheme,
+                                 alpha=0.35)
+        res = evaluate_by_group(dev[40:], handcrafted_scorer, cal)
+        deployed[scheme] = {g: v["deployed"] for g, v in res.by_group.items()}
+
+    first = deployed["pooled"]
+    for scheme, counts in deployed.items():
+        assert counts == first, (scheme, counts, first)
+
+
+def test_the_recorded_threshold_comes_from_the_calibration_partition(dev):
+    """
+    Each band records the threshold its cases were actually judged against.
+
+    Under a pooled calibration measured on bands, every band's recorded
+    threshold is the single pooled one. Looking it up by the measurement
+    group would silently report the refusal threshold instead, because no
+    calibration group is named after a band.
+    """
+    cal = calibrate_by_group(dev[:40], handcrafted_scorer, scheme="pooled",
+                             alpha=0.20)
+    res = evaluate_by_group(dev[40:], handcrafted_scorer, cal)
+    recorded = {v["threshold"] for v in res.by_group.values()}
+    assert recorded == {cal.thresholds["all"]}
+    assert INFEASIBLE_THRESHOLD not in recorded or not cal.feasible
+
+
+def test_measure_by_rejects_an_unknown_partition(dev):
+    cal = calibrate_by_group(dev[:40], handcrafted_scorer, scheme="pooled",
+                             alpha=0.20)
+    with pytest.raises(ValueError):
+        evaluate_by_group(dev[40:], handcrafted_scorer, cal,
+                          measure_by="not-a-scheme")

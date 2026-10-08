@@ -236,8 +236,14 @@ def calibrate_by_group(cases: list[dict], scorer, *, scheme: str = "by-band",
 @dataclass
 class GroupResult:
     scheme: str
+    """How calibration was partitioned."""
+
     alpha: float
     n: int = 0
+    measured_by: str = "by-band"
+    """How the results are broken down. Separate from `scheme` on purpose —
+    see `evaluate_by_group`."""
+
     unsafe: int = 0
     resolved: int = 0
     abstained: int = 0
@@ -283,7 +289,8 @@ class GroupResult:
         return out
 
     def as_dict(self) -> dict:
-        return {"scheme": self.scheme, "alpha": self.alpha, "n": self.n,
+        return {"scheme": self.scheme, "measured_by": self.measured_by,
+                "alpha": self.alpha, "n": self.n,
                 "unsafe_rate": self.unsafe_rate, "coverage": self.coverage,
                 "questions_per_case": self.questions_per_case,
                 "worst_group_rate": self.worst_group_rate,
@@ -292,25 +299,57 @@ class GroupResult:
 
 
 def evaluate_by_group(cases: list[dict], scorer, cal: GroupCalibration,
-                      budget: int = 4) -> GroupResult:
+                      budget: int = 4, measure_by: str = "by-band"
+                      ) -> GroupResult:
     """
     Deploy, judging each case against its own group's threshold.
 
     Outcome labels follow `evaluate.py` exactly — committed-while-undetermined
     is unsafe, whatever verdict came out — so the two paths cannot disagree
     about what "unsafe" means.
+
+    `measure_by` is separate from `cal.scheme`, and it has to be
+    ------------------------------------------------------------
+    The calibration partition decides which threshold a case is judged
+    against. The **measurement** partition decides how the results are broken
+    down. The first version used one parameter for both, and that silently
+    inverted the comparison the module exists to make.
+
+    Under `scheme="pooled"` there is a single group, so bucketing the results
+    by the calibration partition gave one bucket: `worst_group_rate` returned
+    the pooled rate and `max_concentration` was 1.00 by definition. The
+    reported numbers at alpha = 0.20 were a worst group of 11.1% and a
+    concentration of 1.00 for the pooled rule, against 12.9% and 1.80 for the
+    grouped one — which reads as the grouped rule being *worse* on exactly
+    the axis it was built to improve.
+
+    The real figure for the pooled rule, measured on bands, is **45.7%** in
+    `well-below` against a 20% budget. Measured consistently, group
+    conditioning takes the worst band from 45.7% to 12.9%.
+
+    So the two partitions are now separate arguments, and `measure_by`
+    defaults to the bands regardless of how calibration was grouped. A
+    comparison between grouping schemes is only a comparison if every scheme
+    is scored against the same partition.
     """
     from .evaluate import OPENING, ever_decidable, final_truth
 
-    r = GroupResult(scheme=cal.scheme, alpha=cal.alpha, n=len(cases))
-    key = SCHEMES[cal.scheme]
+    if measure_by not in SCHEMES:
+        raise ValueError(f"unknown measurement partition: {measure_by!r}")
+
+    r = GroupResult(scheme=cal.scheme, alpha=cal.alpha, n=len(cases),
+                    measured_by=measure_by)
+    key = SCHEMES[measure_by]
 
     for case in cases:
         group = key(case)
         g = r.by_group.setdefault(group, {
             "deployed": 0, "unsafe": 0, "resolved": 0, "abstained": 0,
-            "decidable": 0, "threshold": cal.thresholds.get(
-                group, INFEASIBLE_THRESHOLD)})
+            "decidable": 0,
+            # The threshold this case was actually judged against, which comes
+            # from the CALIBRATION partition. Looking it up by the measurement
+            # group would be wrong whenever the two differ.
+            "threshold": cal.threshold_for(case)})
 
         g["deployed"] += 1
         decidable = ever_decidable(case)
@@ -353,6 +392,7 @@ class GroupValidation:
     scheme: str
     alpha: float
     delta: float
+    measured_by: str = "by-band"
     trials: int = 0
     feasible_trials: int = 0
     violations: int = 0
@@ -363,6 +403,65 @@ class GroupValidation:
     worst_sum: float = 0.0
     concentration_sum: float = 0.0
     post_hoc: bool = False
+    bands: dict[str, dict] = field(default_factory=dict)
+    """
+    Per-band counts, pooled over feasible trials.
+
+    Added because the summary could not answer the question the fix has to
+    answer. A scheme that drives the worst band's unsafe rate down by
+    **abstaining on that band** has not fixed anything — it has moved the harm
+    from wrong decisions to no decisions, and for `well-below`, the
+    lowest-income households, that is a different harm rather than a smaller
+    one.
+
+    Safety and coverage therefore have to be read together *per band*, not
+    pooled. `mean_coverage` alone would hide a scheme that resolves 90% of the
+    three comfortable bands and 0% of the one that was failing.
+    """
+
+    def tally(self, band: str) -> dict:
+        if band not in self.bands:
+            self.bands[band] = {"deployed": 0, "unsafe": 0, "resolved": 0,
+                                "abstained": 0, "decidable": 0}
+        return self.bands[band]
+
+    @property
+    def band_table(self) -> list[dict]:
+        """Unsafe rate and coverage side by side, per band."""
+        out = []
+        for band, t in sorted(self.bands.items()):
+            out.append({
+                "band": band,
+                "deployed": t["deployed"],
+                "unsafe": t["unsafe"],
+                "unsafe_rate": (t["unsafe"] / t["deployed"]
+                                if t["deployed"] else 0.0),
+                "coverage": (t["resolved"] / t["decidable"]
+                             if t["decidable"] else 0.0),
+                "abstention_rate": (t["abstained"] / t["deployed"]
+                                    if t["deployed"] else 0.0),
+            })
+        return out
+
+    @property
+    def worst_band_overall(self) -> str | None:
+        rows = [r for r in self.band_table if r["deployed"]]
+        if not rows:
+            return None
+        return max(rows, key=lambda r: r["unsafe_rate"])["band"]
+
+    @property
+    def min_band_coverage(self) -> float:
+        """
+        The least-served band's coverage.
+
+        The number that catches a scheme buying safety with denial of
+        service. A pooled coverage of 80% is compatible with one band at
+        zero, and if that band is the one the scheme was built to protect,
+        the fix is not a fix.
+        """
+        rows = [r for r in self.band_table if r["deployed"]]
+        return min((r["coverage"] for r in rows), default=0.0)
 
     @property
     def infeasible_rate(self) -> float:
@@ -394,13 +493,17 @@ class GroupValidation:
 
     def as_dict(self) -> dict:
         return {
-            "scheme": self.scheme, "alpha": self.alpha, "delta": self.delta,
+            "scheme": self.scheme, "measured_by": self.measured_by,
+            "alpha": self.alpha, "delta": self.delta,
             "trials": self.trials, "feasible_trials": self.feasible_trials,
             "infeasible_rate": self.infeasible_rate,
             "violation_rate_when_feasible": self.violation_rate_when_feasible,
             "group_violation_rate_when_feasible":
                 self.group_violation_rate_when_feasible,
             "mean_coverage": self._mean(self.coverage_sum),
+            "min_band_coverage": self.min_band_coverage,
+            "worst_band": self.worst_band_overall,
+            "bands": self.band_table,
             "mean_questions": self._mean(self.questions_sum),
             "mean_worst_group_rate": self._mean(self.worst_sum),
             "mean_max_concentration": self._mean(self.concentration_sum),
@@ -412,7 +515,8 @@ def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
                     alpha: float = 0.05, delta: float = 0.05,
                     trials: int = 150, seed: int = 23,
                     calibration_share: float = 0.6,
-                    calibration_size: int | None = None) -> GroupValidation:
+                    calibration_size: int | None = None,
+                    measure_by: str = "by-band") -> GroupValidation:
     """
     The same experiment as `validate`, with the grouping scheme varied.
 
@@ -425,6 +529,7 @@ def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
     from .validate import trial_split
 
     v = GroupValidation(scheme=scheme, alpha=alpha, delta=delta,
+                        measured_by=measure_by,
                         post_hoc=scheme in POST_HOC)
 
     for t in range(trials):
@@ -437,7 +542,8 @@ def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
 
         cal = calibrate_by_group(cal_cases, scorer, scheme=scheme,
                                  alpha=alpha, delta=delta)
-        res = evaluate_by_group(dep_cases, scorer, cal)
+        res = evaluate_by_group(dep_cases, scorer, cal,
+                                measure_by=measure_by)
 
         v.trials += 1
         if res.unsafe_rate > alpha:
@@ -454,6 +560,15 @@ def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
         v.questions_sum += res.questions_per_case
         v.worst_sum += res.worst_group_rate
         v.concentration_sum += res.max_concentration
+
+        # Per-band counts, so safety and coverage can be read together for
+        # each band rather than pooled. Accumulated only on feasible trials,
+        # matching every other figure in this object.
+        for band, g in res.by_group.items():
+            t = v.tally(band)
+            for k in ("deployed", "unsafe", "resolved", "abstained",
+                      "decidable"):
+                t[k] += g[k]
 
     return v
 

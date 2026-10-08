@@ -78,19 +78,61 @@ class TestItPrecededTheHoldout:
             "the pre-registration must predate the script that opens the "
             f"holdout: {prereg_at} vs {opened_at}")
 
+    @staticmethod
+    def _readers(pattern: str) -> set[str]:
+        out = subprocess.run(
+            ["git", "grep", "-l", pattern],
+            cwd=ROOT, capture_output=True, text=True).stdout.split()
+        return {f for f in out if not f.endswith(".pyc")}
+
     def test_only_the_opening_script_and_the_split_touch_the_holdout(self):
         """
         Opening it once is the plan. A second analysis path reading the
         holdout would be a second look, whatever it was called.
+
+        The pattern is the **exact** path, not any string containing
+        "holdout.json". It used to be the loose version, and when a second
+        benchmark arrived with its own `fine_holdout.json` the guard fired on
+        a document that never touches the original — it could not tell the two
+        apart. Loosening it to pass would have left both holdouts unguarded,
+        so it is split into one guard per benchmark instead.
         """
-        out = subprocess.run(
-            ["git", "grep", "-l", "holdout.json"],
-            cwd=ROOT, capture_output=True, text=True).stdout.split()
         allowed = {"scripts/split.py", "scripts/open_holdout.py",
                    "tests/test_split.py", "tests/test_preregistration.py",
-                   "README.md", "docs/preregistration.md", "docs/theory.md"}
-        unexpected = {f for f in out if not f.endswith(".pyc")} - allowed
-        assert not unexpected, f"extra readers of the holdout: {unexpected}"
+                   "README.md", "docs/preregistration.md", "docs/theory.md",
+                   # Round four declares that it does not read this file.
+                   # Mentioning it in order to say so is not reading it.
+                   "docs/preregistration-4.md"}
+        unexpected = self._readers("evidence/holdout.json") - allowed
+        assert not unexpected, f"extra readers of the coarse holdout: {unexpected}"
+
+    def test_only_round_four_touches_the_fine_holdout(self):
+        """
+        The second benchmark's holdout gets the same discipline as the first.
+
+        A new benchmark is a new chance to spend a holdout casually, and the
+        guard that protects the original would not have noticed: it matched
+        one filename. This one matches the other.
+        """
+        allowed = {"scripts/split.py", "scripts/run_round4.py",
+                   "tests/test_split.py", "tests/test_preregistration.py",
+                   "README.md", "docs/preregistration-4.md"}
+        unexpected = self._readers("fine_holdout") - allowed
+        assert not unexpected, f"extra readers of the fine holdout: {unexpected}"
+
+    def test_the_coarse_holdout_is_not_read_by_round_four(self):
+        """
+        Round four says in its analysis plan that it does not touch the
+        original holdout. Asserted rather than trusted.
+        """
+        for script in ("scripts/run_round4.py", "scripts/run_secondary.py",
+                       "scripts/rerun_corruption.py"):
+            path = ROOT / script
+            if not path.exists():
+                continue
+            body = path.read_text()
+            assert "evidence/holdout.json" not in body, script
+            assert '"holdout"' not in body or "fine_" in body, script
 
 
 class TestTheResultIsReportedAsPredicted:
