@@ -1,18 +1,20 @@
-  20/160  (768 engine calls, 511s)
-  40/160  (768 engine calls, 511s)
-  60/160  (768 engine calls, 511s)
-  80/160  (768 engine calls, 511s)
-  100/160  (768 engine calls, 511s)
-  120/160  (768 engine calls, 511s)
-  140/160  (768 engine calls, 511s)
-  160/160  (768 engine calls, 511s)
+  10 incomes, household space 640, building 160
+  20/160  (768 engine calls, 441s)
+  40/160  (768 engine calls, 441s)
+  60/160  (768 engine calls, 441s)
+  80/160  (768 engine calls, 441s)
+  100/160  (768 engine calls, 443s)
+  120/160  (768 engine calls, 443s)
+  140/160  (768 engine calls, 443s)
+  160/160  (768 engine calls, 443s)
 
-  160 cases, 768 engine calls, 511s
+  160 cases, 768 engine calls, 443s
+  oracle: policyengine-us==2.33.1
   cache hits saved 1,792 evaluations
   dev       79 cases  {'above': 19, 'near-threshold': 27, 'well-above': 16, 'well-below': 17}
            sha256 e3b07513022c275b5e6158261ed8786b50f57460a528fde83fb441fca5883112
   holdout   81 cases  {'above': 19, 'near-threshold': 27, 'well-above': 17, 'well-below': 18}
            sha256 15d3a1dc881061344f7672e7071c7ca4cbfd52e94f0bfafe8c0b7e53432c8a0a
 
-  seed 20260408, stratified by the share of open knowledge states
+  seed 20260408, stratified by income band
   holdout is opened once, when the method is final

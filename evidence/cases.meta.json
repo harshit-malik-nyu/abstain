@@ -1,0 +1,53 @@
+{
+ "build_seconds": 442.6,
+ "engine": "policyengine-us==2.33.1",
+ "engine_calls": 768,
+ "fields": [
+  "employment_income",
+  "dependents",
+  "age",
+  "state_name"
+ ],
+ "household_space": 640,
+ "incomes": [
+  0,
+  6000,
+  12000,
+  18000,
+  21000,
+  24000,
+  30000,
+  36000,
+  48000,
+  60000
+ ],
+ "n_cases": 160,
+ "seed": 515,
+ "sweepable": {
+  "age": [
+   22,
+   35,
+   50,
+   64
+  ],
+  "dependents": [
+   0,
+   1,
+   2,
+   3
+  ],
+  "employment_income": [
+   0,
+   9000,
+   18000,
+   27000,
+   36000
+  ],
+  "state_name": [
+   "NY",
+   "TX",
+   "CA",
+   "MS"
+  ]
+ }
+}
