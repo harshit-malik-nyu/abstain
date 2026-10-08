@@ -1,8 +1,14 @@
 # What is guaranteed, and on what basis
 
-Three claims appear in this repository. They rest on different things and are
+Four claims appear in this repository. They rest on different things and are
 separated here because conflating them is the easiest way to overstate the
 result.
+
+The fourth was added after it was measured, and it is the one that most
+changes what the method is for: **the guarantee is marginal, and on this
+benchmark the gap between marginal and conditional is the difference between a
+98.5% pass rate and a 98.2% failure rate.** It is §4 rather than a note under
+"what none of this covers", because a caveat that large is not a caveat.
 
 ---
 
@@ -95,16 +101,110 @@ pass.
 
 ---
 
+## 4. The guarantee is marginal, not conditional
+
+§1 to §3 are statements about the error rate **over the population**. None of
+them says anything about any subgroup, and that is not a gap in the argument —
+it is what the argument is. Achieving conditional coverage without
+distributional assumptions is known to be impossible in general, so a
+distribution-free marginal bound is the correct thing to have proved.
+
+The question is whether the distinction matters here. It does, more than
+anything else in this document.
+
+**Measured on 672 cases, 400 trials, α = 0.20:**
+
+| | |
+|---|---:|
+| Trials honouring the budget **overall** | **98.5%** |
+| Trials breaking it **for some income band** | **98.2%** |
+
+| band | deployed | unsafe rate | share of budget / share of cases |
+|---|---:|---:|---:|
+| **well-below** | 26,752 | **45.7%** | **4.12×** |
+| near-threshold | 53,916 | 5.2% | 0.47× |
+| above | 35,934 | 5.6% | 0.50× |
+| well-above | 71,798 | 5.4% | 0.49× |
+
+### The mechanism, which is not a scorer defect
+
+Per-band AUC is 0.9345 to **0.9976** — the scorer orders states almost
+perfectly *inside the band it fails on*. What differs is the score **level**:
+undecidable states average 0.2106 in `well-below` against 0.1131 in
+`near-threshold`. One global threshold is a single horizontal line across four
+vertically shifted distributions, so it cuts each at a different quantile.
+
+> Good ranking within every subgroup does not give a threshold that is safe
+> within every subgroup. Conditional validity needs conditional
+> **calibration**, not conditional ranking.
+
+**Status: measured, and it is a property of using one threshold rather than a
+property of this scorer.** A better-ranking scorer does not fix it; the fitted
+scorer, which ranks better, would be subject to exactly the same argument.
+
+### The fix, its status, and its cost
+
+One threshold per band — Mondrian conformal prediction, not new here. Paired
+on identical draws at α = 0.20:
+
+| | violations per band | worst band | coverage | questions/case | infeasible |
+|---|---:|---:|---:|---:|---:|
+| one global threshold | 98.2% | 45.6% | 76.0% | 2.06 | 0% |
+| **one per band** | **3.3%** | **12.9%** | **81.0%** | **1.89** | 2.8% |
+
+**Status: measured. The guarantee it delivers is per-group at level δ**, which
+is a stronger statement than §3's and rests on the same §1 bound applied
+within each group — so its epistemic standing is §3's, group by group, with
+the same unproved threshold-search step.
+
+Its cost is not coverage. It was pre-registered as a coverage cost and that
+prediction was wrong: a single threshold has to be high enough for the worst
+band and is then too high for the other three, so the pooled rule was never on
+the safety–coverage frontier. The cost is **sample size** — δ-level
+feasibility in *every* group at once, so the smallest group binds. At α = 0.10
+on 672 cases it is feasible in 7 trials out of 400, exactly as
+[`power.py`](../src/abstain/power.py) predicted before the run.
+
+### What conditioning does not fix
+
+It is validity conditional on **the groups you chose**. A subgroup that cuts
+across the bands is no better protected than before, and there is no finite
+amount of conditioning that covers every subgroup — that is the impossibility
+result again. `group.threshold_for` refuses to serve a group calibration never
+saw rather than borrowing another group's threshold, which is the honest
+behaviour and not a solution.
+
+---
+
 ## What none of this covers
 
 **Correctness.** The bound is on answering while undecidable. A case can be
 decidable and the agent still wrong, and nothing here constrains that.
 
-**Distribution shift.** Every validation draws calibration and deployment from
-one pool, which is exactly the exchangeability the argument assumes.
-`knowing-when-to-doubt` measures what happens when deployment differs and
-finds the guarantee fails — this project does not re-measure it.
+**Distribution shift.** Every validation in §1 to §4 draws calibration and
+deployment from one pool, which is exactly the exchangeability the argument
+assumes. Round five breaks it on purpose and prices it — calibrate on the
+natural band mix, deploy on a mix shifted toward `well-below` — and the
+results are in [`preregistration-5.md`](preregistration-5.md) and
+`evidence/round5_shift.json`. The headline expectation, pre-registered, is
+that **group conditioning is substantially robust to a shift in group
+proportions and the pooled rule is not**, because re-weighting groups
+calibrated separately changes which thresholds are used, not what any
+threshold is.
+
+That invariance is narrow and worth stating precisely. It does not cover a
+shift *within* a band, a band calibration never saw, or a change in the
+relationship between the score and determinability. Those break group
+conditioning exactly as they break the pooled rule. Weighted conformal methods
+for covariate shift exist and none is implemented here.
 
 **The oracle.** Determinability comes from PolicyEngine, an implementation of
 published rules with its own defects. Where it is wrong, this bounds agreement
-with a wrong oracle.
+with a wrong oracle. The version is recorded in the data
+(`policyengine-us==2.33.0`) rather than left to the environment, because
+determinability is defined by what the engine says — two builds under
+different versions are two benchmarks.
+
+**Anything a language model does.** No model was run. The corruption study in
+[`results-secondary.md`](results-secondary.md) is the nearest substitute and
+is a substitute.
