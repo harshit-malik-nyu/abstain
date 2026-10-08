@@ -37,7 +37,6 @@ import argparse
 import itertools
 import json
 import random
-import sys
 import time
 from pathlib import Path
 

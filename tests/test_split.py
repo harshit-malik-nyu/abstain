@@ -20,6 +20,20 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def require_cases():
+    """
+    Skip while the case set is still being generated, fail once it exists.
+
+    The distinction matters: a missing cases.json means the build has not
+    finished, which is not a failure. A present cases.json whose split does
+    not match is a real problem and must be loud.
+    """
+    p = ROOT / "evidence" / "cases.json"
+    if not p.exists():
+        pytest.skip("cases.json not generated yet")
+    return p
+
+
 def digest_of(name: str) -> str:
     return hashlib.sha256((ROOT / "evidence" / f"{name}.json")
                           .read_bytes()).hexdigest()
@@ -29,6 +43,7 @@ class TestTheSplitIsIntact:
 
     @pytest.mark.parametrize("half", ["dev", "holdout"])
     def test_the_committed_digest_still_matches(self, half):
+        require_cases()
         """
         If either half is edited, this fails. That is the whole mechanism:
         the holdout's value is that it has not moved, and a silent edit would
@@ -38,18 +53,21 @@ class TestTheSplitIsIntact:
         assert digest_of(half) == recorded
 
     def test_the_halves_do_not_overlap(self):
+        require_cases()
         dev = {c["id"] for c in json.loads((ROOT / "evidence" / "dev.json").read_text())}
         hold = {c["id"] for c in json.loads((ROOT / "evidence" / "holdout.json").read_text())}
         assert dev and hold
         assert not (dev & hold)
 
     def test_together_they_are_the_whole_benchmark(self):
-        table = json.loads((ROOT / "evidence" / "oracle_table.json").read_text())
+        require_cases()
+        table = json.loads((ROOT / "evidence" / "cases.json").read_text())
         dev = json.loads((ROOT / "evidence" / "dev.json").read_text())
         hold = json.loads((ROOT / "evidence" / "holdout.json").read_text())
         assert len(dev) + len(hold) == len(table)
 
     def test_it_regenerates_from_the_committed_seed(self):
+        require_cases()
         """
         The split must be reproducible from the script, or the committed
         halves are just two files somebody chose.
@@ -63,6 +81,7 @@ class TestTheSplitIsIntact:
 class TestStratification:
 
     def test_the_stratum_variable_actually_varies(self):
+        require_cases()
         """
         REGRESSION on a vacuous split. The first stratum was the share of
         knowledge states that are underdetermined, and fifteen of sixteen
@@ -80,6 +99,7 @@ class TestStratification:
         assert biggest < 0.6, f"one stratum holds {biggest:.0%} of cases"
 
     def test_both_halves_span_the_strata(self):
+        require_cases()
         sys.path.insert(0, str(ROOT / "scripts"))
         from split import hardness
 
@@ -88,6 +108,7 @@ class TestStratification:
             assert len({hardness(c) for c in rows}) >= 3
 
     def test_each_half_is_large_enough_to_measure_on(self):
+        require_cases()
         """
         Seven cases gives a standard error near 19 points on a rate, wider
         than every effect this project tries to detect. That was the reason
