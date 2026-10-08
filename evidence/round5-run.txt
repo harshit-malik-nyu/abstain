@@ -1,0 +1,64 @@
+  fine_dev: 672 cases
+  bands: 400 trials seed 31 · shift: 300 trials seed 41
+
+  Per-band safety AND coverage, by scheme
+  ----------------------------------------------------------------------------
+  A scheme that fixes a band's unsafe rate by abstaining on it has
+  moved the harm, not reduced it. Both numbers, per band.
+
+  alpha = 0.20
+                scheme             band   unsafe      cov   abstain
+                pooled            above    5.6%   68.3%    26.1%
+                pooled   near-threshold    5.2%   75.4%    19.4%
+                pooled       well-above    5.4%   88.4%     6.2%
+                pooled       well-below   45.7%   54.3%     0.0%
+                       — least-served band            54.3%
+
+               by-band            above    6.2%   70.8%    22.9%
+               by-band   near-threshold    4.1%   75.9%    20.0%
+               by-band       well-above   10.8%   85.8%     3.4%
+               by-band       well-below    5.6%   92.4%     2.0%
+                       — least-served band            70.8%
+
+  alpha = 0.15
+                scheme             band   unsafe      cov   abstain
+                pooled            above    5.6%   65.4%    29.0%
+                pooled   near-threshold    1.4%   77.4%    21.2%
+                pooled       well-above    5.1%   88.4%     6.5%
+                pooled       well-below   29.0%   71.0%     0.0%
+                       — least-served band            65.4%
+
+               by-band            above    4.6%   63.2%    32.2%
+               by-band   near-threshold    2.9%   76.8%    20.3%
+               by-band       well-above    6.8%   87.2%     6.0%
+               by-band       well-below    2.6%   91.8%     5.6%
+                       — least-served band            63.2%
+
+
+  The shift sweep — calibrate unshifted, deploy shifted
+  ----------------------------------------------------------------------------
+  natural well-below share: 14.3%
+  control, ordinary path, alpha 0.20: violations 2.0%, coverage 75.9%
+  (1409s)
+
+  alpha = 0.20
+    well-below share  pooled viol  by-band viol  pooled bound  distinct
+               0.143         0.7%          0.0%        0.175    63.3%
+               0.250        17.0%          0.0%        0.175    61.9%
+               0.400        65.3%          0.0%        0.175    56.7%
+               0.600        92.3%          0.0%        0.175    46.0%
+               0.800        95.3%          0.0%        0.175    32.1%
+               1.000        98.0%          0.7%        0.175    14.3%
+  monotone in shift: pooled True, by-band True
+
+  alpha = 0.15
+    well-below share  pooled viol  by-band viol  pooled bound  distinct
+               0.143         0.0%          0.0%        0.127    63.3%
+               0.250        13.0%          0.0%        0.127    61.9%
+               0.400        27.0%          0.0%        0.127    56.7%
+               0.600        79.3%          0.5%        0.127    46.0%
+               0.800        89.3%          1.5%        0.127    32.1%
+               1.000        91.3%          2.4%        0.127    14.3%
+  monotone in shift: pooled True, by-band True
+
+  wrote evidence/round5_shift.json (1733.3s)

@@ -79,8 +79,8 @@ case, per band, α = 0.20:
 |---|---:|---:|---:|
 | **well-below** *(45.7% unsafe)* | **1.67** | **2.15** | **+0.48** |
 | near-threshold | 2.28 | 2.29 | +0.01 |
-| above | 2.41 | 2.26 | −0.16 |
-| well-above | 1.86 | 1.30 | **−0.56** |
+| above | 2.41 | 2.26 | −0.15 |
+| well-above | 1.85 | 1.31 | **−0.54** |
 
 **The global threshold asks the fewest questions of the applicants whose
 answers are least determined**, and the most of a band that barely needs them.
@@ -198,22 +198,62 @@ one and is not what "any fixed score" suggests at first reading.
 
 ---
 
-## What breaking the assumption costs
+## What breaking the assumption costs, and the certificate that never notices
 
 Every guarantee here rests on exchangeability, and until round five the
 repository asserted that and never priced it. The bands make it measurable:
 calibrate on the natural mix, deploy on a mix where `well-below`'s share is
-forced upward.
+forced upward. 300 trials per point, α = 0.20.
 
-[Round five →](docs/preregistration-5.md) · results in
-[`evidence/round5_shift.json`](evidence/round5_shift.json)
+| `well-below` share of deployment | one global threshold | **one per band** | the bound the rule reported |
+|---:|---:|---:|---:|
+| 14.3% *(natural)* | 0.7% | 0.0% | 0.175 |
+| 25% | 17.0% | 0.0% | 0.175 |
+| 40% | **65.3%** | 0.0% | 0.175 |
+| 60% | **92.3%** | 0.0% | 0.175 |
+| 80% | **95.3%** | 0.0% | 0.175 |
+| **100%** | **98.0%** | **0.7%** | **0.175** |
 
-The prediction worth the round is that **group-conditional calibration is
-substantially robust to this shift and the pooled rule is not** — because
-re-weighting groups that were calibrated separately changes which thresholds
-get used, not what any threshold is. If that holds, the fairness finding and
-the robustness finding are one finding, and that is a stronger reason to pay
-group conditioning's costs than "the pooled number was misleading".
+**All five pre-registered predictions held.** Three things in that table.
+
+**The pooled rule collapses.** 0.7% → 98.0% violations as the applicant mix
+moves toward one band. Monotone throughout. Nothing about the rule changed;
+only who showed up.
+
+**Group conditioning is essentially immune — 140× better at full shift.** This
+is not a lucky robustness property, it is the construction: re-weighting groups
+that were calibrated separately changes *which* thresholds get used, not *what
+any threshold is.* The guarantee was never a statement about the mixture.
+
+> So the fairness finding and the robustness finding are the same finding. The
+> subgroup that absorbs the error budget is exactly the subgroup whose
+> over-representation breaks the pooled rule, and one threshold per group fixes
+> both at once.
+
+**And the failure is perfectly silent.** The last column is the method's own
+confidence statement. It reads **0.175 at every shift level** — flat, while the
+deployed violation rate goes from 0.7% to 98.0%. The bound is computed on
+calibration data, calibration data is unshifted, so the certificate is
+identical whether the rule is honouring its budget or breaking it 98% of the
+time. **An operator watching the reported bound would see nothing wrong.**
+
+[Round five →](docs/preregistration-5.md) · run in
+[`evidence/round5-run.txt`](evidence/round5-run.txt)
+
+### What this does not show
+
+That the method is safe under shift. It is not, and the table is how unsafe.
+And group conditioning's invariance is narrow: it covers a shift in the
+*proportions* of groups calibrated separately, and nothing else. A shift
+*within* a band, a band calibration never saw, or a change in the relationship
+between score and determinability breaks it exactly as they break the pooled
+rule. Weighted conformal methods for covariate shift exist; none is implemented
+here.
+
+One limitation of the harness itself: forcing a 14.3% band to 80% of the fold
+requires resampling it with replacement, so the right-hand rows rest on fewer
+distinct cases — 14.3% distinct at full shift. That figure is reported per row
+in the evidence rather than left for the reader to work out.
 
 ---
 

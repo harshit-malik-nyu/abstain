@@ -81,6 +81,24 @@ def bands():
     return json.loads(p.read_text())["per_band"]
 
 
+@pytest.fixture(scope="module")
+def allocation():
+    """
+    Questions per case, per band — from its own recorded run.
+
+    The per-band fixture above comes from round five, which ran before
+    `GroupValidation` tracked questions per band. Rather than quote the
+    allocation figures from an ad-hoc run with no file behind it — which is
+    what the README did until this test caught it — `scripts/run_allocation.py`
+    produces them at round four's trial count and seed, and they are read
+    from there.
+    """
+    p = ROOT / "evidence" / "allocation.json"
+    if not p.exists():
+        pytest.skip("the allocation run has not happened in this checkout")
+    return json.loads(p.read_text())["runs"]
+
+
 def band_row(bands: list[dict], scheme: str, alpha: float,
              band: str) -> dict:
     s = next(x for x in bands
@@ -175,17 +193,36 @@ def test_the_per_band_pairs_are_as_measured(readme, bands):
         assert pct(wb["abstention_rate"]) in readme, (scheme, "abstention")
 
 
-def test_the_question_allocation_table_is_as_measured(readme, bands):
+def test_the_question_allocation_table_is_as_measured(readme, allocation):
     """
     The mechanism: which band gets asked how much, under each scheme.
     """
     for scheme in ("pooled", "by-band"):
         for band in ("well-below", "near-threshold", "above", "well-above"):
-            q = band_row(bands, scheme, 0.20, band)["questions_per_case"]
+            q = band_row(allocation, scheme, 0.20,
+                         band)["questions_per_case"]
             assert f"{q:.2f}" in readme, (scheme, band, q)
 
 
-def test_the_global_threshold_underasks_the_failing_band(bands):
+def test_the_reallocation_lowers_the_total(readme, allocation):
+    """
+    Fewer questions overall while asking more where they are needed.
+
+    Without this the finding would be "it asks more of the failing band",
+    which is unsurprising. The total falling is what makes it a
+    mis-allocation rather than an under-allocation.
+    """
+    totals = {}
+    for scheme in ("pooled", "by-band"):
+        s = next(x for x in allocation
+                 if x["scheme"] == scheme and x["alpha"] == 0.20)
+        totals[scheme] = s["mean_questions"]
+    assert totals["by-band"] < totals["pooled"]
+    for v in totals.values():
+        assert f"{v:.2f}" in readme, v
+
+
+def test_the_global_threshold_underasks_the_failing_band(allocation):
     """
     The claim stated as an inequality rather than a pair of numbers.
 
@@ -193,14 +230,14 @@ def test_the_global_threshold_underasks_the_failing_band(bands):
     highest unsafe rate than of a band with a low one. If that ever reverses,
     "mis-allocates questions in exactly the wrong direction" is wrong.
     """
-    worst = band_row(bands, "pooled", 0.20, "well-below")
-    comfortable = band_row(bands, "pooled", 0.20, "well-above")
+    worst = band_row(allocation, "pooled", 0.20, "well-below")
+    comfortable = band_row(allocation, "pooled", 0.20, "well-above")
     assert worst["unsafe_rate"] > comfortable["unsafe_rate"] * 5
     assert worst["questions_per_case"] < comfortable["questions_per_case"]
 
     # And conditioning reverses it.
-    fixed_worst = band_row(bands, "by-band", 0.20, "well-below")
-    fixed_comfortable = band_row(bands, "by-band", 0.20, "well-above")
+    fixed_worst = band_row(allocation, "by-band", 0.20, "well-below")
+    fixed_comfortable = band_row(allocation, "by-band", 0.20, "well-above")
     assert fixed_worst["questions_per_case"] > \
         fixed_comfortable["questions_per_case"]
 
@@ -353,3 +390,89 @@ def test_theory_states_the_marginal_limit_as_a_numbered_claim(theory):
     assert "## 4. The guarantee is marginal, not conditional" in \
         (ROOT / "docs" / "theory.md").read_text()
     assert "Four claims appear in this repository" in theory
+
+
+# ---------------------------------------------------------------------------
+# The shift sweep
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def shift():
+    p = ROOT / "evidence" / "round5_shift.json"
+    if not p.exists():
+        pytest.skip("round five has not been run in this checkout")
+    return json.loads(p.read_text())["shift"]["sweep"]
+
+
+def point(sweep: dict, scheme: str, alpha: float, share: float) -> dict:
+    return next(p for p in sweep["points"]
+                if p["scheme"] == scheme and p["alpha"] == alpha
+                and p["target_share"] == share)
+
+
+def test_the_shift_table_is_as_measured(readme, shift):
+    for share in (0.143, 0.25, 0.40, 0.60, 0.80, 1.00):
+        for scheme in ("pooled", "by-band"):
+            p = point(shift, scheme, 0.20, share)
+            assert p["violation_rate"] is not None, (scheme, share)
+            assert pct(p["violation_rate"]) in readme, (scheme, share)
+
+
+def test_the_pooled_rule_collapses_under_shift(shift):
+    """F2 and F3 as inequalities, not as quoted values."""
+    rates = [point(shift, "pooled", 0.20, s)["violation_rate"]
+             for s in (0.143, 0.25, 0.40, 0.60, 0.80, 1.00)]
+    assert rates == sorted(rates), rates
+    assert rates[0] <= 0.05, "F1: the control has to hold"
+    assert rates[-1] > 0.80, "F3: full shift must break it badly"
+
+
+def test_group_conditioning_survives_the_shift(shift):
+    """
+    F4, the prediction worth the round.
+
+    Stated as the inequality rather than the numbers: group conditioning must
+    stay inside delta at every shift level, and must be far better than the
+    pooled rule at full shift. If this ever fails, the claim that the fairness
+    finding and the robustness finding are one finding is withdrawn.
+    """
+    for share in (0.143, 0.25, 0.40, 0.60, 0.80, 1.00):
+        g = point(shift, "by-band", 0.20, share)["violation_rate"]
+        assert g is not None and g <= 0.05, (share, g)
+
+    pooled = point(shift, "pooled", 0.20, 1.00)["violation_rate"]
+    grouped = point(shift, "by-band", 0.20, 1.00)["violation_rate"]
+    assert grouped < pooled / 5, (grouped, pooled)
+
+
+def test_the_reported_bound_does_not_move(readme, shift):
+    """
+    F5: the failure is silent.
+
+    The bound is computed on unshifted calibration data, so it must be
+    identical at every shift level while the deployed rate climbs. That
+    identity is the finding — an operator watching the certificate sees
+    nothing.
+    """
+    bounds = {point(shift, "pooled", 0.20, s)["mean_reported_bound"]
+              for s in (0.143, 0.25, 0.40, 0.60, 0.80, 1.00)}
+    assert len(bounds) == 1, bounds
+
+    bound = bounds.pop()
+    assert f"{bound:.3f}" in readme, bound
+
+    # And the gap it hides, so the test fails if the sweep ever stops being
+    # alarming rather than only if the bound starts moving.
+    worst = point(shift, "pooled", 0.20, 1.00)["mean_unsafe_rate"]
+    assert worst > bound * 2, (worst, bound)
+
+
+def test_the_resampling_limitation_is_reported(readme, shift):
+    """
+    Forcing a 14.3% band to 80% of the fold needs replacement, so the
+    high-shift rows rest on fewer distinct cases. The README has to say so.
+    """
+    full = point(shift, "pooled", 0.20, 1.00)["distinct_fraction"]
+    natural = point(shift, "pooled", 0.20, 0.143)["distinct_fraction"]
+    assert full < natural
+    assert pct(full) in readme, full
