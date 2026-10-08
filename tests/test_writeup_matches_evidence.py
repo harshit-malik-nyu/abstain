@@ -873,3 +873,115 @@ def test_the_post_hoc_scheme_does_not_generalise(holdout):
     assert post["post_hoc"] is True
     assert post["group_violation_rate_when_feasible"] > \
         full["group_violation_rate_when_feasible"] * 5
+
+
+# ---------------------------------------------------------------------------
+# "Just recalibrate" — the rebuttal, and what survives it
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def recal():
+    p = ROOT / "evidence" / "recalibration.json"
+    if not p.exists():
+        pytest.skip("the recalibration run has not happened")
+    return json.loads(p.read_text())
+
+
+def rpoint(payload: dict, label: str, scheme: str, share: float) -> dict:
+    return next(p for p in payload[label]["points"]
+                if p["scheme"] == scheme and p["target_share"] == share)
+
+
+def test_recalibration_fixes_validity(readme, recal):
+    """
+    G1, as the inequality it is: a large, monotone-ish improvement.
+
+    Not "at or below delta everywhere", because that is what G1 predicted and
+    it is not what happened. The claim the write-up makes is the 10x
+    improvement, and that is what is pinned.
+    """
+    for share in (0.25, 0.40, 0.60, 0.80, 1.00):
+        stale = rpoint(recal, "stale", "pooled", share)["violation_rate"]
+        fresh = rpoint(recal, "recalibrated", "pooled",
+                       share)["violation_rate"]
+        assert fresh < stale, share
+        assert pct(fresh) in readme, (share, fresh)
+
+    worst_stale = rpoint(recal, "stale", "pooled", 1.00)["violation_rate"]
+    worst_fresh = rpoint(recal, "recalibrated", "pooled",
+                         1.00)["violation_rate"]
+    assert worst_fresh < worst_stale / 5
+
+
+def test_g1_is_recorded_as_a_miss(readme, recal):
+    """
+    It predicted delta at every level. Three levels are above it.
+
+    Pinned so the miss cannot quietly vanish from a later edit, and so that
+    a future run which *does* meet delta everywhere forces the write-up to
+    stop calling it a miss.
+    """
+    above = [s for s in (0.143, 0.25, 0.40, 0.60, 0.80, 1.00)
+             if rpoint(recal, "recalibrated", "pooled",
+                       s)["violation_rate"] > 0.05]
+    assert above, "G1 now holds everywhere; the write-up must be updated"
+    assert "**G1 missed.**" in (ROOT / "README.md").read_text()
+
+
+def test_recalibration_does_nothing_for_the_subgroup_failure(readme, recal):
+    """
+    G3, which is the point of the whole round.
+
+    At the mix an operator actually faces, a freshly recalibrated pooled rule
+    must still concentrate — and must do so at essentially the same magnitude
+    as the stale one, or "recalibration does nothing for it" is too strong.
+    """
+    fresh = rpoint(recal, "recalibrated", "pooled", 0.143)
+    assert fresh["hides_a_subgroup"] is True
+    assert fresh["worst_band_rate"] > 0.20, "must exceed the tolerance"
+    assert fresh["max_concentration"] > 3.5
+
+    stale = rpoint(recal, "stale", "pooled", 0.143)
+    assert abs(fresh["worst_band_rate"] - stale["worst_band_rate"]) < 0.05, \
+        "if recalibration moved the subgroup rate much, G3 is overstated"
+
+    assert pct(fresh["worst_band_rate"]) in readme
+    assert f"{fresh['max_concentration']:.2f}" in readme
+
+
+def test_the_coverage_advantage_shrinks_but_survives(readme, recal):
+    """
+    G2. Most of the stale advantage was staleness, and the write-up says the
+    smaller number rather than the larger one.
+    """
+    def cov(label: str, scheme: str, share: float) -> float:
+        return rpoint(recal, label, scheme, share)["mean_coverage"]
+
+    stale_gap = cov("stale", "by-band", 1.00) - cov("stale", "pooled", 1.00)
+    fresh_gap = cov("recalibrated", "by-band", 0.143) - \
+        cov("recalibrated", "pooled", 0.143)
+    assert stale_gap > 0.30
+    assert 0.0 < fresh_gap < 0.10
+    assert pct(fresh_gap) in readme or f"+{fresh_gap * 100:.1f}" in readme
+
+
+def test_the_two_schemes_coincide_when_there_is_one_group(recal):
+    """
+    A sanity check that would catch a bug in the grouping itself: at a 100%
+    share there is one band, so by-band and pooled must agree exactly.
+    """
+    a = rpoint(recal, "recalibrated", "pooled", 1.00)["mean_coverage"]
+    b = rpoint(recal, "recalibrated", "by-band", 1.00)["mean_coverage"]
+    assert a == pytest.approx(b, abs=1e-9)
+
+
+def test_an_all_infeasible_point_is_not_reported_as_zero_coverage(readme,
+                                                                  recal):
+    """
+    At an 80% share group conditioning never certifies. Reporting that as 0%
+    coverage would read as "resolved nothing" when it means "never
+    certified" — different outcomes with opposite implications.
+    """
+    p = rpoint(recal, "recalibrated", "by-band", 0.80)
+    assert p["feasible_trials"] == 0
+    assert "never certified" in readme

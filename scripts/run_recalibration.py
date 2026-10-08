@@ -73,13 +73,23 @@ def main() -> int:
     print("\n  G2 — what is group conditioning still worth after "
           "recalibration?")
     print(f"  {'wb share':>9} {'pooled cov':>11} {'by-band cov':>12} "
-          f"{'advantage':>10}")
+          f"{'advantage':>10} {'feasible':>10}")
     for s in SHARES:
         p = point("recalibrated", "pooled", s)
         b = point("recalibrated", "by-band", s)
+        feas = f"{b.feasible_trials}/{b.trials}"
+        if not b.feasible_trials:
+            # A mean over no feasible trial is 0.0, and printing that as a
+            # coverage of zero would read as "resolved nothing" when it
+            # means "never certified". Different outcomes, opposite
+            # implications.
+            print(f"  {s:>9.3f} {p._mean(p.coverage_sum):>10.1%} "
+                  f"{'n/a':>11} {'—':>10} {feas:>10}")
+            continue
         print(f"  {s:>9.3f} {p._mean(p.coverage_sum):>10.1%} "
               f"{b._mean(b.coverage_sum):>11.1%} "
-              f"{b._mean(b.coverage_sum) - p._mean(p.coverage_sum):>+10.1%}")
+              f"{b._mean(b.coverage_sum) - p._mean(p.coverage_sum):>+10.1%} "
+              f"{feas:>10}")
 
     print("\n  G3 — does a recalibrated pooled rule still concentrate?")
     print(f"  {'wb share':>9} {'pooled rate':>12} {'worst band':>11} "

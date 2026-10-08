@@ -331,6 +331,57 @@ time. **An operator watching the reported bound would see nothing wrong.**
 [Round five →](docs/preregistration-5.md) · run in
 [`evidence/round5-run.txt`](evidence/round5-run.txt)
 
+### "Just recalibrate" — the obvious rebuttal, tested
+
+Calibration is held at the natural mix in that table, which models the *onset*
+of a shift and invites a one-line reply: of course it fails, you never let it
+recalibrate. If that reply were right, the advice from this project would
+collapse to *recalibrate when your population moves* — easier, and already
+standard practice.
+
+So the same sweep was run with the calibration fold reweighted to match the
+deployment fold. The operator knows the mix and has recalibrated on it.
+
+| `well-below` share | pooled violations, **stale** | pooled violations, **recalibrated** | recalibrated **worst band** | concentration | hides a subgroup |
+|---:|---:|---:|---:|---:|:--:|
+| 14.3% *(natural)* | 0.7% | 0.7% | **45.1%** | **4.03** | **yes** |
+| 25% | 17.0% | 2.0% | 30.8% | 2.86 | **yes** |
+| 40% | 65.3% | 2.3% | 22.1% | 2.02 | **yes** |
+| 60% | 92.3% | 8.0% | 17.2% | 1.48 | no |
+| 80% | 95.3% | 12.7% | 14.1% | 1.19 | no |
+| 100% | 98.0% | 9.3% | 12.7% | 1.00 | no |
+
+**Recalibration fixes the validity failure and does nothing for the subgroup
+failure.** At the mix an operator actually faces, a freshly recalibrated
+pooled rule still runs the lowest-income band at **45.1%** against a 20%
+budget, at **4.03×** its share — statistically indistinguishable from the
+stale rule's 45.7% and 4.12×. The thing recalibration fixes is not the thing
+that was broken.
+
+> The fix is **calibrate per group**, not **recalibrate often**. Recalibrating
+> is still worth doing; it is an answer to a different failure.
+
+The concentration does fall at the right of that table, and for a reason that
+is not a reassurance: when one band is 80% of the cases there is barely a
+disparity left to have. At 100% it is 1.00 by definition.
+
+**G1 missed.** I predicted recalibration would return violations to at or
+below δ = 0.05 *at every* shift level. It does at the first three and not the
+last three — 8.0%, 12.7%, 9.3%. The likely cause is the harness rather than
+the method: forcing a band that holds 96 distinct cases up to 80% of a fold
+requires resampling with replacement, so the calibration fold at those points
+is built from few distinct cases and its exchangeability with deployment is
+weakened by the resampling itself. **That is an explanation, not an excuse,
+and the prediction is recorded as missed.**
+
+**G2 held.** Group conditioning's coverage advantage shrinks from **+38.4
+points** to a steady **+3.7 to +4.0** once the pooled rule is allowed to
+recalibrate. Most of the stale advantage really was staleness, and saying so
+is more useful than the larger number. Two sanity checks inside that: at a
+100% share the two schemes are *identical* (87.3% each), because one band is
+one group; and at 80% group conditioning is infeasible in all 300 trials, which
+is reported as *never certified* rather than as zero coverage.
+
 ### What this does not show
 
 That the method is safe under shift. It is not, and the table is how unsafe.
