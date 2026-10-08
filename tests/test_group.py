@@ -530,4 +530,5 @@ def test_refitting_changes_the_outcome(dev):
     fitted = validate_groups(dev[:300], None, scheme="pooled", alpha=0.35,
                              trials=3, seed=23, calibration_share=0.30,
                              refit=fit)
-    assert fitted.mean_coverage != plain.mean_coverage
+    assert fitted.as_dict()["mean_coverage"] != \
+        plain.as_dict()["mean_coverage"]
