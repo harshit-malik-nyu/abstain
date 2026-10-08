@@ -153,11 +153,15 @@ it rules out is a lucky split rather than a wrong design.
   errors and is recorded as a failed prediction. So did the other four: A2's
   monotonicity, C1 and C2 predicting the wrong band, and E6 predicting that
   group conditioning would cost coverage when it gains it.
-- **The subgroup result.** It does not depend on the scorer being good — the
-  scorer ranks at 0.9976 inside the band it fails on — nor on the domain, nor
-  on the oracle being right. It depends only on using one threshold across
-  groups whose score distributions are shifted, which is what every single
-  threshold does.
+- **The subgroup result, narrowed by its own test.** It does not depend on the
+  scorer ranking well — the scorer ranks at 0.9976 inside the band it fails on
+  — nor on the hand-built functional form, since a learned scorer over the same
+  features still concentrates at 3.31x. It **does** depend substantially on
+  the score carrying a feature that is directionally wrong for a group:
+  removing that feature cuts the disparity to 1.72x and brings every band
+  inside budget. A single threshold contributes and, here, is not the dominant
+  term. I predicted otherwise and the pre-registration is why that is a
+  reported finding rather than a surviving claim.
 - **The three bugs, and that scrutiny rather than validation found them.** The
   refusal threshold that was not a refusal, the subgroup comparison that
   measured itself, and the feasibility-conditioning the metric did not have.

@@ -15,10 +15,12 @@ This is a rule where the operator names a tolerance and gets it:
 benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
-afterwards: **three bugs, every one of which made the method look better than
-it was; five pre-registered predictions that missed; and one result that
+afterwards: **four bugs, every one of which made the method look better than
+it was; nine pre-registered predictions that missed; and one result that
 changes what the method is for.** The guarantee it delivers is not the
-guarantee its own README advertised for four rounds, and the gap is not small.
+guarantee its own README advertised for four rounds, and the gap is not small
+— and the strongest form of the claim that replaced it was refuted by its own
+pre-registered test, two rounds later.
 
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every miss has a test pinning it as a miss, and every
@@ -827,7 +829,8 @@ opens the fine holdout, which has been opened once.
 ## Status
 
 Built, validated, replicated, and reported including every prediction that
-missed, every judgement that was wrong, and every bug that flattered it.
+missed, every judgement that was wrong, every bug that flattered it, and the
+one central claim that its own pre-registered test refuted.
 
 **The confirmatory holdout run was interrupted partway through** by the
 session it was running in, after the replication and concentration tables had
