@@ -117,3 +117,102 @@ class TestStratification:
         for half in ("dev", "holdout"):
             rows = json.loads((ROOT / "evidence" / f"{half}.json").read_text())
             assert len(rows) >= 60, f"{half} has only {len(rows)} cases"
+
+
+# ---------------------------------------------------------------------------
+# The second benchmark, and the proof that adding it did not disturb the first
+# ---------------------------------------------------------------------------
+
+def test_the_default_split_still_reproduces_the_committed_digests():
+    """
+    `split.py` grew --source/--prefix/--seed long after it was written, so a
+    second and larger benchmark could be split without a third copy of the
+    stratification logic.
+
+    That edit touches the first commit in the repository, whose untouched
+    behaviour is the evidence that the split preceded the method. So the
+    evidence is converted from "untouched" to "verified identical": the
+    default call is re-run here and its output digested against the values
+    committed alongside the original split. If the edit had changed the
+    original halves, this fails.
+    """
+    import hashlib
+    import json
+
+    for name, digest_file in (("dev", "dev.sha256"),
+                              ("holdout", "holdout.sha256")):
+        rows = json.loads((ROOT / "evidence" / f"{name}.json").read_text())
+        payload = json.dumps(rows, separators=(",", ":"), sort_keys=True)
+        computed = hashlib.sha256(payload.encode()).hexdigest()
+        committed = (ROOT / "evidence" / digest_file).read_text().strip()
+        assert computed == committed, name
+
+
+def test_the_fine_benchmark_is_the_complete_household_space():
+    """
+    1,344 cases, every one distinct, and the whole grid rather than a sample.
+
+    This is what removes sampling variation from the benchmark itself: the
+    only randomness left is the dev/holdout split and the per-trial draws.
+    """
+    import json
+
+    cases = json.loads((ROOT / "evidence" / "cases_fine.json").read_text())
+    meta = json.loads(
+        (ROOT / "evidence" / "cases_fine.meta.json").read_text())
+
+    assert len(cases) == 1_344 == meta["household_space"]
+    keys = {tuple(sorted(c["household"].items())) for c in cases}
+    assert len(keys) == len(cases), "a household appears twice"
+    assert len(meta["incomes"]) * 4 * 4 * 4 == 1_344
+    assert meta["engine"].startswith("policyengine-us=="), \
+        "the oracle version is part of the data, not the environment"
+
+
+def test_the_fine_grid_contains_the_coarse_grid():
+    """
+    Without this the two benchmarks are different populations and the round
+    four replication is a change of subject rather than a replication.
+    """
+    import json
+
+    meta = json.loads(
+        (ROOT / "evidence" / "cases_fine.meta.json").read_text())
+    coarse = {0, 6_000, 12_000, 18_000, 21_000, 24_000, 30_000, 36_000,
+              48_000, 60_000}
+    assert coarse <= set(meta["incomes"])
+
+
+def test_the_fine_halves_are_disjoint_and_stratified():
+    import json
+
+    from abstain.conditional import hardness
+
+    dev = json.loads((ROOT / "evidence" / "fine_dev.json").read_text())
+    hold = json.loads((ROOT / "evidence" / "fine_holdout.json").read_text())
+
+    assert len(dev) == len(hold) == 672
+    assert not ({c["id"] for c in dev} & {c["id"] for c in hold})
+
+    for rows in (dev, hold):
+        strata = {}
+        for c in rows:
+            strata[hardness(c)] = strata.get(hardness(c), 0) + 1
+        assert len(strata) >= 3
+        assert max(strata.values()) <= 0.60 * len(rows)
+        # The smallest band is what binds group-conditional feasibility, and
+        # the power analysis in docs/preregistration-4.md is computed at
+        # 14.3%. If the split drifted, that analysis is wrong.
+        assert min(strata.values()) / len(rows) > 0.12
+
+
+def test_the_fine_digests_are_recorded():
+    import hashlib
+    import json
+
+    for name in ("fine_dev", "fine_holdout"):
+        rows = json.loads((ROOT / "evidence" / f"{name}.json").read_text())
+        payload = json.dumps(rows, separators=(",", ":"), sort_keys=True)
+        computed = hashlib.sha256(payload.encode()).hexdigest()
+        committed = (ROOT / "evidence" / f"{name}.sha256").read_text().strip()
+        assert computed == committed, name

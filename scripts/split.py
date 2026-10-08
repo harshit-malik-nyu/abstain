@@ -37,6 +37,7 @@ things rather than the same thing twice.
 
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import random
@@ -72,12 +73,26 @@ def hardness(case: dict) -> str:
 
 
 def main() -> int:
-    source = ROOT / "evidence" / "cases.json"
+    # Options added long after this file was written, to split a second,
+    # larger benchmark without a third copy of the stratification logic. The
+    # defaults reproduce the original call exactly, and that is verified
+    # rather than asserted: `tests/test_split.py` re-runs the default and
+    # checks the digests against the ones committed here in the first commit.
+    # If this edit had changed the original split, that test fails.
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--source", default="cases.json")
+    ap.add_argument("--prefix", default="",
+                    help="written as <prefix>dev.json / <prefix>holdout.json")
+    ap.add_argument("--seed", type=int, default=SEED)
+    args = ap.parse_args()
+
+    source = ROOT / "evidence" / args.source
     if not source.exists():
-        print("  evidence/cases.json not built yet — run scripts/build_cases.py")
+        print(f"  evidence/{args.source} not built yet — "
+              "run scripts/build_cases.py")
         return 1
     table = json.loads(source.read_text())
-    rng = random.Random(SEED)
+    rng = random.Random(args.seed)
 
     by_stratum: dict[str, list] = {}
     for case in table:
@@ -91,7 +106,8 @@ def main() -> int:
         dev.extend(shuffled[:half])
         holdout.extend(shuffled[half:])
 
-    for name, rows in (("dev", dev), ("holdout", holdout)):
+    for name, rows in ((f"{args.prefix}dev", dev),
+                       (f"{args.prefix}holdout", holdout)):
         payload = json.dumps(rows, separators=(",", ":"), sort_keys=True)
         digest = hashlib.sha256(payload.encode()).hexdigest()
         (ROOT / "evidence" / f"{name}.json").write_text(payload)
@@ -103,7 +119,7 @@ def main() -> int:
         print(f"  {name:8s} {len(rows):>3} cases  {strata}")
         print(f"           sha256 {digest}")
 
-    print(f"\n  seed {SEED}, stratified by the share of open knowledge states")
+    print(f"\n  seed {args.seed}, stratified by income band")
     print("  holdout is opened once, when the method is final")
     return 0
 
