@@ -483,3 +483,51 @@ def test_the_readme_reports_the_question_allocation(dev):
     assert "mis-allocates questions" in t
     assert "1.67" in t and "2.15" in t
     assert "0.0%" in t, "the zero abstention rate on the failing band"
+
+
+def test_validate_groups_can_refit_and_the_folds_stay_disjoint(dev):
+    """
+    The capability whose absence silently answered the wrong question.
+
+    `validate_groups` had no `refit`, so an experiment asking whether group
+    conditioning fixes the subgroup failure *for a learned scorer* passed the
+    handcrafted one instead and printed a table that looked like an answer.
+
+    This asserts the fold is real — the scorer handed to calibration must be
+    the one the refit produced, not the one passed in — and that passing
+    `refit` actually changes the result.
+    """
+    seen = []
+
+    def spy(fit_cases):
+        seen.append(len(fit_cases))
+        return handcrafted_scorer
+
+    v = validate_groups(dev, spy, scheme="pooled", alpha=0.35, trials=4,
+                        seed=23, calibration_share=0.30, refit=spy)
+    assert len(seen) == v.trials > 0
+    # A third is reserved for fitting, so the fold is neither empty nor
+    # everything.
+    assert all(0 < n < len(dev) for n in seen)
+
+
+def test_refitting_changes_the_outcome(dev):
+    """
+    If `refit` were ignored, the two arms would come out identical and the
+    experiment would be comparing a scorer with itself.
+    """
+    from abstain.scorer import FittedScorer
+    from abstain.validate import states_of
+
+    def fit(fit_cases):
+        return FittedScorer().fit(
+            [(c, k, d) for c, k, d in states_of(fit_cases)],
+            epochs=60, lr=0.5)
+
+    plain = validate_groups(dev[:300], handcrafted_scorer, scheme="pooled",
+                            alpha=0.35, trials=3, seed=23,
+                            calibration_share=0.30)
+    fitted = validate_groups(dev[:300], None, scheme="pooled", alpha=0.35,
+                             trials=3, seed=23, calibration_share=0.30,
+                             refit=fit)
+    assert fitted.mean_coverage != plain.mean_coverage

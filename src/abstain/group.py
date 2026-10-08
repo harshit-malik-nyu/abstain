@@ -524,9 +524,27 @@ def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
                     trials: int = 150, seed: int = 23,
                     calibration_share: float = 0.6,
                     calibration_size: int | None = None,
-                    measure_by: str = "by-band") -> GroupValidation:
+                    measure_by: str = "by-band",
+                    refit=None) -> GroupValidation:
     """
     The same experiment as `validate`, with the grouping scheme varied.
+
+    `refit`, and the experiment that was silently wrong without it
+    -------------------------------------------------------------
+    Pass a callable taking the fitting cases and returning a scorer, and each
+    trial trains a fresh one on a fold disjoint from both calibration and
+    deployment — the same three-fold protocol `validate.refit` enforces, for
+    the same reason: a scorer fit on the calibration or deployment data
+    violated a 5% target in 35.8% of trials when this project measured it.
+
+    This did not exist until an experiment needed it, and its absence was not
+    an inconvenience but a wrong answer. Addendum two asked whether group
+    conditioning fixes the subgroup failure **for a learned scorer**; with no
+    way to refit here, that arm passed the handcrafted scorer instead and
+    produced a table that looked like an answer and was a duplicate of an
+    earlier result. Nothing failed and nothing warned. A missing capability
+    that quietly changes which question is being answered is worse than one
+    that raises an error.
 
     Uses `validate.trial_split` rather than its own draw, so the pooled and
     grouped arms see **identical** calibration and deployment sets in every
@@ -541,16 +559,22 @@ def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
                         post_hoc=scheme in POST_HOC)
 
     for t in range(trials):
-        _, cal_cases, dep_cases = trial_split(
+        fit_cases, cal_cases, dep_cases = trial_split(
             cases, trial=t, seed=seed,
             calibration_share=calibration_share,
-            calibration_size=calibration_size)
+            calibration_size=calibration_size, refit=refit)
         if not cal_cases or not dep_cases:
             continue
 
-        cal = calibrate_by_group(cal_cases, scorer, scheme=scheme,
+        active = scorer
+        if refit is not None:
+            if not fit_cases:
+                continue
+            active = refit(fit_cases)
+
+        cal = calibrate_by_group(cal_cases, active, scheme=scheme,
                                  alpha=alpha, delta=delta)
-        res = evaluate_by_group(dep_cases, scorer, cal,
+        res = evaluate_by_group(dep_cases, active, cal,
                                 measure_by=measure_by)
 
         v.trials += 1

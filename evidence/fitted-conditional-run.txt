@@ -1,0 +1,44 @@
+  fine_dev: 672 cases, 200 trials, seed 53
+  the fitted scorer is refit per trial on a disjoint third
+
+  handcrafted, alpha = 0.20   pooled 11.1%   coverage 76.0%   worst band well-below   max concentration 4.13   hides a subgroup: True
+              band  deployed  unsafe    rate     cov    conc
+        well-below     13393    6150  45.9%  54.1%    4.13
+    near-threshold     26835    1411   5.3%  75.5%    0.47
+             above     18032     957   5.3%  68.6%    0.48
+        well-above     35940    1949   5.4%  88.3%    0.49
+
+  handcrafted, alpha = 0.15   pooled 7.3%   coverage 78.7%   worst band well-below   max concentration 3.86   hides a subgroup: True
+              band  deployed  unsafe    rate     cov    conc
+        well-below     13393    3787  28.3%  71.7%    3.86
+    near-threshold     26835     340   1.3%  77.8%    0.17
+             above     18032     956   5.3%  65.8%    0.72
+        well-above     35940    1809   5.0%  88.5%    0.69
+
+  fitted, alpha = 0.20   pooled 11.8%   coverage 88.1%   worst band well-below   max concentration 3.31   hides a subgroup: True
+              band  deployed  unsafe    rate     cov    conc
+        well-below      8952    3506  39.2%  60.8%    3.31
+    near-threshold     17864    1416   7.9%  92.0%    0.67
+             above     12036    1007   8.4%  91.6%    0.71
+        well-above     23948    1505   6.3%  93.7%    0.53
+
+  fitted, alpha = 0.15   pooled 9.0%   coverage 90.9%   worst band well-below   max concentration 2.71   hides a subgroup: True
+              band  deployed  unsafe    rate     cov    conc
+        well-below      8952    2187  24.4%  75.6%    2.71
+    near-threshold     17864    1011   5.7%  94.0%    0.63
+             above     12036     981   8.2%  91.7%    0.90
+        well-above     23948    1486   6.2%  93.8%    0.69
+
+  H4 — does group conditioning fix the learned scorer too?
+   alpha     scheme   feas  grp-viol   worst     cov
+    0.20     pooled    200     99.0%  45.8%  76.0%
+    0.20    by-band    196      2.6%  13.0%  80.3%
+    0.15     pooled    200     90.0%  28.1%  78.7%
+    0.15    by-band    120      8.3%   9.1%  79.6%
+
+  H1/H2 — side by side at alpha = 0.20
+          scorer   pooled  coverage      worst band  its rate    conc
+     handcrafted   11.1%    76.0%      well-below    45.9%    4.13
+          fitted   11.8%    88.1%      well-below    39.2%    3.31
+
+  wrote evidence/fitted_conditional.json (1068.0s)
