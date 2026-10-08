@@ -54,24 +54,43 @@ class TestItCommitsToSomething:
 
 class TestItPrecededTheHoldout:
 
-    def test_no_committed_code_reads_the_holdout_yet(self):
+    def test_the_preregistration_was_committed_before_the_holdout_opened(self):
         """
-        The discipline is the ordering. Until the holdout script exists, no
-        tracked file should reference holdout.json except the split that
-        wrote it and the tests that check its digest.
+        The permanent form of the discipline.
+
+        Before the holdout was opened this asserted that no tracked file read
+        holdout.json. That check did its job and then correctly fired the
+        moment scripts/open_holdout.py appeared — which is legitimate, because
+        the holdout is now open.
+
+        What survives opening is the ordering, and git records it. The
+        pre-registration must be older than the script that reads the holdout,
+        or the predictions were written with the answer in hand.
+        """
+        def first_commit(path: str) -> str:
+            return subprocess.run(
+                ["git", "log", "--diff-filter=A", "--format=%ct", "--", path],
+                cwd=ROOT, capture_output=True, text=True).stdout.split()[-1]
+
+        prereg_at = int(first_commit("docs/preregistration.md"))
+        opened_at = int(first_commit("scripts/open_holdout.py"))
+        assert prereg_at < opened_at, (
+            "the pre-registration must predate the script that opens the "
+            f"holdout: {prereg_at} vs {opened_at}")
+
+    def test_only_the_opening_script_and_the_split_touch_the_holdout(self):
+        """
+        Opening it once is the plan. A second analysis path reading the
+        holdout would be a second look, whatever it was called.
         """
         out = subprocess.run(
             ["git", "grep", "-l", "holdout.json"],
             cwd=ROOT, capture_output=True, text=True).stdout.split()
-        # Files that may legitimately name the holdout before it is opened:
-        # the script that wrote it, the tests that check its digest, and the
-        # documents that describe the discipline. Anything else reading it is
-        # the discipline being broken.
-        allowed = {"scripts/split.py", "tests/test_split.py",
-                   "tests/test_preregistration.py", "README.md",
-                   "docs/preregistration.md"}
+        allowed = {"scripts/split.py", "scripts/open_holdout.py",
+                   "tests/test_split.py", "tests/test_preregistration.py",
+                   "README.md", "docs/preregistration.md", "docs/theory.md"}
         unexpected = {f for f in out if not f.endswith(".pyc")} - allowed
-        assert not unexpected, f"these read the holdout early: {unexpected}"
+        assert not unexpected, f"extra readers of the holdout: {unexpected}"
 
 
 class TestTheResultIsReportedAsPredicted:
