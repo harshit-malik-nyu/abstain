@@ -9,6 +9,8 @@ sink the project, so a later softening is visible in a diff.
 from __future__ import annotations
 
 import subprocess
+
+import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,10 +82,24 @@ class TestItPrecededTheHoldout:
 
     @staticmethod
     def _readers(pattern: str) -> set[str]:
+        """
+        Files that name the holdout, restricted to things that could read it.
+
+        `evidence/` is excluded, and that is a tightening rather than a
+        loosening: those files are run OUTPUT. A log prints the name of the
+        set it was given, so the guard was firing on the very record the run
+        produced — matching a string in a result rather than a read in code.
+        Allow-listing each log one by one would have grown an exception list
+        that eventually swallowed a real reader.
+
+        What the guard is actually about is code paths, so it looks at those.
+        """
         out = subprocess.run(
             ["git", "grep", "-l", pattern],
             cwd=ROOT, capture_output=True, text=True).stdout.split()
-        return {f for f in out if not f.endswith(".pyc")}
+        return {f for f in out
+                if not f.endswith(".pyc")
+                and not f.startswith("evidence/")}
 
     def test_only_the_opening_script_and_the_split_touch_the_holdout(self):
         """
@@ -122,7 +138,11 @@ class TestItPrecededTheHoldout:
         """
         allowed = {"scripts/split.py", "scripts/run_round4.py",
                    "tests/test_split.py", "tests/test_preregistration.py",
-                   "README.md", "docs/preregistration-4.md"}
+                   "README.md", "docs/preregistration-4.md",
+                   # Names the holdout's evidence files only to check that
+                   # the interrupted and resumed runs agree. A verifier is
+                   # not a reader, same as the build workflow above.
+                   "scripts/verify_resumed_run.py"}
         unexpected = self._readers("fine_holdout") - allowed
         assert not unexpected, f"extra readers of the fine holdout: {unexpected}"
 
@@ -330,3 +350,92 @@ class TestTheBenchmarkCannotBeSilentlyReplaced:
             (ROOT / "evidence" / "cases_fine.meta.json").read_text())
         assert re.fullmatch(r"policyengine-us==\d+\.\d+\.\d+",
                             meta["engine"]), meta["engine"]
+
+
+class TestTheHoldoutWasOpenedOnceDespiteTheInterruption:
+    """
+    The confirmatory run was killed partway through and relaunched.
+
+    That is indistinguishable from a second look unless it is checked, and
+    "it was the same seed" is an assertion rather than a check. These make it
+    one.
+    """
+
+    PARTIAL = "evidence/round4-holdout-partial-interrupted.txt"
+    COMPLETE = "evidence/round4-holdout-run.txt"
+
+    def _rows(self, name: str) -> list[str]:
+        import re
+        path = ROOT / name
+        out = []
+        for line in path.read_text().splitlines():
+            s = " ".join(line.split())
+            if not s or not re.search(r"\d", s):
+                continue
+            if s.startswith("---") or "----" in s:
+                continue
+            if s.startswith("wrote evidence/"):
+                continue
+            out.append(s)
+        return out
+
+    def test_the_interrupted_log_was_committed_before_the_relaunch(self):
+        """
+        Otherwise it could have been edited afterwards to agree, and the
+        whole check would be circular.
+        """
+        import subprocess
+        if not (ROOT / self.PARTIAL).exists():
+            pytest.skip("no interrupted run in this checkout")
+
+        def added(path: str) -> int:
+            out = subprocess.run(
+                ["git", "log", "--diff-filter=A", "--format=%ct", "--", path],
+                cwd=ROOT, capture_output=True, text=True).stdout.split()
+            return int(out[-1]) if out else 0
+
+        partial_at = added(self.PARTIAL)
+        assert partial_at, "the interrupted log must be committed"
+
+        complete_at = added(self.COMPLETE)
+        if complete_at:
+            assert partial_at < complete_at, (
+                "the interrupted log has to predate the completed one, or it "
+                "could have been written to match")
+
+    def test_the_resumed_run_reproduces_every_seen_row(self):
+        """
+        Character for character. A single number moving means two different
+        experiments, and the result should be discarded rather than explained.
+        """
+        if not (ROOT / self.PARTIAL).exists() or \
+                not (ROOT / self.COMPLETE).exists():
+            pytest.skip("the resumed run has not completed in this checkout")
+
+        before, after = self._rows(self.PARTIAL), self._rows(self.COMPLETE)
+        assert before, "the interrupted log carried no numbers"
+        missing = [r for r in before if r not in after]
+        assert not missing, (
+            "the two runs disagree, so the holdout was opened twice: "
+            f"{missing[:3]}")
+
+    def test_the_script_was_not_modified_between_the_two_runs(self):
+        """
+        A resumed run is the same draw only if the code is the same code.
+        """
+        import subprocess
+        if not (ROOT / self.PARTIAL).exists():
+            pytest.skip("no interrupted run in this checkout")
+
+        last_touched = subprocess.run(
+            ["git", "log", "-1", "--format=%ct", "--",
+             "scripts/run_round4.py"],
+            cwd=ROOT, capture_output=True, text=True).stdout.strip()
+        partial_added = subprocess.run(
+            ["git", "log", "--diff-filter=A", "--format=%ct", "--",
+             self.PARTIAL],
+            cwd=ROOT, capture_output=True, text=True).stdout.split()
+        assert last_touched and partial_added
+        assert int(last_touched) < int(partial_added[-1]), (
+            "run_round4.py changed after the interrupted run was recorded; "
+            "the relaunch is then a different experiment")

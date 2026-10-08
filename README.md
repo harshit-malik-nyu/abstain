@@ -642,6 +642,19 @@ Five pre-registrations, each committed before the code it needed existed:
 Built, validated, replicated, and reported including every prediction that
 missed, every judgement that was wrong, and every bug that flattered it.
 
+**The confirmatory holdout run was interrupted partway through** by the
+session it was running in, after the replication and concentration tables had
+printed. It was relaunched rather than re-designed: the seed is fixed in the
+script, the script's last commit predates the first run, and nothing between
+the two touched the benchmark — so a resumed run is the same draw, not a
+second look. That claim is checked rather than asserted.
+[`scripts/verify_resumed_run.py`](scripts/verify_resumed_run.py) requires
+every numeric row the interrupted log printed to reappear character for
+character in the completed one, and the interrupted log was committed
+*before* the relaunch so it could not be edited to match afterwards. If a
+single number had moved, the two would be different experiments and the
+result would be discarded rather than explained.
+
 ## License
 
 MIT. Derived from the `underdetermined` benchmark in the same account.
