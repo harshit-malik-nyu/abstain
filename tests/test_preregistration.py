@@ -138,3 +138,70 @@ class TestTheResultIsReportedAsPredicted:
     def test_the_shape_predictions_held(self):
         c = self._check()
         assert c["P7"] and c["P8"]
+
+
+class TestTheSecondaryResultIsReported:
+    """
+    The pre-registration promised the fitted scorer as a secondary result and
+    said it would be reported whether or not it won. It won, against the
+    choice made in advance, and that has to survive into the README.
+    """
+
+    @staticmethod
+    def _rows():
+        import json
+        p = ROOT / "evidence" / "fitted_secondary.json"
+        if not p.exists():
+            import pytest
+            pytest.skip("secondary result not run")
+        return json.loads(p.read_text())
+
+    def test_the_fitted_scorer_beats_the_primary_on_coverage(self):
+        rows = self._rows()
+        h = next(r for r in rows if r["scorer"] == "handcrafted"
+                 and r["alpha"] == 0.10)
+        f = next(r for r in rows if r["scorer"] == "fitted"
+                 and r["alpha"] == 0.10)
+        assert f["mean_coverage"] > h["mean_coverage"] + 0.15
+
+    def test_it_does_so_without_breaking_the_bound(self):
+        """
+        Winning on coverage by violating would not be winning.
+        """
+        for r in self._rows():
+            if r["scorer"] == "fitted":
+                assert r["violation_rate"] <= 0.05
+
+    def test_the_readme_says_the_judgement_was_wrong(self):
+        t = (ROOT / "README.md").read_text()
+        assert "The judgement was wrong" in t
+
+    def test_the_auc_defect_is_recorded(self):
+        """
+        A one-point AUC difference producing a twenty-three point coverage
+        difference means AUC is the wrong summary for choosing a scorer here.
+        That is a defect in the project's own method selection and belongs in
+        the write-up rather than in a footnote.
+        """
+        t = " ".join((ROOT / "README.md").read_text().split())
+        assert "AUC is the wrong summary for choosing between scorers here" in t
+
+
+class TestTheCaseAgainstLeadsWithTheRealLimit:
+
+    def test_it_leads_with_no_model_being_run(self):
+        t = (ROOT / "docs" / "against.md").read_text()
+        head = t[:t.index("## 2.")]
+        assert "There is no model in it" in head
+        assert "most serious objection" in head
+
+    def test_it_refuses_the_misleading_comparison(self):
+        """
+        The companion benchmark's 62.5% and this project's numbers come from
+        different cases and different inputs. Tabulating them together would
+        be the single most misleading thing available here.
+        """
+        for doc in ("docs/against.md", "README.md"):
+            t = " ".join((ROOT / doc).read_text().split())
+            if "62.5%" in t:
+                assert "not comparable" in t

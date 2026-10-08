@@ -131,6 +131,29 @@ At α = 0.10, against the two degenerate policies on the same 81 cases:
 its development set degrades on unseen data. This did not, which is the
 clearest evidence available that the holdout stayed shut.
 
+## The scorer I excluded was better
+
+The pre-registration named the handcrafted scorer as primary, reasoning that
+it needs no fitting fold and so costs no calibration data. Measured on
+holdout, refit per trial on a disjoint fold:
+
+| Scorer | α | Violations | Coverage | Questions/case |
+|---|---:|---:|---:|---:|
+| Handcrafted | 0.10 | 2.0% | 74.8% | 2.37 |
+| **Fitted** | 0.10 | **1.0%** | **97.7%** | 2.39 |
+| Handcrafted | 0.20 | 0.0% | 81.4% | 2.18 |
+| **Fitted** | 0.20 | 2.0% | **93.8%** | 2.05 |
+
+**The judgement was wrong.** The pre-registration is what preserves the
+evidence that it was made in advance rather than after seeing this.
+
+One detail worth more than the result: the two score almost identically on
+ordering — **AUC 0.9644 against 0.9631**. A one-point AUC difference producing
+a twenty-three point coverage difference means the ordering that matters is
+entirely local to the threshold, and **AUC is the wrong summary for choosing
+between scorers here.** That is a defect in how this project selected its
+scorer, not a detail.
+
 ## What is guaranteed, and on what basis
 
 Three claims, resting on different things. [`docs/theory.md`](docs/theory.md)
@@ -160,10 +183,24 @@ requirement roughly triples:
 The calibration fold is 47. **`correct_for_search=True` turns the proof on for
 anyone with three times the data.**
 
+## The case against
+
+[`docs/against.md`](docs/against.md) lists seven objections, leading with the
+one that cannot be answered: **no language model was run.** The rule is
+evaluated against an oracle-backed simulation where determinability is
+computable, and the deployment it is motivated by is one where it is not.
+
+The companion benchmark measured a real model answering **62.5%** of
+undecidable cases. That number and these are **not comparable** — different
+cases, different n, and that model scored free text rather than four known
+fields. Putting them in one table would be the most misleading thing this
+repository could do, so it does not.
+
 ## Status
 
 Built, validated, pre-registered, and tested once on held-out data. The result
-stands as reported.
+stands as reported, including the prediction that missed and the scorer choice
+that was wrong.
 
 ## The holdout is locked before the method exists
 
