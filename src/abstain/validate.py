@@ -84,9 +84,40 @@ class Validation:
 
     @property
     def violation_rate(self) -> float:
+        """
+        Over **all** trials, including those where calibration declined.
+
+        Kept, and reported, because it is what an operator who ignores the
+        feasibility flag actually experiences. It is not the guarantee.
+        """
         if not self.results:
             return 0.0
         return sum(t.violated for t in self.results) / len(self.results)
+
+    @property
+    def violation_rate_when_feasible(self) -> float | None:
+        """
+        Over trials where calibration reported feasible. **This is the claim.**
+
+        The guarantee is conditional on feasibility and always was: the
+        procedure says "here is a threshold that holds α" or it says "no
+        threshold here does". Scoring a declined trial against a bound the
+        method refused to issue measures obedience to the flag, not the
+        bound.
+
+        The distinction was invisible while every condition was feasible, and
+        the corruption study made it load-bearing: under an anti-correlated
+        score the procedure declines in 100% of trials, and the honest
+        statement about those trials is that there is no guarantee to test —
+        not that the guarantee held, and not that it failed.
+
+        `None` rather than 0.0 when nothing was feasible, because a rate over
+        an empty set is undefined and reporting 0.0 would read as a pass.
+        """
+        usable = [t for t in self.results if t.feasible]
+        if not usable:
+            return None
+        return sum(t.violated for t in usable) / len(usable)
 
     @property
     def infeasible_rate(self) -> float:
@@ -105,23 +136,35 @@ class Validation:
         return sum(t.questions for t in usable) / len(usable) if usable else 0.0
 
     @property
-    def holds(self) -> bool:
+    def holds(self) -> bool | None:
         """
-        Judged against delta, which is what the Clopper-Pearson level buys.
+        Judged against delta on the feasible trials, which is the claim.
 
         A little slack is allowed because the violation rate is itself
-        estimated from a finite number of trials; the slack is one standard
-        error of a binomial at delta, not a round number chosen to pass.
+        estimated from a finite number of trials; the slack is two standard
+        errors of a binomial at delta, not a round number chosen to pass, and
+        the standard error uses the number of **feasible** trials rather than
+        all of them — a condition feasible in 10 trials out of 150 has a far
+        noisier estimate and the slack has to widen to match.
+
+        `None` when nothing was feasible: there is no guarantee to judge, and
+        returning True there would turn a total refusal to certify into a
+        pass.
         """
-        if not self.results:
-            return False
-        se = (self.delta * (1 - self.delta) / len(self.results)) ** 0.5
-        return self.violation_rate <= self.delta + 2 * se
+        usable = [t for t in self.results if t.feasible]
+        if not usable:
+            return None
+        se = (self.delta * (1 - self.delta) / len(usable)) ** 0.5
+        return (self.violation_rate_when_feasible or 0.0) <= \
+            self.delta + 2 * se
 
     def as_dict(self) -> dict:
         return {"alpha": self.alpha, "delta": self.delta,
                 "trials": len(self.results),
+                "feasible_trials": sum(t.feasible for t in self.results),
                 "violation_rate": self.violation_rate,
+                "violation_rate_when_feasible":
+                    self.violation_rate_when_feasible,
                 "infeasible_rate": self.infeasible_rate,
                 "mean_coverage": self.mean_coverage,
                 "mean_questions": self.mean_questions,
@@ -132,7 +175,10 @@ def validate(cases: list[dict], scorer, *, alpha: float = 0.05,
              delta: float = 0.05, trials: int = 200,
              calibration_share: float = 0.6, seed: int = 0,
              refit=None, unit: str = "trajectory",
-             correct_for_search: bool = False) -> Validation:
+             correct_for_search: bool = False,
+             bound: str = "clopper-pearson",
+             calibration_size: int | None = None,
+             on_trial=None) -> Validation:
     """
     Repeatedly calibrate and deploy on disjoint halves, counting violations.
 
@@ -157,6 +203,30 @@ def validate(cases: list[dict], scorer, *, alpha: float = 0.05,
     and a score fit on them is not. The failure is worth keeping visible
     because it is silent: the threshold looks reasonable, the calibration
     reports its bound, and the deployed rate is seven times the target.
+
+    `calibration_size` and why it is absolute
+    -----------------------------------------
+    `calibration_share` scales the calibration fold with the pool, which is
+    the right default and the wrong instrument for asking *how much
+    calibration data does this need*. A finite-sample bound tightens with n,
+    so the interesting sweep holds n fixed and watches the violation rate —
+    and that requires naming n rather than a fraction of whatever happened to
+    be passed in.
+
+    When set, exactly `calibration_size` cases calibrate and the remainder
+    deploy; a trial with too few cases for both is skipped rather than run on
+    a degenerate split.
+
+    `on_trial` and why there is only one trial loop
+    ----------------------------------------------
+    Called as `on_trial(calibration, result, deployed_cases)` after each
+    trial, for analyses that need more than the summary — the per-stratum
+    breakdown in `conditional.py` is the one that exists.
+
+    A callback rather than a second loop somewhere else, because two copies
+    of the draw-calibrate-deploy sequence will drift, and then a difference
+    between the headline result and the subgroup result is attributable to
+    the copy rather than to the subgroup. One loop, observed from outside.
     """
     v = Validation(alpha=alpha, delta=delta)
 
@@ -182,7 +252,12 @@ def validate(cases: list[dict], scorer, *, alpha: float = 0.05,
         else:
             rest = shuffled
 
-        cut = int(len(rest) * calibration_share)
+        if calibration_size is not None:
+            if len(rest) < calibration_size + 1:
+                continue
+            cut = calibration_size
+        else:
+            cut = int(len(rest) * calibration_share)
         cal_cases, dep_cases = rest[:cut], rest[cut:]
         if not cal_cases or not dep_cases:
             continue
@@ -192,7 +267,8 @@ def validate(cases: list[dict], scorer, *, alpha: float = 0.05,
                 cal_cases, active,
                 lambda c, sc, tau: run_case(c, sc, tau, budget=4),
                 alpha=alpha, delta=delta,
-                correct_for_search=correct_for_search)
+                correct_for_search=correct_for_search,
+                bound=bound)
         else:
             samples = [(active(c, k), not determinable)
                        for c, k, determinable in states_of(cal_cases)]
@@ -204,6 +280,9 @@ def validate(cases: list[dict], scorer, *, alpha: float = 0.05,
             realised_unsafe=res.unsafe_rate, coverage=res.coverage,
             questions=res.questions_per_case,
             violated=res.unsafe_rate > alpha))
+
+        if on_trial is not None:
+            on_trial(cal, res, dep_cases)
 
     return v
 

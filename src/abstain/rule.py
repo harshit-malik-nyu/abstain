@@ -84,9 +84,38 @@ class Scorer(Protocol):
 
     Higher means safer. The guarantee does not require the score to be good,
     only to be fixed before calibration and applied unchanged afterwards.
+
+    The range is [0, 1]. That is a contract, not a convention —
+    `INFEASIBLE_THRESHOLD` below is only unreachable because of it.
     """
 
     def __call__(self, case: dict, known: frozenset[str]) -> float: ...
+
+
+# The threshold returned when no candidate achieves the tolerance.
+#
+# This was 1.0 and that was a safety bug. `run_case` commits when
+# `score >= threshold`, so 1.0 is cleared by any score that reaches exactly
+# 1.0 — and a score clipped into [0, 1] has a point mass there by
+# construction. "Infeasible" is the rule declining to certify itself, and the
+# threshold it falls back to has to make that refusal real.
+#
+# How it was found, and why it had stayed hidden: `handcrafted_scorer` tops
+# out at 0.9718 on this benchmark, so the sentinel was unreachable for the
+# only scorer the primary experiment ever ran. The corruption study in
+# `robustness.py` ran scorers that do reach 1.0, and the defect was immediate
+# — under the anti-correlated score, 796 of 1,264 states sat at exactly 1.0
+# and 792 of those were undetermined, so the "most conservative" threshold
+# committed blind on nearly every one of them. 100% of trials violated.
+#
+# `evaluate.ask_everything` had used 1.1 for this exact reason since it was
+# written. One part of the codebase knew and the sentinel did not, which is
+# the ordinary way a bug like this survives review.
+#
+# nextafter rather than 1.1 or infinity: the tightest float strictly above
+# the documented range, so it is unreachable by contract rather than by
+# margin, and still finite, so it survives a JSON round-trip.
+INFEASIBLE_THRESHOLD = math.nextafter(1.0, math.inf)
 
 
 # ---------------------------------------------------------------------------
@@ -175,7 +204,8 @@ def calibrate(samples: list[tuple[float, bool]], alpha: float = 0.05,
     observed values produced 10% violations at a 5% target.
     """
     if not samples:
-        return Calibration(1.0, alpha, delta, 0, 0.0, 1.0, 0.0, False)
+        return Calibration(INFEASIBLE_THRESHOLD, alpha, delta, 0,
+                           0.0, 1.0, 0.0, False)
 
     candidates = [i / (grid - 1) for i in range(grid)]
     best = None
@@ -206,18 +236,20 @@ def calibrate(samples: list[tuple[float, bool]], alpha: float = 0.05,
             break
 
     if best is None:
-        # No threshold achieves the target. Returning the most conservative
-        # one and saying so is correct; silently returning the best available
-        # would report a guarantee the data does not support.
-        return Calibration(1.0, alpha, delta, len(samples), 0.0, 1.0, 0.0,
-                           False)
+        # No threshold achieves the target. Reporting that, and falling back
+        # to a threshold no score can clear, is correct; silently returning
+        # the best available would report a guarantee the data does not
+        # support.
+        return Calibration(INFEASIBLE_THRESHOLD, alpha, delta, len(samples),
+                           0.0, 1.0, 0.0, False)
     return best
 
 
 def calibrate_on_trajectories(cases: list[dict], scorer, run, *,
                               alpha: float = 0.05, delta: float = 0.05,
                               grid: int = 101,
-                              correct_for_search: bool = False) -> Calibration:
+                              correct_for_search: bool = False,
+                              bound: str = "clopper-pearson") -> Calibration:
     """
     Calibrate on what the rule actually does, not on the state population.
 
@@ -267,9 +299,28 @@ def calibrate_on_trajectories(cases: list[dict], scorer, run, *,
     each candidate at delta/grid. That restores a valid simultaneous
     statement at the cost of a more conservative threshold, and measuring
     what it costs is the point of having both.
+
+    `bound` — and why the baseline lives in this function
+    ----------------------------------------------------
+    `"clopper-pearson"` is the method. `"plugin"` accepts a threshold on its
+    **empirical** calibration rate alone, with no finite-sample correction.
+
+    The plug-in is what a competent engineer writes when asked to hold an
+    error budget, and it is correct in expectation — which is the property
+    that makes it fail. An operator who asks for 5% and gets 5% *on average*
+    is over budget half the time, and has been given an estimate rather than
+    a guarantee.
+
+    Putting it behind a parameter on the same function rather than in a
+    separate implementation is deliberate: it makes the comparison one line
+    of difference instead of two code paths that could diverge in ways the
+    experiment would then attribute to the bound.
     """
     if not cases:
-        return Calibration(1.0, alpha, delta, 0, 0.0, 1.0, 0.0, False)
+        return Calibration(INFEASIBLE_THRESHOLD, alpha, delta, 0,
+                           0.0, 1.0, 0.0, False)
+    if bound not in ("clopper-pearson", "plugin"):
+        raise ValueError(f"unknown bound: {bound!r}")
 
     # Union bound over the candidates when a simultaneous statement is
     # wanted. Conservative by construction: a grid of 101 tests each at
@@ -291,16 +342,28 @@ def calibrate_on_trajectories(cases: list[dict], scorer, run, *,
 
         if not committed:
             continue
-        if unsafe / committed > alpha:
+        empirical = unsafe / committed
+        if empirical > alpha:
             continue
-        bound = clopper_pearson_upper(unsafe, committed, level)
-        if bound <= alpha:
+
+        if bound == "plugin":
+            # No correction. The empirical rate is taken at face value, and
+            # `bound_unsafe` records it unchanged so the reported field is
+            # not quietly claiming a confidence statement it does not have.
             return Calibration(
                 threshold=tau, alpha=alpha, delta=level, n=len(cases),
-                empirical_unsafe=unsafe / committed, bound_unsafe=bound,
+                empirical_unsafe=empirical, bound_unsafe=empirical,
                 coverage=committed / len(cases), feasible=True)
 
-    return Calibration(1.0, alpha, delta, len(cases), 0.0, 1.0, 0.0, False)
+        ucb = clopper_pearson_upper(unsafe, committed, level)
+        if ucb <= alpha:
+            return Calibration(
+                threshold=tau, alpha=alpha, delta=level, n=len(cases),
+                empirical_unsafe=empirical, bound_unsafe=ucb,
+                coverage=committed / len(cases), feasible=True)
+
+    return Calibration(INFEASIBLE_THRESHOLD, alpha, delta, len(cases),
+                       0.0, 1.0, 0.0, False)
 
 
 # ---------------------------------------------------------------------------

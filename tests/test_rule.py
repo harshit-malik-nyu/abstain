@@ -11,7 +11,8 @@ from __future__ import annotations
 
 import random
 
-from abstain.rule import calibrate, clopper_pearson_upper, run_case
+from abstain.rule import (INFEASIBLE_THRESHOLD, calibrate,
+                          clopper_pearson_upper, run_case)
 
 
 class TestTheBound:
@@ -80,13 +81,26 @@ class TestCalibration:
         """
         Silently returning the best available threshold would report a
         guarantee the data does not support.
+
+        This test used to assert `c.threshold == 1.0`, and that assertion was
+        itself part of a safety bug: `run_case` commits on
+        `score >= threshold`, so 1.0 is cleared by any score that reaches the
+        top of its range, and a score clipped into [0, 1] has a point mass
+        there. The test passed, the behaviour was wrong, and the test was
+        pinning the wrong behaviour in place.
+
+        It was found by the corruption study, not here — the scorer this
+        suite exercises never reaches 1.0. `tests/test_robustness.py` holds
+        the behavioural version of the check.
         """
         rng = random.Random(3)
         # every state underdetermined: no threshold can achieve any alpha
         s = [(rng.random(), True) for _ in range(500)]
         c = calibrate(s, alpha=0.05)
         assert not c.feasible
-        assert c.threshold == 1.0
+        assert c.threshold == INFEASIBLE_THRESHOLD
+        assert c.threshold > 1.0, \
+            "the refusal threshold has to be outside the score's range"
         assert c.coverage == 0.0
 
     def test_the_grid_is_pre_specified_not_data_dependent(self):
