@@ -32,16 +32,20 @@ The guarantee is **marginal**. It bounds the error rate over the population and
 says nothing about any subgroup of it. That is the standard caveat on split
 conformal methods, usually written in a limitations section and left there.
 
-Measured, on 672 cases and 400 trials at α = 0.20:
+Measured on **held-out data** — 672 cases, 400 trials, α = 0.20:
 
 | | |
 |---|---:|
-| Trials where the rule honoured its budget **overall** | **98.5%** |
-| Trials where it broke that budget **for some income band** | **98.2%** |
+| Trials where the rule honoured its budget **overall** | **100%** |
+| Trials where it broke that budget **for some income band** | **99.8%** |
 
 The band is always the same one. `well-below` — households under $6,000 of
-employment income — runs at **45.7% unsafe** against a 20% budget, absorbing
-**4.1×** its proportional share, while the headline number reads 11.1%.
+employment income — runs at **49.0% unsafe** against a 20% budget, absorbing
+**4.2×** its proportional share, while the headline number reads 11.5%.
+
+Development data said the same thing slightly less starkly: 98.5% against
+98.2%, with that band at 45.7%. **The holdout is worse**, which is the
+direction that cannot be explained by having tuned anything.
 
 Those are the applicants most likely to be eligible and least able to absorb a
 wrong decision. **At a stated 20% tolerance they receive a decision built on a

@@ -41,18 +41,59 @@ def squash(path: str) -> str:
     return " ".join((ROOT / path).read_text().split())
 
 
-def pct(x: float, places: int = 1) -> str:
-    return f"{x * 100:.{places}f}%"
+def pct_forms(x: float, places: int = 1) -> list[str]:
+    """
+    Every rendering of a rate the write-up legitimately uses.
+
+    Tables keep one decimal so columns line up — "0.0%", "100.0%" — while
+    prose drops a trailing zero — "0%", "100%". Both are correct renderings
+    of the same number, and a test that insisted on one would be policing
+    typography rather than checking arithmetic. The job here is to catch a
+    figure that CHANGED, so any faithful form passes.
+    """
+    exact = f"{x * 100:.{places}f}"
+    forms = [exact + "%"]
+    if exact.endswith(".0"):
+        forms.append(exact[:-2] + "%")
+    return forms
+
+
+class _Pct(str):
+    """Lets `pct(v) in readme` read naturally while accepting either form."""
+
+    def __new__(cls, x: float, places: int = 1):
+        forms = pct_forms(x, places)
+        self = super().__new__(cls, forms[0])
+        self.forms = forms
+        return self
+
+
+def pct(x: float, places: int = 1) -> "_Pct":
+    return _Pct(x, places)
+
+
+class _Haystack(str):
+    """
+    A string whose `in` test understands `pct`.
+
+    `pct(v) in readme` is the readable form and appears dozens of times
+    below; this keeps that phrasing while letting a value match any
+    rendering the write-up legitimately uses.
+    """
+
+    def __contains__(self, needle) -> bool:
+        forms = getattr(needle, "forms", None) or [needle]
+        return any(str.__contains__(self, f) for f in forms)
 
 
 @pytest.fixture(scope="module")
 def readme():
-    return squash("README.md")
+    return _Haystack(squash("README.md"))
 
 
 @pytest.fixture(scope="module")
 def theory():
-    return squash("docs/theory.md")
+    return _Haystack(squash("docs/theory.md"))
 
 
 @pytest.fixture(scope="module")
@@ -739,3 +780,96 @@ def test_the_pinned_oracle_in_the_readme_matches_the_data(readme):
     meta = json.loads(
         (ROOT / "evidence" / "cases_fine.meta.json").read_text())
     assert meta["engine"] in readme, meta["engine"]
+
+
+# ---------------------------------------------------------------------------
+# The holdout, which is now what the README leads with
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def holdout():
+    p = ROOT / "evidence" / "round4_holdout.json"
+    if not p.exists():
+        pytest.skip("the holdout has not been opened in this checkout")
+    return json.loads(p.read_text())
+
+
+def test_the_headline_pair_comes_from_the_holdout(readme, holdout):
+    """
+    The README leads with held-out numbers, not development ones.
+
+    Pinned because leading with the weaker set would be the easiest
+    unremarked downgrade in the document.
+    """
+    pooled = next(s for s in holdout["E4_E7_schemes"]
+                  if s["scheme"] == "pooled" and s["alpha"] == 0.20)
+    overall_pass = 1.0 - pooled["violation_rate_when_feasible"]
+    per_band_fail = pooled["group_violation_rate_when_feasible"]
+
+    assert pct(overall_pass) in readme, pct(overall_pass)
+    assert pct(per_band_fail) in readme, pct(per_band_fail)
+    assert "held-out" in readme or "holdout" in readme
+
+
+def test_the_holdout_is_worse_than_dev_and_the_readme_says_so(
+        readme, round4, holdout):
+    """
+    The direction matters more than the magnitude.
+
+    A result that degrades from dev to holdout is the usual sign of tuning;
+    one that worsens *against* the method cannot be. The README claims that
+    and it has to be true.
+    """
+    def worst(payload) -> float:
+        c = next(x for x in payload["E3_E8_concentration"]
+                 if x["alpha"] == 0.20)
+        return next(b["unsafe_rate"] for b in c["bands"]
+                    if b["band"] == c["worst_band"])
+
+    assert worst(holdout) > worst(round4)
+    assert pct(worst(holdout)) in readme
+    assert pct(worst(round4)) in readme, \
+        "the dev figure must still be shown for comparison"
+    assert "The holdout is worse" in readme
+
+
+def test_the_same_band_fails_on_holdout(holdout):
+    for c in holdout["E3_E8_concentration"]:
+        assert c["worst_band"] == "well-below", c["alpha"]
+        assert c["hides_a_subgroup"] is True, c["alpha"]
+
+
+def test_group_conditioning_replicates_on_holdout(holdout):
+    """
+    E5 and the E6 reversal, on data neither was developed against.
+    """
+    for alpha in (0.20, 0.15):
+        pooled = next(s for s in holdout["E4_E7_schemes"]
+                      if s["scheme"] == "pooled" and s["alpha"] == alpha)
+        band = next(s for s in holdout["E4_E7_schemes"]
+                    if s["scheme"] == "by-band" and s["alpha"] == alpha)
+
+        # E5: far fewer trials break some band's budget.
+        assert band["group_violation_rate_when_feasible"] < \
+            pooled["group_violation_rate_when_feasible"] / 5, alpha
+        # E6 reversed: coverage up, not down, and fewer questions.
+        assert band["mean_coverage"] > pooled["mean_coverage"], alpha
+        assert band["mean_questions"] < pooled["mean_questions"], alpha
+
+
+def test_the_post_hoc_scheme_does_not_generalise(holdout):
+    """
+    `separate-well-below` was chosen after seeing which band failed, and the
+    pre-registration said that makes it fitted to this benchmark.
+
+    On holdout it sits far nearer the pooled rule than the full scheme does,
+    which is what "fitted" predicts: separating the group you know fails
+    leaves the groups you did not check sharing a threshold.
+    """
+    at20 = {s["scheme"]: s for s in holdout["E4_E7_schemes"]
+            if s["alpha"] == 0.20}
+    post = at20["separate-well-below"]
+    full = at20["by-band"]
+    assert post["post_hoc"] is True
+    assert post["group_violation_rate_when_feasible"] > \
+        full["group_violation_rate_when_feasible"] * 5
