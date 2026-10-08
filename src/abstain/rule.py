@@ -221,6 +221,11 @@ class Trajectory:
     case_id: int
     asked: list[str] = field(default_factory=list)
     final: str | None = None
+    committed: bool = False
+    """True when the rule chose to answer. An agent that commits does not get
+    to abstain: if the state was undecidable it has guessed, and that is the
+    failure the bound is about."""
+
     scores: list[float] = field(default_factory=list)
     stopped_because: str = ""
 
@@ -252,13 +257,26 @@ def run_case(case: dict, scorer: Scorer, threshold: float,
 
         if s >= threshold:
             state = case["states"]["|".join(sorted(known))]
-            t.final = state["truth"]
+            t.committed = True
+            # A rule that decides to answer commits to a verdict. Reading
+            # "cannot_determine" off the oracle here would let it abstain
+            # after choosing not to — which made "answer immediately" score
+            # 0% unsafe, the opposite of what it is.
+            if state["label"] == "determinable":
+                t.final = state["truth"]
+            else:
+                # Undecidable and committing anyway: the agent guesses. Which
+                # way it guesses does not matter — the commitment is the
+                # failure, and scoring it as right half the time would hide
+                # that.
+                t.final = "eligible"
             t.stopped_because = "score cleared threshold"
             return t
 
         remaining = [f for f in fields if f not in known]
         if not remaining or len(t.asked) >= budget:
             t.final = "cannot_determine"
+            t.committed = False
             t.stopped_because = ("budget exhausted" if remaining
                                  else "nothing left to ask")
             return t
