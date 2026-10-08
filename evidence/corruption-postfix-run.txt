@@ -1,0 +1,30 @@
+  dev: 79 cases, 150 trials, seed 13
+  post-fix: the refusal threshold is now outside the score range
+
+        corruption  alpha   feas  viol|feas  viol(all)  infeas     cov  holds
+          identity   0.20    150       2.0%      2.0%   0.0%  72.9%   True
+          identity   0.15    150       0.7%      0.7%   0.0%  73.5%   True
+          identity   0.10    150       0.7%      0.7%   0.0%  70.8%   True
+       coarse(0.1)   0.20    150       0.0%      0.0%   0.0%  65.2%   True
+       coarse(0.1)   0.15    150       0.0%      0.0%   0.0%  65.2%   True
+       coarse(0.1)   0.10    116       0.0%      0.0%  22.7%  62.7%   True
+     sharpen(0.25)   0.20    150       0.0%      0.0%   0.0%  75.2%   True
+     sharpen(0.25)   0.15    150       0.0%      0.0%   0.0%  74.3%   True
+     sharpen(0.25)   0.10    150       0.0%      0.0%   0.0%  74.6%   True
+       noisy(0.10)   0.20     76       3.9%      2.0%  49.3%  40.4%   True
+       noisy(0.10)   0.15     25      12.0%      2.0%  83.3%  38.8%   True
+       noisy(0.10)   0.10      0        n/a      0.0% 100.0%   0.0%   None
+       noisy(0.25)   0.20      0        n/a      0.0% 100.0%   0.0%   None
+       noisy(0.25)   0.15      0        n/a      0.0% 100.0%   0.0%   None
+       noisy(0.25)   0.10      0        n/a      0.0% 100.0%   0.0%   None
+       noisy(0.50)   0.20      0        n/a      0.0% 100.0%   0.0%   None
+       noisy(0.50)   0.15      0        n/a      0.0% 100.0%   0.0%   None
+       noisy(0.50)   0.10      0        n/a      0.0% 100.0%   0.0%   None
+          constant   0.20      0        n/a      0.0% 100.0%   0.0%   None
+          constant   0.15      0        n/a      0.0% 100.0%   0.0%   None
+          constant   0.10      0        n/a      0.0% 100.0%   0.0%   None
+          inverted   0.20      0        n/a      0.0% 100.0%   0.0%   None
+          inverted   0.15      0        n/a      0.0% 100.0%   0.0%   None
+          inverted   0.10      0        n/a      0.0% 100.0%   0.0%   None
+
+  wrote evidence/corruption_postfix.json (820.1s)
