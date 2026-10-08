@@ -16,12 +16,35 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: '3.12' }
-      - run: pip install policyengine-us
+      # PINNED, and the pin matters more than it looks.
+      #
+      # Determinability in this benchmark is defined by what the engine says,
+      # which makes the engine version part of the data rather than part of
+      # the environment. This step used to install the latest release, so a
+      # rerun months later would build a DIFFERENT benchmark under the same
+      # filename -- and the step below re-splits, which would have replaced
+      # the dev and holdout halves the primary result rests on, silently.
+      #
+      # The pin is read off evidence/cases_fine.meta.json, which records the
+      # version the committed data was built with.
+      - run: pip install "policyengine-us==2.33.0"
       - run: |
           mkdir -p evidence
           python scripts/build_cases.py 2>&1 | tee evidence/build-run.txt
       - name: Split
         run: python scripts/split.py 2>&1 | tee -a evidence/build-run.txt
+
+      # A rebuild that changes the committed halves is a failure, not an
+      # update. The digests were committed with the split in the first commit
+      # of this repository and the holdout has been opened against them; if a
+      # rebuild moves them, the right response is to investigate, not to
+      # commit new ones over the top.
+      - name: The halves must not have changed
+        run: |
+          git diff --exit-code -- evidence/dev.sha256 evidence/holdout.sha256 \
+            || { echo "::error::rebuild changed the committed split"; exit 1; }
+          git diff --exit-code -- evidence/dev.json evidence/holdout.json \
+            || { echo "::error::rebuild changed dev/holdout contents"; exit 1; }
       - name: Summary
         if: always()
         run: |

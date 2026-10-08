@@ -476,3 +476,89 @@ def test_the_resampling_limitation_is_reported(readme, shift):
     natural = point(shift, "pooled", 0.20, 0.143)["distinct_fraction"]
     assert full < natural
     assert pct(full) in readme, full
+
+
+# ---------------------------------------------------------------------------
+# The figure
+# ---------------------------------------------------------------------------
+
+def test_the_figure_is_not_older_than_its_source():
+    """
+    A figure is the part of a write-up a reader trusts most and checks least.
+
+    `docs/shift.svg` is generated from `evidence/round5_shift.json`. If the
+    evidence is regenerated and the figure is not, the picture silently
+    disagrees with the table beside it — so a stale figure is a failure here
+    rather than something a reader has to notice.
+    """
+    svg = ROOT / "docs" / "shift.svg"
+    src = ROOT / "evidence" / "round5_shift.json"
+    if not svg.exists() or not src.exists():
+        pytest.skip("figure or its source not present in this checkout")
+    assert svg.stat().st_mtime >= src.stat().st_mtime, \
+        "regenerate with scripts/make_figure.py"
+
+
+def test_the_figure_carries_the_numbers_it_claims(shift):
+    """
+    The three figures the picture asserts, checked against the sweep.
+
+    Pinned because a chart can drift from its data in ways no reader will
+    catch: an axis rescaled, a label left over from a previous run.
+    """
+    svg = ROOT / "docs" / "shift.svg"
+    if not svg.exists():
+        pytest.skip("figure not present in this checkout")
+    text = svg.read_text()
+
+    first = point(shift, "pooled", 0.20, 0.143)["violation_rate"]
+    last = point(shift, "pooled", 0.20, 1.00)["violation_rate"]
+    grouped = point(shift, "by-band", 0.20, 1.00)["violation_rate"]
+    bound = point(shift, "pooled", 0.20, 1.00)["mean_reported_bound"]
+
+    assert pct(first) in text
+    assert f"{last * 100:.0f}%" in text
+    assert pct(grouped) in text
+    assert f"{bound:.3f}" in text
+
+
+def test_the_figure_is_accessible_and_self_describing():
+    """
+    It is referenced from the README as an image, so its alt text is the
+    only thing a screen reader or a text-only view gets. The SVG carries its
+    own description too, for anyone opening the file directly.
+    """
+    svg = ROOT / "docs" / "shift.svg"
+    if not svg.exists():
+        pytest.skip("figure not present in this checkout")
+    text = svg.read_text()
+    assert 'role="img"' in text
+    assert 'aria-label="' in text
+    assert len(text.split('aria-label="')[1].split('"')[0]) > 120, \
+        "the label has to describe the finding, not name the chart"
+
+    readme = (ROOT / "README.md").read_text()
+    assert "docs/shift.svg" in readme
+    alt = readme.split("![", 1)[1].split("]", 1)[0]
+    assert len(" ".join(alt.split())) > 80, \
+        "the README's alt text has to carry the finding too"
+
+
+def test_the_figure_colours_survive_a_renderer_that_ignores_css():
+    """
+    Dark theme is a CSS override on top of explicit attributes, not the only
+    source of colour.
+
+    The first version set every neutral through CSS custom properties, which
+    a non-browser renderer dropped — the figure came out with black gridlines
+    and was only noticed because it was proofed outside a browser. Light
+    theme must therefore be readable with the stylesheet thrown away.
+    """
+    svg = ROOT / "docs" / "shift.svg"
+    if not svg.exists():
+        pytest.skip("figure not present in this checkout")
+    body = svg.read_text().split("</style>", 1)[-1]
+    assert "var(--" not in body, \
+        "no colour in the body may depend on a CSS custom property"
+    assert body.count('fill="#') > 10
+    assert 'stroke="#d8dee4"' in body, "gridlines need a literal light value"

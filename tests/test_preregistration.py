@@ -102,7 +102,13 @@ class TestItPrecededTheHoldout:
                    "README.md", "docs/preregistration.md", "docs/theory.md",
                    # Round four declares that it does not read this file.
                    # Mentioning it in order to say so is not reading it.
-                   "docs/preregistration-4.md"}
+                   "docs/preregistration-4.md",
+                   # And the build workflow names it only to assert it has
+                   # not changed. A guard is not a reader: that step exists
+                   # because a rebuild under a newer oracle would otherwise
+                   # replace these halves silently, which is the failure
+                   # this whole class of test is about.
+                   ".github/workflows/build.yml"}
         unexpected = self._readers("evidence/holdout.json") - allowed
         assert not unexpected, f"extra readers of the coarse holdout: {unexpected}"
 
@@ -283,3 +289,44 @@ class TestTheCaseAgainstLeadsWithTheRealLimit:
             t = " ".join((ROOT / doc).read_text().split())
             if "62.5%" in t:
                 assert "not comparable" in t
+
+
+class TestTheBenchmarkCannotBeSilentlyReplaced:
+    """
+    The rebuild workflow is a path by which the holdout could change without
+    anyone deciding to change it, and it took four rounds to notice.
+    """
+
+    def test_the_oracle_version_is_pinned_in_ci(self):
+        """
+        Determinability is defined by what PolicyEngine says, which makes the
+        version part of the data rather than part of the environment.
+
+        The workflow installed the latest release, so a rerun months later
+        would build a different benchmark under the same filename — and the
+        next step re-splits. Unpinned, that silently replaces the halves the
+        primary result rests on.
+        """
+        import json
+        wf = (ROOT / ".github" / "workflows" / "build.yml").read_text()
+        meta = json.loads(
+            (ROOT / "evidence" / "cases_fine.meta.json").read_text())
+        pinned = meta["engine"]
+
+        assert "pip install policyengine-us\n" not in wf, \
+            "the oracle must not be installed unpinned"
+        assert pinned in wf, \
+            f"CI must pin the version the data records: {pinned}"
+
+    def test_a_rebuild_that_changes_the_split_fails_the_build(self):
+        wf = (ROOT / ".github" / "workflows" / "build.yml").read_text()
+        assert "git diff --exit-code" in wf
+        assert "evidence/dev.sha256" in wf and "evidence/holdout.sha256" in wf
+
+    def test_the_recorded_oracle_version_is_a_real_pin(self):
+        import json
+        import re
+        meta = json.loads(
+            (ROOT / "evidence" / "cases_fine.meta.json").read_text())
+        assert re.fullmatch(r"policyengine-us==\d+\.\d+\.\d+",
+                            meta["engine"]), meta["engine"]

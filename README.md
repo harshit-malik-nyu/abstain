@@ -205,6 +205,12 @@ repository asserted that and never priced it. The bands make it measurable:
 calibrate on the natural mix, deploy on a mix where `well-below`'s share is
 forced upward. 300 trials per point, α = 0.20.
 
+![Violation rate against a 20% tolerance as the deployed applicant mix shifts
+toward the lowest-income band. A single global threshold climbs from 0.7% to
+98% of trials violating; one threshold per band never leaves 0.7%; and the
+bound the method reports stays at 0.175
+throughout.](docs/shift.svg)
+
 | `well-below` share of deployment | one global threshold | **one per band** | the bound the rule reported |
 |---:|---:|---:|---:|
 | 14.3% *(natural)* | 0.7% | 0.0% | 0.175 |
