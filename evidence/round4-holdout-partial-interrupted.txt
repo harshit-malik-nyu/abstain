@@ -1,0 +1,54 @@
+  fine_holdout: 672 cases
+  400 trials, calibration share 0.3, seed 31, delta 0.05
+  schemes: pooled, by-band, separate-well-below
+    alpha 0.20: needs   327 cases — powered
+    alpha 0.15: needs   444 cases — powered
+    alpha 0.10: needs   890 cases — UNDERPOWERED by 1.32x
+
+  E1/E2 — the pooled rule, replicated
+  ----------------------------------------------------------------------------
+   alpha   feas  viol|feas  viol(all)  infeas     cov  q/case  holds
+    0.20    400       0.0%      0.0%   0.0%  75.1%    2.04   True
+    0.15    400       1.8%      1.8%   0.0%  77.1%    2.17   True
+    0.10    400       0.0%      0.0%   0.0%  77.8%    2.27   True   [exploratory]
+
+  E3/E8 — where the pooled rule spends its budget
+  ----------------------------------------------------------------------------
+              band  pop share  states open
+        well-below      14.3%        76.6%
+    near-threshold      28.6%        75.3%
+             above      19.0%        65.3%
+        well-above      38.1%        31.9%
+
+  alpha = 0.20   pooled 11.5%   worst band well-below   max concentration 4.24   hides a subgroup: True
+              band  deployed  unsafe    rate     cov    conc
+        well-below     26752   13097  49.0%  51.0%    4.24
+    near-threshold     53916    3400   6.3%  73.9%    0.55
+             above     35934    2544   7.1%  65.3%    0.61
+        well-above     71798    2688   3.7%  90.0%    0.32
+
+  alpha = 0.15   pooled 7.3%   worst band well-below   max concentration 4.35   hides a subgroup: True
+              band  deployed  unsafe    rate     cov    conc
+        well-below     26752    8545  31.9%  68.1%    4.35
+    near-threshold     53916     738   1.4%  77.0%    0.19
+             above     35934    2544   7.1%  57.8%    0.97
+        well-above     71798    1992   2.8%  90.3%    0.38
+
+  alpha = 0.10   pooled 4.1%   worst band well-below   max concentration 3.44   hides a subgroup: True
+              band  deployed  unsafe    rate     cov    conc
+        well-below     26752    3730  13.9%  86.1%    3.44
+    near-threshold     53916      62   0.1%  76.4%    0.03
+             above     35934    2456   6.8%  53.0%    1.69
+        well-above     71798    1389   1.9%  88.2%    0.48
+
+  E4/E5/E6/E7 — grouping schemes, paired on identical draws
+  ----------------------------------------------------------------------------
+   alpha               scheme   feas  viol|feas  grp-viol   worst     cov   conc      q
+    0.20               pooled    400       0.0%     99.8%  48.8%  75.1%   4.30   2.04
+    0.20              by-band    370       0.0%      3.5%  12.8%  78.0%   1.72   1.90
+    0.20  separate-well-below    400       0.0%     69.5%  24.8%  78.6%   2.26   1.91  [post-hoc]
+
+    0.15               pooled    400       1.8%     82.5%  31.7%  77.1%   4.23   2.17
+    0.15              by-band    163       0.0%      5.5%   9.7%  78.5%   1.93   1.98
+    0.15  separate-well-below    393       0.8%     39.4%  13.8%  80.7%   1.92   2.03  [post-hoc]
+
