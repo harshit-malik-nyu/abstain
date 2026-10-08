@@ -129,3 +129,81 @@ holdout is not touched by this round** — round four's confirmatory run is the
 only thing it carries.
 
 No tuning. Misses reported as misses, pinned by test.
+
+---
+
+# Addendum — the objection round five invites
+
+Written before `sweep_shift` grows a `shift_calibration` option. The git
+history shows this commit precedes it.
+
+## The objection
+
+Round five holds calibration at the natural mix in every condition, on the
+reasoning that an operator does not know a shift is coming. That is fair for
+the *onset* of a shift and unfair afterwards, and it makes the comparison
+vulnerable to a one-line rebuttal:
+
+> Of course the pooled rule fails — you never let it recalibrate. A shifted
+> population is a new population; recalibrate on it and the problem goes away.
+> That is an operations question, not an argument for group conditioning.
+
+If that rebuttal is right, the practical advice from this project collapses
+from "calibrate per group, and here is what it costs" to "recalibrate when
+your population moves", which is both easier and already standard practice.
+
+The round-five numbers cannot answer it. The coverage advantage of group
+conditioning *grows* with the shift — from +4.7 points at the natural mix to
+**+38.4** at full shift — but that is measured against a pooled rule using a
+threshold for a population that no longer exists, so it measures staleness
+rather than conditioning.
+
+## What is added
+
+The same sweep with the **calibration fold reweighted to match the deployment
+fold**. The operator now knows the mix and has recalibrated on it. Everything
+else is unchanged.
+
+| | |
+|---|---|
+| **Set** | `evidence/fine_dev.json` |
+| **Shift** | as before, `well-below` share ∈ {0.143 … 1.00}, applied to **both** folds |
+| **Trials** | 300 |
+| **Seed** | 41, unchanged, so the two sweeps are paired per trial |
+
+## Predictions
+
+**G1.** With calibration shifted too, the pooled rule's violation rate will
+return to **at or below δ at every shift level**. Recalibration fixes the
+*validity* failure, and if it does not then round five was measuring something
+other than staleness and its interpretation is wrong.
+
+**G2.** Group conditioning will **still hold coverage at or above** the
+recalibrated pooled rule at every shift level. Its advantage should shrink
+substantially — most of the +38.4 points were staleness — but not vanish,
+because within any mixture the bands still have shifted score distributions
+and one threshold still cuts them at different quantiles.
+
+**G3.** The recalibrated pooled rule will **still concentrate**: at the
+natural mix its worst band will exceed α while its pooled rate does not.
+Recalibration restores the marginal guarantee and does nothing for the
+conditional one, because the thing it fixes is not the thing that was broken.
+
+G3 is the one that matters. If it fails — if recalibrating also evens out the
+budget — then the subgroup finding is a staleness artefact and the honest
+recommendation is "recalibrate", not "condition".
+
+## What would falsify the round-five interpretation
+
+- **G1 fails.** Recalibration does not restore validity, so the shift result
+  was not about staleness and needs re-explaining.
+- **G3 fails.** The subgroup concentration is an artefact of a stale
+  threshold rather than a property of one threshold, and the central finding
+  of this repository is substantially weaker than stated. It would be
+  reported that way, at the top of the README.
+
+## What would not falsify it
+
+**G2 shrinking to near zero.** If recalibration recovers most of the coverage,
+that is a true and useful finding about what the fix is worth, and the
+subgroup argument stands on G3 rather than on coverage.
