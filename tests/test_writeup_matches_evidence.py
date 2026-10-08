@@ -707,3 +707,35 @@ def test_the_greedy_policy_is_a_constant_order(confounds):
         for key in ("pooled_unsafe_rate", "well_below_unsafe_rate",
                     "concentration", "questions_per_case"):
             assert g[key] == pytest.approx(f[key], abs=1e-12), (key, alpha)
+
+
+def test_every_script_in_the_reproduce_block_exists(readme):
+    """
+    A reproduce section that names a script which is not there is worse than
+    none: it reads as rigour and fails on first use.
+    """
+    import re
+    block = (ROOT / "README.md").read_text()
+    named = set(re.findall(r"python (scripts/[\w_]+\.py)", block))
+    assert len(named) >= 8, named
+    for script in named:
+        assert (ROOT / script).exists(), script
+
+
+def test_the_holdout_script_is_excluded_from_the_reproduce_block(readme):
+    """
+    The one script a reader must not run casually.
+    """
+    import re
+    block = (ROOT / "README.md").read_text()
+    runnable = re.findall(r"^python (scripts/[\w_]+\.py)(.*)$", block,
+                          re.MULTILINE)
+    for script, args in runnable:
+        assert "--set holdout" not in args, script
+    assert "deliberately not in that list" in " ".join(block.split())
+
+
+def test_the_pinned_oracle_in_the_readme_matches_the_data(readme):
+    meta = json.loads(
+        (ROOT / "evidence" / "cases_fine.meta.json").read_text())
+    assert meta["engine"] in readme, meta["engine"]

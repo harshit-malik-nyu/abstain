@@ -637,6 +637,45 @@ Five pre-registrations, each committed before the code it needed existed:
 [four](docs/preregistration-4.md) ·
 [five](docs/preregistration-5.md)
 
+## Reproducing any of it
+
+No dependencies beyond the standard library to *run* the method — the
+logistic regression is written out, the binomial bound is written out, and the
+figure is hand-built SVG. PolicyEngine is needed only to rebuild the
+benchmark, and the committed benchmark means you do not have to.
+
+```bash
+pip install -e ".[dev]"
+pytest -q                               # ~170 tests, including every claim
+                                        # in this README checked against the
+                                        # evidence file that produced it
+
+python scripts/run_secondary.py         # rounds 2-3: plug-in baseline,
+                                        # corruptions, conditional coverage
+python scripts/rerun_corruption.py      # round 2 after the sentinel fix
+python scripts/run_round4.py --set dev  # replication + schemes, dev
+python scripts/run_round5.py            # per-band detail + the shift sweep
+python scripts/run_recalibration.py     # does recalibrating alone fix it?
+python scripts/run_allocation.py        # questions per band, per scheme
+python scripts/check_confounds.py       # is it the stopping or asking rule?
+python scripts/diagnose_mechanism.py    # why the levels are shifted
+python scripts/make_figure.py           # regenerate docs/shift.svg
+
+# Rebuilding the benchmark needs the pinned oracle, and takes ~12 minutes.
+pip install "policyengine-us==2.33.0"
+python scripts/build_cases.py --n 1344 --seed 515 --fine-incomes \
+    --out evidence/cases_fine.json
+python scripts/split.py --source cases_fine.json --prefix fine_ \
+    --seed 20261008
+```
+
+Every script writes its numbers to `evidence/` and prints the same table it
+writes. Seeds are fixed in the scripts, not passed on the command line, so a
+rerun is the same run.
+
+`scripts/run_round4.py --set holdout` is deliberately not in that list. It
+opens the fine holdout, which has been opened once.
+
 ## Status
 
 Built, validated, replicated, and reported including every prediction that
