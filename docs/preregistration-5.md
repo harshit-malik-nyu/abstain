@@ -207,3 +207,90 @@ recommendation is "recalibrate", not "condition".
 **G2 shrinking to near zero.** If recalibration recovers most of the coverage,
 that is a true and useful finding about what the fix is worth, and the
 subgroup argument stands on G3 rather than on coverage.
+
+---
+
+# Addendum two — does a learned scorer concentrate too?
+
+Written before any code reads `FittedScorer` through the conditional lens. The
+git history shows it.
+
+## Why this is the test the mechanism needs
+
+The subgroup finding rests on one hand-built scorer whose only real feature is
+distance from the eligibility boundary, and
+[`scripts/diagnose_mechanism.py`](../scripts/diagnose_mechanism.py) traces the
+failure to exactly that: the feature is maximal for households far *below* the
+limit, where eligibility still flips 69% of the time. Stated that way it reads
+as a defect of one feature, which would make the whole finding a story about a
+toy scorer.
+
+The claim I have actually been making is stronger and more general:
+
+> The concentration is a property of using **one threshold** across groups
+> whose score distributions sit at different levels, not a property of this
+> score.
+
+If that is right, a scorer that **learns** from labelled data — no hand-written
+distance feature, weights fit by gradient descent — should concentrate too. If
+it does not, my mechanism is wrong or is specific to the handcrafted feature,
+and the README's generalisation has to come out.
+
+`FittedScorer` is already in the repository and already has holdout results:
+it beat the handcrafted scorer on coverage, 97.7% against 74.8%, at a nearly
+identical AUC. **It has never been looked at per band.**
+
+## The design
+
+Identical to round four's concentration measurement, with the scorer swapped
+and refit per trial on a fold disjoint from both calibration and deployment —
+the three-fold protocol `validate.refit` already enforces, because a scorer fit
+on the calibration or deployment data breaks the guarantee for reasons measured
+earlier in this project.
+
+| | |
+|---|---|
+| **Set** | `evidence/fine_dev.json` |
+| **Scorers** | `handcrafted` (control) · `fitted`, refit per trial |
+| **α** | 0.20, 0.15 |
+| **Trials** | 200 |
+| **Seed** | 53 |
+| **Calibration share** | 0.30, as round four |
+
+## Predictions
+
+**H1.** The fitted scorer will **also concentrate**: at α = 0.20 some band's
+share of unsafe commitments will exceed **2×** its share of deployments, and
+`hides_a_subgroup` will be true.
+
+**H2.** The worst band will be **the same band** — `well-below`. If the fitted
+scorer fails on a *different* band, the concentration is general and its
+location is scorer-specific, which is a weaker and still-reportable version of
+the claim.
+
+**H3.** The fitted scorer's **pooled** unsafe rate will be at or below the
+handcrafted scorer's, consistent with its much higher coverage. It is a better
+scorer by every pooled measure; that is the point of using it here.
+
+**H4.** Group-conditional calibration will reduce its worst-band rate too, by
+at least half. The fix should not care which scorer produced the levels.
+
+## What would falsify the central mechanism
+
+- **H1 fails.** A learned scorer does not concentrate, so the concentration is
+  a property of the handcrafted distance feature rather than of single-threshold
+  calibration. The README's generalisation comes out, the finding is restated
+  as being about one scorer, and that is a materially weaker result which would
+  be reported at the top rather than buried.
+
+## What would not falsify it
+
+- **H2 failing.** A different worst band would mean the *location* is
+  scorer-specific while the phenomenon is not. Reportable as such.
+- **H3 failing.** It would say the fitted scorer is worse on this axis, which
+  is a fact about the scorer rather than about conditioning.
+
+## Analysis plan
+
+One run on `fine_dev`, written to `evidence/fitted_conditional.json`. Neither
+holdout is touched. Misses reported as misses, pinned by test.
