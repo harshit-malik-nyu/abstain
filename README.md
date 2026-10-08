@@ -116,6 +116,31 @@ feature's relationship to determinability is at least stable.
 > and systematic, group-correlated overconfidence is the one kind a single
 > threshold cannot absorb.
 
+### It is the stopping rule, not the asking rule
+
+The rule does two things — decides **when** to stop asking, and **what** to
+ask next — and the finding is attributed entirely to the first. A question
+policy that happened to serve one band badly would look identical, so that is
+ruled out rather than assumed. 200 trials, α = 0.20, everything else fixed:
+
+| question policy | pooled | `well-below` | concentration | worst band | questions |
+|---|---:|---:|---:|---|---:|
+| greedy one-step lookahead *(default)* | 11.1% | 45.8% | 4.13 | `well-below` | 2.05 |
+| fixed order, blind to the case | 11.1% | 45.8% | 4.13 | `well-below` | 2.05 |
+| random order, seeded per state | 12.5% | 42.9% | 3.43 | `well-below` | **2.42** |
+
+**The same band fails under every policy**, and randomising the question order
+buys 2.9 points off it while costing 0.37 more questions per case. At α = 0.15
+it is *worse* — 32.6% against 29.5%. **You cannot fix this by changing what
+you ask, only by changing when you stop**, which is exactly where
+group-conditional calibration intervenes.
+
+One thing fell out of that table. The greedy policy and the blind fixed order
+are **bit-identical**, because the scorer's penalties for unknown fields are
+case-independent constants — so the expected one-step gain ranks the same way
+for every case, and the "adaptive" lookahead is a constant order wearing a
+costume. Worth knowing before attributing anything to it.
+
 ### The rule never abstains on the band it fails
 
 Under one global threshold, `well-below`'s abstention rate is **0.0%**.

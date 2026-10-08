@@ -1,0 +1,16 @@
+  fine_dev: 672 cases, 200 trials, seed 31
+  Does the concentration survive a different question policy?
+
+  alpha = 0.20
+     question policy   pooled  well-below    conc      worst band   q/case
+    greedy (default)   11.1%      45.8%    4.13      well-below     2.05
+         fixed order   11.1%      45.8%    4.13      well-below     2.05
+        random order   12.5%      42.9%    3.43      well-below     2.42
+
+  alpha = 0.15
+     question policy   pooled  well-below    conc      worst band   q/case
+    greedy (default)    7.6%      29.5%    3.86      well-below     2.15
+         fixed order    7.6%      29.5%    3.86      well-below     2.15
+        random order    8.4%      32.6%    3.86      well-below     2.53
+
+  wrote evidence/confounds.json

@@ -630,3 +630,80 @@ def test_eligibility_really_does_flip_for_the_failing_band(mechanism, readme):
     flip_share = d["flip"] / (d["flip"] + d["amount_only"])
     assert flip_share > 0.5
     assert f"{flip_share:.0%}" in readme
+
+
+# ---------------------------------------------------------------------------
+# The confound: is it the stopping rule or the asking rule?
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def confounds():
+    p = ROOT / "evidence" / "confounds.json"
+    if not p.exists():
+        pytest.skip("the confound check has not been run")
+    return json.loads(p.read_text())["rows"]
+
+
+def row(rows: list[dict], policy: str, alpha: float) -> dict:
+    return next(r for r in rows if r["policy"] == policy
+                and r["alpha"] == alpha)
+
+
+def test_the_same_band_fails_under_every_question_policy(confounds):
+    """
+    The claim that the finding is a threshold property.
+
+    If a question policy that cannot be serving any band strategically — a
+    fixed order blind to the case, or a random one — produced a different
+    worst band, the subgroup result would be about what the agent asks rather
+    than about when it stops.
+    """
+    for alpha in (0.20, 0.15):
+        for policy in ("greedy (default)", "fixed order", "random order"):
+            r = row(confounds, policy, alpha)
+            assert r["worst_band"] == "well-below", (policy, alpha)
+            assert r["concentration"] > 2.0, (policy, alpha)
+            assert r["hides_a_subgroup"] is True, (policy, alpha)
+
+
+def test_randomising_the_question_order_does_not_fix_it(confounds, readme):
+    """
+    And it is not merely that the band still fails — changing the policy
+    buys almost nothing and costs questions.
+
+    At alpha = 0.15 the random order is *worse* for the failing band than
+    the greedy one, which is the sharpest form of "you cannot fix this by
+    changing what you ask".
+    """
+    greedy20 = row(confounds, "greedy (default)", 0.20)
+    random20 = row(confounds, "random order", 0.20)
+    assert random20["questions_per_case"] > greedy20["questions_per_case"]
+    gain = greedy20["well_below_unsafe_rate"] - \
+        random20["well_below_unsafe_rate"]
+    assert gain < 0.05, "a large gain would make this a policy problem"
+
+    greedy15 = row(confounds, "greedy (default)", 0.15)
+    random15 = row(confounds, "random order", 0.15)
+    assert random15["well_below_unsafe_rate"] > \
+        greedy15["well_below_unsafe_rate"]
+
+    assert pct(random20["well_below_unsafe_rate"]) in readme
+    assert f"{random20['questions_per_case']:.2f}" in readme
+
+
+def test_the_greedy_policy_is_a_constant_order(confounds):
+    """
+    Greedy and the case-blind fixed order come out bit-identical.
+
+    The scorer's penalties for unknown fields are case-independent constants,
+    so the expected one-step gain ranks the same way for every case and the
+    lookahead never adapts. Pinned because the README says so, and because a
+    future scorer with case-dependent penalties would break the claim without
+    breaking anything else.
+    """
+    for alpha in (0.20, 0.15):
+        g = row(confounds, "greedy (default)", alpha)
+        f = row(confounds, "fixed order", alpha)
+        for key in ("pooled_unsafe_rate", "well_below_unsafe_rate",
+                    "concentration", "questions_per_case"):
+            assert g[key] == pytest.approx(f[key], abs=1e-12), (key, alpha)
