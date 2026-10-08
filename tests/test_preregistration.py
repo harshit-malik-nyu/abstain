@@ -447,3 +447,53 @@ class TestTheHoldoutWasOpenedOnceDespiteTheInterruption:
         assert int(last_touched) < int(partial_added[-1]), (
             "run_round4.py changed after the interrupted run was recorded; "
             "the relaunch is then a different experiment")
+
+
+class TestEveryRoundWasPreRegisteredBeforeItsCode:
+    """
+    The discipline claim, checked for all six rounds rather than the first.
+
+    `TestItPrecededTheHoldout` above checks one pair — the original
+    pre-registration against the script that opens the holdout — because at
+    the time there was one round. Five more arrived, each asserting in its
+    own text that it was written before the code it needed, and nothing
+    checked the other five.
+
+    An unchecked claim repeated five times is how a discipline becomes a
+    decoration.
+    """
+
+    PAIRS = [
+        ("docs/preregistration.md", "scripts/open_holdout.py"),
+        ("docs/preregistration-2.md", "src/abstain/robustness.py"),
+        ("docs/preregistration-2.md", "src/abstain/conditional.py"),
+        ("docs/preregistration-3.md", "src/abstain/group.py"),
+        ("docs/preregistration-4.md", "scripts/run_round4.py"),
+        ("docs/preregistration-5.md", "src/abstain/shift.py"),
+    ]
+
+    @staticmethod
+    def _added(path: str) -> int | None:
+        out = subprocess.run(
+            ["git", "log", "--diff-filter=A", "--format=%ct", "--", path],
+            cwd=ROOT, capture_output=True, text=True).stdout.split()
+        return int(out[-1]) if out else None
+
+    @pytest.mark.parametrize("prereg,code", PAIRS)
+    def test_the_document_predates_the_code(self, prereg, code):
+        written = self._added(prereg)
+        built = self._added(code)
+        if written is None or built is None:
+            pytest.skip(f"shallow clone: {prereg} or {code} has no add commit")
+        assert written < built, (
+            f"{prereg} was committed after {code}, so its predictions were "
+            f"not written before the thing they predict")
+
+    def test_every_preregistration_is_covered_by_a_pair(self):
+        """
+        A round whose document is never checked against anything is a round
+        claiming discipline it has not demonstrated.
+        """
+        docs = {p.name for p in (ROOT / "docs").glob("preregistration*.md")}
+        checked = {Path(p).name for p, _ in self.PAIRS}
+        assert docs == checked, docs ^ checked
