@@ -72,3 +72,50 @@ class TestItPrecededTheHoldout:
                    "docs/preregistration.md"}
         unexpected = {f for f in out if not f.endswith(".pyc")} - allowed
         assert not unexpected, f"these read the holdout early: {unexpected}"
+
+
+class TestTheResultIsReportedAsPredicted:
+    """
+    The pre-registration is only worth something if the scoring is honest.
+    These assert the miss is recorded as a miss rather than softened.
+    """
+
+    @staticmethod
+    def _check():
+        import json
+        p = ROOT / "evidence" / "prediction_check.json"
+        if not p.exists():
+            import pytest
+            pytest.skip("holdout not opened")
+        return json.loads(p.read_text())
+
+    def test_the_primary_prediction_held(self):
+        assert self._check()["P1"]
+
+    def test_the_miss_is_recorded_as_a_miss(self):
+        """
+        P2 came in at 5.3% against a 5% target. It is 0.19 standard errors
+        over and it is still a miss. Recording it as held would be the
+        easiest possible way to make a pre-registration worthless.
+        """
+        c = self._check()
+        assert c["P2"] is False
+        assert 0 < c["P2_excess_pp"] < 1
+        assert abs(c["P2_standard_errors"]) < 1
+
+    def test_the_readme_calls_it_a_miss(self):
+        t = (ROOT / "README.md").read_text()
+        assert "missed" in t.lower()
+        assert "still a miss" in t
+
+    def test_coverage_did_not_degrade_from_dev_to_holdout(self):
+        """
+        A method tuned against its development set degrades on unseen data.
+        This is the clearest available evidence that the holdout stayed shut.
+        """
+        c = self._check()
+        assert c["holdout_coverage_at_0.10"] >= c["dev_coverage_at_0.10"]
+
+    def test_the_shape_predictions_held(self):
+        c = self._check()
+        assert c["P7"] and c["P8"]

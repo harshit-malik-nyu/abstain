@@ -1,0 +1,47 @@
+{
+  "cases": 81,
+  "trials": 150,
+  "seed": 3,
+  "results": {
+    "0.2": {
+      "alpha": 0.2,
+      "delta": 0.05,
+      "trials": 150,
+      "violation_rate": 0.013333333333333334,
+      "infeasible_rate": 0.0,
+      "mean_coverage": 0.8145454545454546,
+      "mean_questions": 2.1797979797979794,
+      "holds": true
+    },
+    "0.15": {
+      "alpha": 0.15,
+      "delta": 0.05,
+      "trials": 150,
+      "violation_rate": 0.05333333333333334,
+      "infeasible_rate": 0.0,
+      "mean_coverage": 0.8016161616161617,
+      "mean_questions": 2.256161616161616,
+      "holds": true
+    },
+    "0.1": {
+      "alpha": 0.1,
+      "delta": 0.05,
+      "trials": 150,
+      "violation_rate": 0.03333333333333333,
+      "infeasible_rate": 0.0,
+      "mean_coverage": 0.7527272727272727,
+      "mean_questions": 2.3654545454545453,
+      "holds": true
+    },
+    "0.05": {
+      "alpha": 0.05,
+      "delta": 0.05,
+      "trials": 150,
+      "violation_rate": 0.0,
+      "infeasible_rate": 1.0,
+      "mean_coverage": 0.0,
+      "mean_questions": 0.0,
+      "holds": true
+    }
+  }
+}

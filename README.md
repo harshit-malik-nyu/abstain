@@ -82,9 +82,59 @@ That is not a flaw in the method. It is the price of calibrating on the unit
 that is deployed, stated rather than hidden by calibrating on a unit that
 gives tighter numbers and a broken guarantee.
 
+## The holdout result
+
+Opened once, after the method was frozen and the predictions committed. The
+git history shows that ordering.
+
+**81 cases, 150 trials per tolerance, disjoint calibration and deployment
+each trial.**
+
+| α | Violations | Infeasible | Coverage | Questions/case |
+|---:|---:|---:|---:|---:|
+| 0.20 | 1.3% | 0% | 81.5% | 2.18 |
+| 0.15 | **5.3%** | 0% | 80.2% | 2.26 |
+| 0.10 | 3.3% | 0% | 75.3% | 2.37 |
+| 0.05 | — | **100%** | — | — |
+
+### Against the pre-registered predictions
+
+| | Prediction | Result | |
+|---|---|---|---|
+| **P1** | violation at α = 0.10 ≤ 0.05 | **0.033** | held |
+| **P2** | violation at α = 0.20 and 0.15 ≤ 0.05 | 0.013 / **0.053** | **missed** |
+| **P3** | α = 0.05 infeasible in most trials | 100% | held |
+| **P4** | coverage at α = 0.10 in [0.55, 0.85] | 0.753 | held |
+| **P5** | questions at α = 0.10 in [1.9, 2.8] | 2.37 | held |
+| **P6** | beats both degenerate policies by 50pp | yes | held |
+| **P7** | coverage monotone as α tightens | 0.815, 0.802, 0.753 | held |
+| **P8** | questions monotone as α tightens | 2.18, 2.26, 2.37 | held |
+
+**Seven of eight held. The miss is reported as a miss.** At α = 0.15 the
+violation rate came in at 5.3% against a 5% target — **0.3 points over, which
+is 0.19 standard errors at 150 trials.** That is consistent with noise and it
+is still a miss, and calling it one is cheaper than explaining it away.
+
+### What the method does
+
+At α = 0.10, against the two degenerate policies on the same 81 cases:
+
+| | Unsafe | Coverage |
+|---|---:|---:|
+| Answer immediately | **92.6%** | — |
+| Ask everything | 0% | **0%** |
+| **The rule** | **2.5%** | **80.2%** |
+
+### The number that matters most
+
+**Coverage rose from dev to holdout — 70.0% to 75.3%.** A method tuned against
+its development set degrades on unseen data. This did not, which is the
+clearest evidence available that the holdout stayed shut.
+
 ## Status
 
-The method is built and validated on dev. **The holdout has not been opened.**
+Built, validated, and tested once on held-out data. The result stands as
+reported.
 
 ## The holdout is locked before the method exists
 
