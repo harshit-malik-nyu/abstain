@@ -11,9 +11,18 @@ This is a rule where the operator names a tolerance and gets it:
 > give me an unsafe rate at or below α, and resolve as much as possible
 > subject to that
 
-It holds. And the most useful thing in this repository is what measuring it
-carefully turned up — three bugs in the rule's own favour, two predictions I
-got backwards, and one result that changes what the method is for.
+**It holds**, on a pre-registered holdout and again on an independent
+benchmark eight times larger.
+
+The useful part of this repository is what came out of attacking it
+afterwards: **three bugs, every one of which made the method look better than
+it was; five pre-registered predictions that missed; and one result that
+changes what the method is for.** The guarantee it delivers is not the
+guarantee its own README advertised for four rounds, and the gap is not small.
+
+Everything below is measured. Every figure is checked against the file that
+produced it by a test, every miss has a test pinning it as a miss, and every
+pre-fix run is kept in `evidence/` beside the fix.
 
 ---
 
@@ -506,6 +515,51 @@ inflates the **deployment** requirement far harder, so the wrong share costs
 data was split.
 
 ---
+
+## If you are building one of these
+
+Six things this project measured that would have changed how I built it, in
+the order they would bite.
+
+**1. Check whether your error budget is spent evenly before you ship the
+number.** It takes one breakdown by whatever groups your deployment actually
+has. Here the pooled rate was inside budget in 98.5% of trials and some group
+was outside it in 98.2%, and nothing in the headline number hinted at that.
+
+**2. Do not pick the scorer by AUC.** Three independent results here show it
+cannot see what a threshold-local rule does: a scorer with a 0.0013 AUC
+advantage had 23 points more coverage; a strictly monotone transform leaves
+AUC identical to the bit; every group ranks above 0.93 while one absorbs 4.1×
+its share of the budget. Compare candidate scorers on the deployed metric at
+the deployed tolerance, not on a ranking summary.
+
+**3. Calibrate per group if you can afford it.** On this benchmark it was not
+a safety–coverage trade — safer in every group, higher coverage, fewer
+questions. The cost is sample size, and it is a hard floor:
+`1 − δ^(1/n) ≤ α` must hold **in your smallest group**, which is 29
+calibration cases for a 10% tolerance at 95% confidence, whatever your scorer.
+
+**4. Size the deployment fold, not just the calibration fold.** The default
+60/40 split is tuned for a pooled check. A per-group rate has to be
+*resolvable* in every group, and that requirement grows much faster — the
+wrong split cost 1.7× the cases here, and a rate measured on 8 cases cannot
+answer whether a group exceeded 10%.
+
+**5. Make "infeasible" actually infeasible, and report it as its own
+outcome.** The refusal threshold has to be outside the score's range, not at
+the top of it. And a declined calibration is neither a pass nor a failure:
+pooling it with real trials hides the difference between "held", "broke" and
+"never certified".
+
+**6. Watch the deployed rate, not the certificate.** The bound is computed on
+calibration data. When the population shifted here, the reported bound stayed
+at 0.175 while violations went from 0.7% to 98%. **An operator monitoring the
+guarantee would have seen nothing.** If you can only monitor one number,
+monitor the realised rate on recent decisions.
+
+And the thing that most needs doing next and is not done here: **run it on a
+language model's own confidence.** The corruption study brackets the answer —
+safe but possibly useless — and brackets are not measurements.
 
 ## The case against
 
