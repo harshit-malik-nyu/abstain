@@ -216,3 +216,43 @@ def test_the_fine_digests_are_recorded():
         computed = hashlib.sha256(payload.encode()).hexdigest()
         committed = (ROOT / "evidence" / f"{name}.sha256").read_text().strip()
         assert computed == committed, name
+
+
+def test_an_independent_rebuild_reproduced_the_split():
+    """
+    CI rebuilt the coarse benchmark from scratch and got the same halves.
+
+    This is the strongest form the reproducibility claim takes anywhere in
+    the repository, and it was not planned: the build workflow fired on an
+    unrelated push, ran on a different machine, and — because the version pin
+    landed in a later commit — used `policyengine-us==2.33.1` against the
+    2.33.0 the committed data was built with. The digests matched anyway.
+
+    What it establishes is narrow and worth keeping narrow: the SNAP
+    determinability verdicts are stable across at least one patch release of
+    the oracle. It is not "stable across any version", and the pin stays.
+    """
+    import json
+
+    meta = ROOT / "evidence" / "cases.meta.json"
+    if not meta.exists():
+        pytest.skip("no independent rebuild recorded in this checkout")
+
+    rebuilt = json.loads(meta.read_text())
+    local = json.loads(
+        (ROOT / "evidence" / "cases_fine.meta.json").read_text())
+
+    assert rebuilt["engine"].startswith("policyengine-us==")
+    assert rebuilt["n_cases"] == 160, "the coarse benchmark"
+
+    # The point of the test: whatever version rebuilt it, the halves it
+    # produced are the committed ones. `test_the_default_split_still_
+    # reproduces_the_committed_digests` above checks the digests themselves;
+    # this records that an independent machine is what produced them.
+    if rebuilt["engine"] != local["engine"]:
+        run = (ROOT / "evidence" / "build-run.txt").read_text()
+        for name in ("dev.sha256", "holdout.sha256"):
+            digest = (ROOT / "evidence" / name).read_text().strip()
+            assert digest in run, (
+                f"the rebuild under {rebuilt['engine']} did not reproduce "
+                f"{name}, so the oracle version changed a verdict")

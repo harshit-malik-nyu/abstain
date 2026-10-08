@@ -620,7 +620,14 @@ it precedes every line of method code.
 | **Fine (complete 1,344-household enumeration)** | **672** | **672** | holdout opened once, for round four |
 
 Each half ships a SHA-256 and `tests/` asserts the committed digests still
-match. `split.py` later grew options so the second benchmark could reuse its
+match. **An independent machine has since reproduced them**: the build
+workflow fired on an unrelated push, rebuilt the coarse benchmark from
+scratch, and — because the version pin landed in a later commit — did it
+under `policyengine-us==2.33.1` against the 2.33.0 the data was built with.
+The digests came out byte-identical, which makes the reproducibility claim
+demonstrated rather than asserted and shows the determinability verdicts
+stable across at least one patch release of the oracle. It does not retire
+the pin: stable across one patch release is not stable across any version. `split.py` later grew options so the second benchmark could reuse its
 stratification; because that file is the first commit, its evidence is
 converted from *untouched* to **verified identical** — the test suite re-runs
 the default call and digests it against the values committed originally. They
