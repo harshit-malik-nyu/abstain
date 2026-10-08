@@ -106,6 +106,22 @@ class Breakdown:
     alpha: float
     tallies: dict[str, StratumTally] = field(default_factory=dict)
     trials: int = 0
+    per_case: dict = field(default_factory=dict)
+    """
+    Per CASE, not per case-trial. The unit the uncertainty lives at.
+
+    The band tallies above pool deployments across trials, and the same case
+    appears in most of them — on the holdout, 96 distinct `well-below` cases
+    produce 26,752 observations, about 279 each. A standard error computed
+    from 26,752 would claim a precision of ±0.3 points on a figure whose real
+    support is 96 cases.
+
+    So each case's own deployment and unsafe counts are kept here, and
+    `bootstrap_band_rate` resamples **cases** rather than observations. Which
+    is the whole point: the naive interval is not merely optimistic, it is
+    answering a question nobody asked — how precisely do we know the rate
+    *for these 96 households*, rather than for households like them.
+    """
 
     def tally(self, band: str) -> StratumTally:
         if band not in self.tallies:
@@ -195,11 +211,19 @@ def collector(breakdown: Breakdown):
             case = by_id.get(row["case"])
             if case is None:
                 continue
-            t = breakdown.tally(hardness(case))
+            outcome = row["outcome"]
+            band = hardness(case)
+            t = breakdown.tally(band)
             t.deployed += 1
+
+            cid = row["case"]
+            rec = breakdown.per_case.setdefault(
+                cid, {"band": band, "deployed": 0, "unsafe": 0})
+            rec["deployed"] += 1
+            if outcome == "unsafe":
+                rec["unsafe"] += 1
             if ever_decidable(case):
                 t.decidable += 1
-            outcome = row["outcome"]
             if outcome == "unsafe":
                 t.unsafe += 1
             elif outcome == "abstained":
@@ -257,3 +281,76 @@ assert OPENING == frozenset({"employment_income"}), (
     "undetermined_share filters reachable states by assuming the opening "
     "state knows income; if OPENING changes, that filter is wrong"
 )
+
+
+# ---------------------------------------------------------------------------
+# Uncertainty, at the unit the data actually has
+# ---------------------------------------------------------------------------
+
+def bootstrap_band_rate(per_case: dict, band: str, *, draws: int = 5_000,
+                        seed: int = 97,
+                        level: float = 0.95) -> dict:
+    """
+    A confidence interval for a band's unsafe rate, resampling **cases**.
+
+    Why not a binomial interval on the pooled count
+    -----------------------------------------------
+    Because the pooled count is not a sample of independent observations. On
+    the holdout, 96 distinct `well-below` cases are deployed about 279 times
+    each, and a Clopper–Pearson interval on 13,097 unsafe out of 26,752 comes
+    out about ±0.6 points. That number is not conservative or optimistic; it
+    answers a different question — how precisely the rate is known *for these
+    96 households* — when the claim being made is about households like them.
+
+    The cluster is the case. Each case contributes its own deployment and
+    unsafe counts across however many trials it appeared in, and the
+    resampling draws cases with replacement. The interval then reflects the
+    96 units of real variation rather than the 26,752 repeats of them.
+
+    This is an ordinary cluster bootstrap and nothing here is novel. What
+    would have been novel is reporting the naive interval.
+    """
+    import random as _random
+
+    rows = [v for v in per_case.values() if v["band"] == band]
+    if not rows:
+        return {"band": band, "cases": 0, "point": 0.0,
+                "lo": 0.0, "hi": 0.0, "naive_halfwidth": 0.0}
+
+    deployed = sum(r["deployed"] for r in rows)
+    unsafe = sum(r["unsafe"] for r in rows)
+    point = unsafe / deployed if deployed else 0.0
+
+    rng = _random.Random(seed)
+    n = len(rows)
+    rates = []
+    for _ in range(draws):
+        d = u = 0
+        for _ in range(n):
+            r = rows[rng.randrange(n)]
+            d += r["deployed"]
+            u += r["unsafe"]
+        rates.append(u / d if d else 0.0)
+    rates.sort()
+
+    tail = (1.0 - level) / 2.0
+    lo = rates[int(tail * (draws - 1))]
+    hi = rates[int((1.0 - tail) * (draws - 1))]
+
+    # What a reader would have got by treating every observation as
+    # independent — reported alongside so the difference is visible rather
+    # than asserted.
+    from .rule import clopper_pearson_upper
+    naive_hi = clopper_pearson_upper(unsafe, deployed, (1.0 - level) / 2.0) \
+        if deployed else 1.0
+
+    return {"band": band, "cases": n, "observations": deployed,
+            "point": point, "lo": lo, "hi": hi, "level": level,
+            "naive_halfwidth": max(0.0, naive_hi - point),
+            "clustered_halfwidth": max(point - lo, hi - point)}
+
+
+def bootstrap_all_bands(per_case: dict, **kw) -> list[dict]:
+    present = [b for b in BANDS
+               if any(v["band"] == b for v in per_case.values())]
+    return [bootstrap_band_rate(per_case, b, **kw) for b in present]

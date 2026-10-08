@@ -1156,3 +1156,75 @@ def test_both_scorers_appear_in_the_scheme_arm(fitted_cond):
     if not rows:
         pytest.skip("no scheme arm in this run")
     assert {r.get("scorer") for r in rows} == {"handcrafted", "fitted"}
+
+
+# ---------------------------------------------------------------------------
+# Uncertainty, at the unit the data has
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def uncertainty():
+    p = ROOT / "evidence" / "uncertainty.json"
+    if not p.exists():
+        pytest.skip("the uncertainty run has not happened")
+    return json.loads(p.read_text())["rows"]
+
+
+def cell(rows: list[dict], which: str, alpha: float, band: str) -> dict:
+    return next(r for r in rows if r["set"] == which
+                and r["alpha"] == alpha and r["band"] == band)
+
+
+def test_the_finding_survives_honest_error_bars(uncertainty):
+    """
+    The check that decides whether the headline stands.
+
+    If the cluster-bootstrap lower bound dipped below the tolerance, the
+    subgroup result would be "possibly over budget" rather than "over
+    budget", and the README would have to say so.
+    """
+    for which in ("dev", "holdout"):
+        for alpha in (0.20, 0.15):
+            c = cell(uncertainty, which, alpha, "well-below")
+            assert c["lo"] > alpha, (which, alpha, c["lo"])
+
+
+def test_the_clustered_interval_is_much_wider_than_the_naive_one(
+        readme, uncertainty):
+    """
+    The methodological point. If these ever converged, the clustering would
+    have stopped mattering and the section explaining it would be wrong.
+    """
+    c = cell(uncertainty, "holdout", 0.20, "well-below")
+    assert c["clustered_halfwidth"] > 10 * c["naive_halfwidth"]
+    assert c["observations"] > 100 * c["cases"], \
+        "the whole point is that observations vastly outnumber cases"
+
+    assert pct(c["lo"]) in readme and pct(c["hi"]) in readme
+    assert str(c["cases"]) in readme
+
+
+def test_the_readme_quotes_the_bootstrap_not_the_naive_interval(readme,
+                                                                uncertainty):
+    c = cell(uncertainty, "holdout", 0.20, "well-below")
+    assert pct(c["clustered_halfwidth"]) in readme
+    text = " ".join((ROOT / "README.md").read_text().split())
+    assert "resampling **cases**" in text.lower() or \
+        "Resampling **cases**" in text
+
+
+def test_the_bootstrap_point_matches_the_published_run(uncertainty, round4,
+                                                       holdout):
+    """
+    A confidence interval around a different point estimate would be
+    describing a different experiment. The runner asserts this too; this
+    pins it in the committed evidence.
+    """
+    for which, payload in (("dev", round4), ("holdout", holdout)):
+        ref = next(c for c in payload["E3_E8_concentration"]
+                   if c["alpha"] == 0.20)
+        for band in ("well-below", "near-threshold", "above", "well-above"):
+            was = next(b["unsafe_rate"] for b in ref["bands"]
+                       if b["band"] == band)
+            now = cell(uncertainty, which, 0.20, band)["point"]
+            assert was == pytest.approx(now, abs=1e-9), (which, band)

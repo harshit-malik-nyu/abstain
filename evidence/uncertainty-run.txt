@@ -1,0 +1,41 @@
+
+  fine_dev: 672 cases, 400 trials, seed 31
+
+  alpha = 0.20   (point estimates match the published run)
+              band  cases     obs    rate     95% CI (cluster)   naive ±  cluster ±
+        well-below     96   26752  45.7%       [36.4%, 55.0%]     0.6%      9.4%
+    near-threshold    192   53916   5.2%         [3.0%, 7.7%]     0.2%      2.5%
+             above    128   35934   5.6%         [1.6%, 9.7%]     0.2%      4.1%
+        well-above    256   71798   5.4%         [2.7%, 8.4%]     0.2%      3.0%
+
+  alpha = 0.15   (point estimates match the published run)
+              band  cases     obs    rate     95% CI (cluster)   naive ±  cluster ±
+        well-below     96   26752  29.0%       [21.0%, 37.2%]     0.5%      8.2%
+    near-threshold    192   53916   1.4%         [0.3%, 2.9%]     0.1%      1.5%
+             above    128   35934   5.6%         [1.6%, 9.7%]     0.2%      4.1%
+        well-above    256   71798   5.1%         [2.7%, 7.9%]     0.2%      2.8%
+
+  fine_holdout: 672 cases, 400 trials, seed 31
+
+  alpha = 0.20   (point estimates match the published run)
+              band  cases     obs    rate     95% CI (cluster)   naive ±  cluster ±
+        well-below     96   26752  49.0%       [39.9%, 58.4%]     0.6%      9.5%
+    near-threshold    192   53916   6.3%         [3.7%, 9.2%]     0.2%      2.9%
+             above    128   35934   7.1%        [3.1%, 11.9%]     0.3%      4.8%
+        well-above    256   71798   3.7%         [1.5%, 6.1%]     0.1%      2.4%
+
+  alpha = 0.15   (point estimates match the published run)
+              band  cases     obs    rate     95% CI (cluster)   naive ±  cluster ±
+        well-below     96   26752  31.9%       [24.0%, 40.2%]     0.6%      8.3%
+    near-threshold    192   53916   1.4%         [0.4%, 2.8%]     0.1%      1.4%
+             above    128   35934   7.1%        [3.1%, 11.9%]     0.3%      4.8%
+        well-above    256   71798   2.8%         [1.1%, 4.8%]     0.1%      2.0%
+
+  Does the uncertainty change any conclusion?
+  --------------------------------------------------------------------
+       dev alpha=0.20  lower bound 36.4% vs tolerance 20%  -> still above the budget
+       dev alpha=0.15  lower bound 21.0% vs tolerance 15%  -> still above the budget
+   holdout alpha=0.20  lower bound 39.9% vs tolerance 20%  -> still above the budget
+   holdout alpha=0.15  lower bound 24.0% vs tolerance 15%  -> still above the budget
+
+  wrote evidence/uncertainty.json (388.3s)

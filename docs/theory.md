@@ -126,6 +126,13 @@ anything else in this document.
 | above | 35,934 | 5.6% | 0.50× |
 | well-above | 71,798 | 5.4% | 0.49× |
 
+Those figures carry a cluster bootstrap rather than a binomial interval,
+because the 26,752 observations are **96 distinct households** deployed once
+per trial. A standard error from 26,752 would claim ±0.6 points; resampling
+cases gives ±9.5. The conclusion is unchanged — the lower bound is 39.9%
+against a 20% budget — and the width is reported so a reader is not quietly
+given sixteen times more precision than the design supports.
+
 ### The mechanism, which is not a scorer defect
 
 Per-band AUC is 0.9345 to **0.9976** — the scorer orders states almost

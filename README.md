@@ -57,6 +57,35 @@ wrong decision. **At a stated 20% tolerance they receive a decision built on a
 guess nearly half the time, and the pooled certificate says the rule is
 working.**
 
+### With honest error bars
+
+That 49.0% pools 26,752 deployed cases — but they are **96 distinct
+households** appearing about 279 times each, once per trial. A standard error
+computed from 26,752 would claim ±0.6 points, which is not optimistic so much
+as answering a different question: how precisely the rate is known *for these
+96 households*, when the claim is about households like them.
+
+Resampling **cases** rather than observations, 5,000 draws:
+
+| band | cases | rate | 95% CI (cluster) | naive ± | cluster ± |
+|---|---:|---:|---:|---:|---:|
+| **well-below** | 96 | **49.0%** | **[39.9%, 58.4%]** | 0.6% | **9.5%** |
+| near-threshold | 192 | 6.3% | [3.7%, 9.2%] | 0.2% | 2.9% |
+| above | 128 | 7.1% | [3.1%, 11.9%] | 0.3% | 4.8% |
+| well-above | 256 | 3.7% | [1.5%, 6.1%] | 0.1% | 2.4% |
+
+**The correct interval is sixteen times wider than the naive one** — and the
+conclusion is unchanged. The lower bound is 39.9% against a 20% budget, and
+the finding clears its tolerance at both α on both halves:
+
+| | α = 0.20 | α = 0.15 |
+|---|---|---|
+| dev | 45.7%, lower bound **36.4%** | 29.0%, lower bound **21.0%** |
+| holdout | 49.0%, lower bound **39.9%** | 31.9%, lower bound **24.0%** |
+
+Nothing in that bootstrap is novel. What would have been novel is reporting
+the naive interval.
+
 ### The mechanism is not what it looks like
 
 Not bad ranking. The scorer orders states *almost perfectly* inside the band it
@@ -824,6 +853,7 @@ python scripts/run_recalibration.py     # does recalibrating alone fix it?
 python scripts/run_allocation.py        # questions per band, per scheme
 python scripts/check_confounds.py       # is it the stopping or asking rule?
 python scripts/diagnose_mechanism.py    # why the levels are shifted
+python scripts/run_uncertainty.py       # cluster bootstrap over cases
 python scripts/make_figure.py           # regenerate docs/shift.svg
 
 # Rebuilding the benchmark needs the pinned oracle, and takes ~12 minutes.
