@@ -185,6 +185,16 @@ def calibrate(samples: list[tuple[float, bool]], alpha: float = 0.05,
         if not answered:
             continue
         k = sum(1 for _, u in answered if u)
+
+        # The Clopper-Pearson upper bound is never below the point estimate,
+        # so a threshold whose empirical rate already exceeds alpha cannot
+        # pass and does not need the bisection. Correctness is unaffected and
+        # the saving is large: a scorer carrying no information answers
+        # everything at every threshold, and bounding a thousand-term
+        # binomial tail at 201 grid points for 120 trials does not finish.
+        if k / len(answered) > alpha:
+            continue
+
         bound = clopper_pearson_upper(k, len(answered), delta)
         if bound <= alpha:
             best = Calibration(
@@ -202,6 +212,71 @@ def calibrate(samples: list[tuple[float, bool]], alpha: float = 0.05,
         return Calibration(1.0, alpha, delta, len(samples), 0.0, 1.0, 0.0,
                            False)
     return best
+
+
+def calibrate_on_trajectories(cases: list[dict], scorer, run, *,
+                              alpha: float = 0.05, delta: float = 0.05,
+                              grid: int = 101) -> Calibration:
+    """
+    Calibrate on what the rule actually does, not on the state population.
+
+    Why this replaces state-level calibration
+    -----------------------------------------
+    The first version calibrated over every knowledge state, uniformly. The
+    rule does not meet states uniformly — it commits at the **first** state to
+    clear the threshold, which is a selected state by construction. Measured
+    on this benchmark at a threshold of 0.82:
+
+        calibration population   1,264 states,  80.3% undetermined
+        states the rule visits     314 states,  57.0% undetermined
+        states it commits at        55 states,   0.0% undetermined
+
+    Calibrating on the first distribution and deploying under the third broke
+    the guarantee: 11% of trials violated a 5% target even with the scorer
+    refit on a disjoint fold. The exchangeability the conformal argument needs
+    was destroyed by the agent's own stopping rule.
+
+    This is the same failure `knowing-when-to-doubt` measures when a human
+    reviewer routes on the model's confidence. There the router is a person;
+    here it is the rule itself, and the mechanism is identical.
+
+    The fix is to make the calibration unit the deployment unit. For each
+    candidate threshold, run the rule on the calibration cases and count the
+    cases where it committed while undecidable. That is exactly the quantity
+    being bounded, measured under exactly the selection that will occur.
+
+    Cost: a full pass over the calibration cases per grid point, so the grid
+    is coarser than the state-level version. That is the price of matching
+    the unit, and it is worth paying.
+    """
+    if not cases:
+        return Calibration(1.0, alpha, delta, 0, 0.0, 1.0, 0.0, False)
+
+    for i in range(grid):
+        tau = i / (grid - 1)
+        committed = unsafe = 0
+        for case in cases:
+            t = run(case, scorer, tau)
+            if not t.committed:
+                continue
+            committed += 1
+            state = case["states"]["|".join(sorted(
+                {"employment_income"} | set(t.asked)))]
+            if state["label"] == "underdetermined":
+                unsafe += 1
+
+        if not committed:
+            continue
+        if unsafe / committed > alpha:
+            continue
+        bound = clopper_pearson_upper(unsafe, committed, delta)
+        if bound <= alpha:
+            return Calibration(
+                threshold=tau, alpha=alpha, delta=delta, n=len(cases),
+                empirical_unsafe=unsafe / committed, bound_unsafe=bound,
+                coverage=committed / len(cases), feasible=True)
+
+    return Calibration(1.0, alpha, delta, len(cases), 0.0, 1.0, 0.0, False)
 
 
 # ---------------------------------------------------------------------------

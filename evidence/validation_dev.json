@@ -1,0 +1,134 @@
+[
+  {
+    "alpha": 0.2,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.041666666666666664,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.7135416666666666,
+    "mean_questions": 2.240104166666667,
+    "holds": true,
+    "scorer": "handcrafted"
+  },
+  {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.7197916666666667,
+    "mean_questions": 2.37421875,
+    "holds": true,
+    "scorer": "handcrafted"
+  },
+  {
+    "alpha": 0.05,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 0.11666666666666667,
+    "mean_coverage": 0.6765919811320755,
+    "mean_questions": 2.4139150943396226,
+    "holds": true,
+    "scorer": "handcrafted"
+  },
+  {
+    "alpha": 0.02,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "scorer": "handcrafted"
+  },
+  {
+    "alpha": 0.2,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.96171875,
+    "mean_questions": 2.0,
+    "holds": true,
+    "scorer": "fitted"
+  },
+  {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.96171875,
+    "mean_questions": 2.0,
+    "holds": true,
+    "scorer": "fitted"
+  },
+  {
+    "alpha": 0.05,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.35833333333333334,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.9546875,
+    "mean_questions": 2.284375,
+    "holds": false,
+    "scorer": "fitted"
+  },
+  {
+    "alpha": 0.02,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "scorer": "fitted"
+  },
+  {
+    "alpha": 0.2,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "scorer": "constant"
+  },
+  {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "scorer": "constant"
+  },
+  {
+    "alpha": 0.05,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "scorer": "constant"
+  },
+  {
+    "alpha": 0.02,
+    "delta": 0.05,
+    "trials": 120,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "scorer": "constant"
+  }
+]

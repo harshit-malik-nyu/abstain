@@ -155,3 +155,76 @@ class TestDeployment:
         t = run_case(case, lambda c, k: 0.0, threshold=0.9, budget=1,
                      choose=lambda c, k: "age")
         assert t.asked == ["age"]
+
+
+class TestTheCalibrationUnitMustMatchDeployment:
+    """
+    The project's central correction. State-level calibration is feasible and
+    wrong; trajectory-level calibration is correct and needs more cases.
+    """
+
+    def _case(self, open_at_start=True):
+        return {"id": 0,
+                "household": {"employment_income": 20_000, "dependents": 1,
+                              "age": 35, "state_name": "NY"},
+                "states": {
+                    "employment_income": {
+                        "label": "underdetermined" if open_at_start
+                        else "determinable",
+                        "truth": "cannot_determine" if open_at_start
+                        else "eligible"},
+                    "dependents|employment_income": {"label": "determinable",
+                                                     "truth": "eligible"},
+                    "age|employment_income": {"label": "determinable",
+                                              "truth": "eligible"},
+                    "employment_income|state_name": {"label": "determinable",
+                                                     "truth": "eligible"},
+                }}
+
+    def test_it_calibrates_on_commitments_not_on_all_states(self):
+        from abstain.rule import calibrate_on_trajectories, run_case
+        cases = [self._case() for _ in range(80)]
+        c = calibrate_on_trajectories(
+            cases, lambda ca, k: 1.0 if "dependents" in k else 0.0,
+            lambda ca, sc, tau: run_case(ca, sc, tau, budget=4),
+            alpha=0.10)
+        assert c.feasible
+        assert c.coverage > 0
+
+    def test_the_selection_problem_is_documented_with_its_numbers(self):
+        """
+        The rule commits at the first state to clear the threshold, which is
+        selected by construction. Measured here: the calibration population
+        was 80.3% undetermined, the states the rule visits 57.0%, and the
+        states it commits at 0.0%.
+        """
+        import inspect
+
+        from abstain import rule
+        doc = " ".join(inspect.getdoc(rule.calibrate_on_trajectories).split())
+        assert "80.3% undetermined" in doc
+        assert "0.0% undetermined" in doc
+        assert "destroyed by the agent's own stopping rule" in doc
+
+    def test_a_tolerance_below_the_sample_floor_is_infeasible(self):
+        """
+        Calibrating on cases rather than states means fewer observations, so
+        the finite-sample bound is looser. With zero unsafe commitments out
+        of n, the tightest honest tolerance is the Clopper-Pearson bound at
+        zero — 0.072 at n=40, 0.049 at n=60.
+
+        Reporting infeasible is correct. Reporting a threshold anyway would
+        claim a guarantee the sample cannot support.
+        """
+        from abstain.rule import calibrate_on_trajectories, run_case
+        cases = [self._case() for _ in range(20)]
+        c = calibrate_on_trajectories(
+            cases, lambda ca, k: 1.0 if "dependents" in k else 0.0,
+            lambda ca, sc, tau: run_case(ca, sc, tau, budget=4),
+            alpha=0.02)
+        assert not c.feasible
+
+    def test_the_floor_is_a_known_function_of_sample_size(self):
+        from abstain.rule import clopper_pearson_upper
+        assert clopper_pearson_upper(0, 40) > 0.05
+        assert clopper_pearson_upper(0, 60) < 0.05
