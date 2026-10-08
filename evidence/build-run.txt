@@ -1,13 +1,13 @@
-  20/160  (768 engine calls, 361s)
-  40/160  (768 engine calls, 361s)
-  60/160  (768 engine calls, 361s)
-  80/160  (768 engine calls, 361s)
-  100/160  (768 engine calls, 361s)
-  120/160  (768 engine calls, 361s)
-  140/160  (768 engine calls, 361s)
-  160/160  (768 engine calls, 361s)
+  20/160  (768 engine calls, 511s)
+  40/160  (768 engine calls, 511s)
+  60/160  (768 engine calls, 511s)
+  80/160  (768 engine calls, 511s)
+  100/160  (768 engine calls, 511s)
+  120/160  (768 engine calls, 511s)
+  140/160  (768 engine calls, 511s)
+  160/160  (768 engine calls, 511s)
 
-  160 cases, 768 engine calls, 361s
+  160 cases, 768 engine calls, 511s
   cache hits saved 1,792 evaluations
   dev       79 cases  {'above': 19, 'near-threshold': 27, 'well-above': 16, 'well-below': 17}
            sha256 e3b07513022c275b5e6158261ed8786b50f57460a528fde83fb441fca5883112
