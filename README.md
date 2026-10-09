@@ -288,6 +288,70 @@ does, and the first where it points in the wrong direction rather than merely
 failing to discriminate. A ranking metric scores a scorer on pairs it will
 never be asked about; a threshold-local rule is judged on one cut.
 
+### A fifth, and the one that should change how these things are measured
+
+Two further rounds tried to repair the scorer at the feature level rather than
+work around it. Both failed, and failing produced the sharpest result in this
+repository.
+
+The diagnosis says the score is missing a term for how much the **award** could
+move. So: add one. `award_aware_scorer` penalises the score wherever the award
+is at risk; `signed_scorer` does it only *below* the boundary, so it reorders
+states instead of merely rescaling them. Weight 0.8, fixed in
+[addendum six](docs/preregistration-5.md) before either existed.
+
+These are three different functions by every measure taken of the functions
+themselves:
+
+| scorer | AUC | reachable state pairs reordered vs handcrafted | cases answered with no question asked, τ = 0.3 |
+|---|---:|---:|---:|
+| handcrafted | 0.9555 | — | 225 of 672 |
+| award-aware | **0.9425** | **4.77%** | **0** |
+| **signed** | **0.9604** | **3.04%** | 129 |
+
+And they are **one policy**:
+
+| | pooled | `well-below` | near-thr. | above | well-above | coverage | q/case | concentration |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| handcrafted | 11.29% | 45.93% | 5.69% | 5.53% | 5.39% | 76.04% | 2.0525 | 4.0691 |
+| award-aware | 11.29% | 45.93% | 5.69% | 5.53% | 5.39% | 76.04% | 2.0525 | 4.0691 |
+| signed | 11.29% | 45.93% | 5.69% | 5.53% | 5.39% | 76.04% | 2.0525 | 4.0691 |
+
+Not identical to the precision shown — **identical under `==`**, across both
+tolerances, every band rate, every band's coverage, every concentration, and
+the group-conditional arms too (pooled 98.5% / 45.67%, by-band 5.26% / 12.94%,
+190 feasible trials, all three). A test asserts the equality rather than a
+table asserting it, because a printed figure at one decimal cannot support a
+claim this strong.
+
+**Why.** Both terms are gated on `dependents` being unknown, and the greedy
+selector asks for `dependents` **first in all 447 cases that ask anything**. So
+the terms act on the opening state and nowhere else. They work there — sharply,
+the award-aware scorer commits immediately on *zero* cases against 225 — and an
+agent that does not commit immediately asks the one question that switches the
+term off. It then commits on the next state, which all three score identically
+because `dependents` is now known.
+
+> **In a sequential rule, a caution term conditioned on an unknown is defeated
+> by the agent resolving that unknown.** It buys one question and changes
+> nothing about what the agent concludes.
+
+Which makes AUC's failure here qualitatively worse than the fourth result.
+There it ranked a better policy lower. Here it moved **in both directions**,
+by 0.0179 — more than the gap between arms elsewhere in this README that *did*
+change behaviour — while the deployed rule did not move in any digit.
+
+> **A confidence function for a sequential agent cannot be evaluated on the
+> state space. It has to be evaluated on the states the agent reaches under the
+> rule.** The state space contains the pairs the added terms reorder. The rule
+> never visits them.
+
+Nine predictions across the two rounds, **five missed, and the four that held
+did so vacuously** — every one was a cost prediction, and a no-op has no cost.
+`docs/predictions.md` labels them that way and a test requires the label,
+because four of nine holding is otherwise a round that reads like a partial
+success and was not one.
+
 ### It is the stopping rule, not the asking rule
 
 The rule does two things — decides **when** to stop asking, and **what** to

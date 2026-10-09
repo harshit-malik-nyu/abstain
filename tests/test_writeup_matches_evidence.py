@@ -1358,3 +1358,120 @@ def test_the_quoted_scale_table_is_the_measured_one(readme, plugin_scale):
                 if v is None:
                     continue
                 assert pct(v) in readme, (alpha, n_cal, bound, v)
+
+
+# ---------------------------------------------------------------------------
+# The fifth AUC result: three scorers, one policy
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def signed():
+    p = ROOT / "evidence" / "signed_scorer.json"
+    if not p.exists():
+        pytest.skip("signed_scorer.json not present")
+    return json.loads(p.read_text())
+
+
+@pytest.fixture(scope="module")
+def opening():
+    p = ROOT / "evidence" / "opening_state.json"
+    if not p.exists():
+        pytest.skip("opening_state.json not present")
+    return json.loads(p.read_text())
+
+
+def test_the_identical_policy_table_is_the_measured_one(readme, signed):
+    """
+    Every figure in the README's one-policy table, at the precision it uses.
+
+    The claim is that three scorers produce the same deployed behaviour. A
+    table of twenty-four numbers asserting it is only worth having if the
+    numbers are the measured ones, so each is checked against the run at two
+    decimal places — which is the precision the README prints, chosen
+    because one decimal cannot distinguish 11.29% from 11.31%.
+    """
+    text = " ".join((ROOT / "README.md").read_text().split())
+    row = next(r for r in signed["arms"]["signed"] if r["alpha"] == 0.20)
+
+    for form in pct_forms(row["pooled_unsafe_rate"], places=2):
+        if form in text:
+            break
+    else:
+        pytest.fail(f"pooled {row['pooled_unsafe_rate']:.2%} not in the README")
+
+    for band in row["bands"]:
+        assert any(f in text for f in pct_forms(band["unsafe_rate"], 2)), \
+            (band["band"], band["unsafe_rate"])
+
+    assert any(f in text for f in pct_forms(row["mean_coverage"], 2)), \
+        row["mean_coverage"]
+    assert f"{row['mean_questions']:.4f}" in text, row["mean_questions"]
+    worst = row["concentration"][row["worst_band"]]
+    assert f"{worst:.4f}" in text, worst
+
+
+def test_the_three_aucs_are_the_measured_ones(readme, signed):
+    """
+    The point of the section is that these three differ. If they drift to
+    equal, the section is making a claim its own evidence contradicts.
+    """
+    text = " ".join((ROOT / "README.md").read_text().split())
+    aucs = {k: v[0]["auc"] for k, v in signed["arms"].items()}
+    assert len(set(aucs.values())) == 3, aucs
+    for label, a in aucs.items():
+        assert f"{a:.4f}" in text, (label, a)
+
+    spread = max(aucs.values()) - min(aucs.values())
+    assert f"{spread:.4f}" in text, \
+        f"the README quotes the AUC spread; measured {spread:.4f}"
+
+
+def test_the_opening_state_figures_in_the_readme_are_measured(readme,
+                                                              opening):
+    """
+    The mechanism's numbers: who asks first, and who commits immediately.
+    """
+    text = " ".join((ROOT / "README.md").read_text().split())
+    hand = opening["first_question"]["handcrafted"]
+    assert has_count(text, hand["n_asking"]), hand["n_asking"]
+
+    commits = opening["immediate_commits"]
+    assert has_count(text, commits["handcrafted"]), commits
+    assert has_count(text, commits["signed"]), commits
+    assert commits["award-aware"] == 0, commits
+
+    for label in ("award-aware", "signed"):
+        rate = opening["order_flips"][label]["flip_rate"]
+        assert any(f in text for f in pct_forms(rate, 2)), (label, rate)
+
+
+def test_the_group_conditional_arms_quoted_are_the_measured_ones(readme,
+                                                                 signed):
+    """
+    The parenthetical claiming the group-conditional arms are identical too.
+    """
+    text = " ".join((ROOT / "README.md").read_text().split())
+    at20 = [s for s in signed["schemes"] if s["alpha"] == 0.20]
+    pooled = next(s for s in at20 if s["scheme"] == "pooled"
+                  and s["scorer"] == "signed")
+    byband = next(s for s in at20 if s["scheme"] == "by-band"
+                  and s["scorer"] == "signed")
+
+    for s in (pooled, byband):
+        gv = s["group_violation_rate_when_feasible"]
+        assert any(f in text for f in pct_forms(gv, 2) + pct_forms(gv, 1)), gv
+        w = s["mean_worst_group_rate"]
+        assert any(f in text for f in pct_forms(w, 2)), (s["scheme"], w)
+    assert has_count(text, byband["feasible_trials"]), \
+        byband["feasible_trials"]
+
+
+def test_the_vacuous_holds_are_called_vacuous_in_the_readme(readme):
+    """
+    Four of nine predictions held because the arm was a no-op. The README
+    must not report that as four passes.
+    """
+    text = " ".join((ROOT / "README.md").read_text().split())
+    assert "vacuously" in text, \
+        "a cost prediction satisfied by a no-op has to be labelled"
+    assert "five missed" in text
