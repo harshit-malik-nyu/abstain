@@ -1,9 +1,13 @@
-# Rounds two to four
+# Rounds two to five, and the addenda
 
-Three questions a reviewer asks first, and what happened when they were asked
+The questions a reviewer asks first, and what happened when they were asked
 properly. Each round was pre-registered before the code it needed existed:
 [round two](preregistration-2.md), [round three](preregistration-3.md), [round
-four](preregistration-4.md).
+four](preregistration-4.md), [round five and its
+addenda](preregistration-5.md).
+
+This file was titled "Rounds two to four" for two rounds after round five was
+in it. A heading is a claim like any other.
 
 The short version:
 
@@ -18,9 +22,11 @@ The short version:
   first attempt to measure this said there was no problem; it was underpowered
   and the fix was an eight-times-larger benchmark.
 
-Two of the three rounds found bugs in this repository rather than facts about
-the world, and both bugs were in the direction of making the method look
-better than it was.
+Most of these rounds found bugs in this repository rather than facts about the
+world, and every one of those bugs made the method look better than it was.
+They are tabulated under [the pattern across the rounds](#the-pattern-across-the-rounds)
+rather than counted here, because a count in a summary paragraph is the thing
+that goes stale.
 
 ---
 

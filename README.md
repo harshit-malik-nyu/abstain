@@ -855,8 +855,10 @@ times — including inside the test that was pinning it.
 
 ## What is guaranteed, and on what basis
 
-Three claims resting on different things. [`docs/theory.md`](docs/theory.md)
-separates them.
+Four claims resting on different things, listed in the order
+[`docs/theory.md`](docs/theory.md) separates them — and the four bullets below
+were already four while this sentence said three, which is the arithmetic a
+reader checks first.
 
 **The Clopper–Pearson bound is exact** for a threshold fixed in advance. Not
 novel, not in doubt.

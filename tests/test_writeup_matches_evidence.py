@@ -1542,3 +1542,28 @@ def test_the_vacuous_holds_are_called_vacuous_in_the_readme(readme):
     assert "vacuously" in text, \
         "a cost prediction satisfied by a no-op has to be labelled"
     assert "five missed" in text
+
+
+def test_the_readme_counts_theory_claims_from_theory(readme):
+    """
+    The README summarises `theory.md` and said "Three claims" while listing
+    four bullets and theory.md carried four numbered sections.
+
+    Derived from theory.md's own section headings, so adding a fifth claim
+    there fails here until the README agrees — and so does the count in
+    theory.md's own opening line, which is the other place it is typed.
+    """
+    text = (ROOT / "docs" / "theory.md").read_text()
+    n = len(re.findall(r"^## \d+\. ", text, re.M))
+    assert n >= 4, n
+
+    words = ("zero one two three four five six seven eight").split()
+    assert f"{words[n]} claims" in readme.lower(), n
+    assert f"{words[n]} claims appear in this repository" in \
+        " ".join(text.split()).lower(), n
+
+    for other in words:
+        if other == words[n]:
+            continue
+        bad = re.compile(rf"(?<![\w-]){other} claims", re.I)
+        assert not bad.search(readme), (other, n)
