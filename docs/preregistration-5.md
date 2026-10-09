@@ -949,3 +949,106 @@ One run on `fine_dev`, 200 trials, seed 53, α = 0.20 and 0.15, written to
 `evidence/partition_sweep.json`. Neither holdout is touched. The partitions
 listed above are fixed here and none is added or dropped after seeing a
 result.
+
+---
+
+# Addendum ten — pool-level uncertainty for the headline number
+
+Written before `scripts/run_pool_bootstrap.py` exists. The git history shows
+it.
+
+## Why this round exists
+
+The single most quoted figure in this repository is a pair of per-trial rates:
+**the budget is honoured overall in 98.5% of trials and broken for some income
+band in 98.2%.** The second of those is
+`group_violation_rate_when_feasible`, and until round O it was quoted with no
+interval at all. Round O added exact Clopper–Pearson intervals and stated
+plainly what they do not cover:
+
+> Each trial is an independent split of a **fixed** pool, so conditional on
+> these 672 cases the trials are i.i.d. and the interval is exact. It does not
+> cover the pool.
+
+That gap is not hypothetical here. The same gap, for the across-trial band
+rates, is the difference between **±0.6 and ±9.5 points** — sixteen times —
+and the repository already rejects the narrow version of it in
+[`conditional.bootstrap_band_rate`](../src/abstain/conditional.py). The
+headline per-trial pair has had the narrow treatment all along.
+
+## What is added
+
+No new method. A case-level bootstrap of the whole validation loop: resample
+672 cases with replacement, run the pooled and by-band arms on the resampled
+pool, record both arms' per-trial group-violation rate and feasible count, and
+repeat.
+
+**B = 40 draws, 100 trials per draw**, α = 0.20, `fine_dev`, seeds derived
+from a fixed root. 100 rather than 200 trials per draw because the cost is
+B × trials and the interval is wanted at the pool level; the consequence is
+that the resulting width contains **both** pool variability and Monte Carlo
+error at 100 trials, so it is an **upper** estimate of the pool-only width
+rather than an exact one. That is the honest direction for a conservative
+interval and it is stated here rather than discovered later.
+
+Resampling with replacement duplicates cases, which means a calibration fold
+can contain the same household twice. That is inherent to the bootstrap and is
+what `bootstrap_band_rate` already does at the case level, so it is consistent
+with existing practice here rather than a new liberty.
+
+## Predictions
+
+**R1.** The pooled arm's 95% percentile interval will lie **entirely above
+90%**. The finding that one global threshold breaks the budget for some band is
+not an artefact of this particular pool.
+
+**R2.** The by-band arm's interval will lie **entirely below 20%**.
+
+**R3.** The two intervals will **not overlap**. If they do, the headline
+comparison is not supported at the pool level and every table built on it
+needs a width beside it.
+
+**R4.** The pool-level interval will be **wider** than the conditional
+Clopper–Pearson interval for at least one arm, because resampling cases adds a
+source of variance the exact interval conditions away. This is the
+methodological point of the round and the one I expect to be least
+interesting if it holds and most interesting if it fails.
+
+**R5.** The by-band arm's **feasible count will vary** across draws. A
+resampled pool can be short of cases in the smallest band, and group
+conditioning binds on the smallest group — so a constant feasible count would
+mean the bootstrap is not reaching the thing that limits the method.
+
+## What would falsify what
+
+**R3 fails.** The pooled-versus-conditioned comparison, which is the most
+load-bearing comparison in the repository, does not survive pool-level
+uncertainty. Then §4 of [`theory.md`](theory.md) leads with the width rather
+than the point estimates, and the practical recommendation weakens to "measure
+it on your own data" — because on 672 cases it would not be established.
+
+**R1 fails while R3 holds.** The direction survives and the magnitude does
+not, which would mean the 98.2% is a property of this pool and the honest
+headline is a range.
+
+**R4 fails** — the pool-level interval is no wider than the exact one. That
+would be worth more than it holding: it would say the 672 cases are large
+enough that pool variability is negligible for this quantity, which is a
+claim the repository has nowhere else and would justify quoting the exact
+intervals without the caveat round O attached to them.
+
+**R2 or R5 missing** is uninformative.
+
+## What this cannot show
+
+A bootstrap resamples the pool it is given. If the 1,344-household
+enumeration that `fine_dev` is drawn from is itself unrepresentative of
+anything outside it, no amount of resampling detects that — objection 7 in
+[`against.md`](against.md) stands untouched.
+
+## Analysis plan
+
+One run on `fine_dev`, B = 40, 100 trials per draw, α = 0.20, root seed 101,
+written to `evidence/pool_bootstrap.json`. Neither holdout is touched. B, the
+trial count, α and the seed are fixed here and none is adjusted after seeing a
+result.
