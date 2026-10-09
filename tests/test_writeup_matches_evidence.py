@@ -1558,14 +1558,21 @@ def test_the_readme_counts_theory_claims_from_theory(readme):
     assert n >= 4, n
 
     words = ("zero one two three four five six seven eight").split()
-    assert f"{words[n]} claims" in readme.lower(), n
+    assert f"{words[n]} claims resting" in readme.lower(), n
     assert f"{words[n]} claims appear in this repository" in \
         " ".join(text.split()).lower(), n
 
+    # Scoped to "<n> claims RESTING", which is the phrase that states this
+    # count. The first version forbade any "<n> claims" anywhere in the
+    # README and promptly failed on "two claims published here and then
+    # retracted" -- a count of something else entirely. Second time a guard
+    # in this suite has been too broad rather than too narrow; both times
+    # the symptom was a false failure on correct prose, which is the benign
+    # direction but still a guard nobody can trust.
     for other in words:
         if other == words[n]:
             continue
-        bad = re.compile(rf"(?<![\w-]){other} claims", re.I)
+        bad = re.compile(rf"(?<![\w-]){other} claims resting", re.I)
         assert not bad.search(readme), (other, n)
 
 

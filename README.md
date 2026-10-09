@@ -16,15 +16,26 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; twenty-six pre-registered predictions that missed; and one result that
-changes what the method is for.** The guarantee it delivers is not the
-guarantee its own README advertised for four rounds, and the gap is not small
-— and the strongest form of the claim that replaced it was refuted by its own
-pre-registered test, two rounds later.
+it was; twenty-six pre-registered predictions that missed; two claims
+published here and then retracted; and one result that changes what the
+method is for.**
+
+The central claim has been attacked three levels deep, and every level moved
+it:
+
+1. The README advertised a guarantee for four rounds that **the method does
+   not deliver** — marginal, not conditional, and on this benchmark that is
+   the difference between a 98.5% pass rate and a 98.2% failure rate.
+2. The claim that replaced it was **refuted by its own pre-registered test**
+   two rounds later (J1).
+3. That refutation was then attacked in turn, which cost three more
+   predictions and found that **the sentence I had published about it was
+   false** of one deployment in four (round O).
 
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
-fix, and **[all seventy-three predictions are listed with their
+fix, both retractions are left visible rather than edited away, and **[all
+seventy-three predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
 wrong.

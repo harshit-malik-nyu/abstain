@@ -440,3 +440,48 @@ def test_the_advice_count_is_the_number_of_items():
             continue
         bad = re.compile(rf"(?<![\w-]){spell(other)} things this project")
         assert not bad.search(text), (other, len(nums))
+
+
+def test_both_retractions_stay_in_the_opening():
+    """
+    The claims this repository published and then withdrew.
+
+    Two: the "zero order flips in 106,365 state pairs" explanation for M1's
+    failure, whose sample covered one income band, and "removing the feature
+    brings every band inside the budget", which was true of the across-trial
+    estimator and false of a quarter of deployments.
+
+    They are the most credibility-relevant facts about the process here and
+    the easiest to lose in an edit, because nothing else breaks when a
+    sentence admitting error is dropped. So the count is asserted in the
+    opening and each one has to remain findable in the documents that carry
+    it.
+    """
+    readme = " ".join((ROOT / "README.md").read_text().split())
+    assert "two claims published here and then retracted" in readme.lower(), \
+        "the opening must say how many claims were withdrawn"
+    assert "both retractions are left visible" in readme.lower()
+
+    prereg = " ".join(
+        (ROOT / "docs" / "preregistration-5.md").read_text().split())
+    assert "106,365" in prereg, "the first retraction's figure"
+    assert "retracted" in prereg.lower()
+
+    preds = " ".join((ROOT / "docs" / "predictions.md").read_text().split())
+    assert "false of a quarter of deployments" in preds, \
+        "the second retraction has to be in the ledger too"
+
+
+def test_the_opening_states_all_three_levels_of_the_attack():
+    """
+    Claim, refutation, attack on the refutation — each one moved the result,
+    and a reader should see the chain rather than the last link.
+    """
+    lines = (ROOT / "README.md").read_text().splitlines()
+    end = next(i for i, ln in enumerate(lines) if ln.strip() == "---")
+    opening = " ".join(" ".join(lines[:end]).split())
+
+    assert "attacked three levels deep" in opening
+    nums = [ln for ln in lines[:end] if re.match(r"^\d+\. ", ln)]
+    assert len(nums) == 3, nums
+    assert "J1" in opening and "round O" in opening
