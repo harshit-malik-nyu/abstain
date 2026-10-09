@@ -379,3 +379,105 @@ def test_observations_outnumber_cases_on_the_real_benchmark(dev):
 
     total = sum(r["deployed"] for r in b.per_case.values())
     assert total > 5 * len(b.per_case)
+
+
+# ---------------------------------------------------------------------------
+# The injectable partition, added for round Q
+# ---------------------------------------------------------------------------
+
+def test_the_default_partition_is_unchanged(dev):
+    """
+    `collector` grew a `partition` argument. Every published result was
+    produced without it, so passing nothing must behave exactly as before
+    and passing `hardness` explicitly must be indistinguishable.
+
+    Checked by running both over the same draw and comparing the whole
+    dictionary, because "behaves the same" is not a claim one should make
+    from the band names alone.
+    """
+    from abstain.conditional import hardness
+    from abstain.scorer import handcrafted_scorer
+    from abstain.validate import validate
+
+    implicit = Breakdown(alpha=0.20)
+    explicit = Breakdown(alpha=0.20)
+
+    def both(cal, result, dep_cases):
+        collector(implicit)(cal, result, dep_cases)
+        collector(explicit, partition=hardness)(cal, result, dep_cases)
+
+    validate(dev, handcrafted_scorer, alpha=0.20, trials=15, seed=29,
+             calibration_share=0.30, on_trial=both)
+
+    assert implicit.as_dict() == explicit.as_dict()
+    assert implicit.per_case == explicit.per_case
+    assert implicit.tallies.keys() == explicit.tallies.keys()
+
+
+def test_an_unexpected_band_label_appears_in_the_output(dev):
+    """
+    The failure mode `band_order` exists to prevent.
+
+    `as_dict` used to filter rows against `BANDS`, so a partition returning
+    any other label produced an empty `bands` list beside a populated
+    `concentration` dict — the breakdown would look empty while the ratio
+    said otherwise. A label nobody expected is exactly the case where the
+    output must not go quiet.
+    """
+    from abstain.scorer import handcrafted_scorer
+    from abstain.validate import validate
+
+    def odd(case: dict) -> str:
+        return "surprise"
+
+    b = Breakdown(alpha=0.20)
+    validate(dev, handcrafted_scorer, alpha=0.20, trials=10, seed=29,
+             calibration_share=0.30, on_trial=collector(b, partition=odd))
+
+    d = b.as_dict()
+    assert [r["band"] for r in d["bands"]] == ["surprise"], d["bands"]
+    assert d["worst_band"] == "surprise"
+    assert set(d["concentration"]) == {"surprise"}
+
+
+def test_an_explicit_order_controls_the_row_order(dev):
+    """
+    Without `order`, rows come out in dictionary-insertion order, which
+    depends on which band the first trial happened to deploy — so two runs
+    of the same experiment could write the rows in different orders and a
+    reader diffing two evidence files would see spurious churn.
+    """
+    from abstain.scorer import handcrafted_scorer
+    from abstain.validate import validate
+
+    names = ("hi", "lo")
+
+    def two(case: dict) -> str:
+        return "lo" if case["household"]["employment_income"] <= 24_000 \
+            else "hi"
+
+    b = Breakdown(alpha=0.20, order=names)
+    validate(dev, handcrafted_scorer, alpha=0.20, trials=10, seed=29,
+             calibration_share=0.30, on_trial=collector(b, partition=two))
+
+    assert [r["band"] for r in b.as_dict()["bands"]] == list(names)
+
+
+def test_population_shares_follows_the_partition(dev):
+    """
+    Four published shares beside a two-band breakdown would be worse than
+    none, so the keys have to follow the grouping rather than `BANDS`.
+    """
+    from abstain.conditional import BANDS, population_shares
+
+    def two(case: dict) -> str:
+        return "lo" if case["household"]["employment_income"] <= 24_000 \
+            else "hi"
+
+    default = population_shares(dev)
+    assert set(default) == set(BANDS)
+    assert sum(default.values()) == pytest.approx(1.0)
+
+    swept = population_shares(dev, partition=two)
+    assert set(swept) == {"lo", "hi"}
+    assert sum(swept.values()) == pytest.approx(1.0)
