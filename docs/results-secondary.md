@@ -747,3 +747,80 @@ The earlier three showed AUC failing to *discriminate*. This one shows it
 ranking three scorers in exactly the wrong order. A ranking metric scores a
 scorer on pairs it will never be asked about; a threshold-local rule is judged
 on one cut.
+
+---
+
+## Addendum five — the free parameter, and the mistake it found
+
+`build_cases.assess` calls a state undetermined when sweeping the unknowns
+either flips the eligibility verdict **or** moves the award by more than
+`material = $50`. That fifty was chosen once, in the first commit, and has
+been the definition of ground truth for every number here since. Nothing had
+tested how much the headline depends on it.
+
+Re-labelling needs no oracle calls — every state records its `spread`, and
+whether the verdict flipped reconstructs from the complete enumeration. The
+re-labelling is checked against the committed labels at $50 first, and
+reproduces them exactly.
+
+200 trials, α = 0.20, `fine_dev`:
+
+| materiality | open states | pooled | coverage | worst band | its rate | concentration |
+|---|---:|---:|---:|---|---:|---:|
+| $0 | 57.3% | 11.6% | 75.7% | `well-below` | 47.4% | **4.07** |
+| $25 | 57.2% | 11.6% | 75.7% | `well-below` | 47.4% | **4.07** |
+| **$50** *(as built)* | 57.2% | 11.6% | 75.7% | `well-below` | 47.4% | **4.07** |
+| $100 | 57.2% | 11.6% | 75.7% | `well-below` | 47.4% | **4.07** |
+| $200 | 57.2% | 11.6% | 75.7% | `well-below` | 47.4% | **4.07** |
+| $500 | 57.2% | 11.6% | 75.8% | `well-below` | 47.7% | 4.11 |
+| **flip-only** | 34.2% | 13.8% | 82.2% | `above` | 21.4% | **1.55** |
+
+### All four predictions missed, and together they found a mistake of mine
+
+The finding is **completely insensitive** to the threshold across two orders
+of magnitude — 4.07 at $0 against 4.11 at $500 — so the 49% is not a property
+of the fifty. But remove the award criterion entirely and the concentration
+collapses to 1.55 with a different worst band.
+
+That combination is only possible if `well-below`'s failures are
+overwhelmingly **award**-driven. Which contradicted a hypothesis tested and
+rejected two rounds earlier.
+
+### The correction
+
+The earlier rejection asked what share of **all undetermined states** are
+award-only: 31% for `well-below`, not a majority, hypothesis dead.
+
+But the rule does not meet undetermined states uniformly. **It commits on the
+high-scoring ones**, and for `well-below` those are precisely the states where
+eligibility is settled — far below the limit — and only the award moves:
+
+| band | unsafe commitments | flip | **award-only** |
+|---|---:|---:|---:|
+| **well-below** | 1,165 | 331 | **834 — 72%** |
+| near-threshold | 232 | 143 | 38% |
+| above | 208 | 208 | 0% |
+| well-above | 385 | 308 | 20% |
+
+**72%, not 31%.** The population that matters is the one the rule selects —
+which is the entire reason `calibrate_on_trajectories` exists, and I walked
+into the same selection effect while diagnosing the rule that the rule itself
+had to be fixed for.
+
+### What the mechanism actually is
+
+> **The scorer answers a different question than the one it is scored on.** It
+> estimates whether *eligibility* is settled, and for households far below the
+> limit it is right — they are eligible. Determinability here requires the
+> *award* to be settled too, and far below the limit the award swings hardest
+> with household size. The scorer is confident, correct about its own
+> question, and wrong about the one that counts.
+
+Which is why the failure is systematic rather than noisy, and why it is
+group-correlated: the two questions diverge most exactly where income is
+lowest. The materiality sweep is the independent confirmation — delete the
+second question and the disparity largely goes with it.
+
+The original reasoning is kept in `scripts/diagnose_mechanism.py` under a
+correction header rather than deleted. A rejection that was itself wrong is
+worth more visible than gone.

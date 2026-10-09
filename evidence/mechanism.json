@@ -1,4 +1,5 @@
 {
+ "correction": "Asked of ALL undetermined states, well-below is 31% amount-only and the hypothesis looked rejected. Asked of the states the rule actually commits on, it is 72% and the hypothesis is substantially right. The rule meets a selected population.",
  "criterion_split": {
   "above": {
    "amount_only": 520,
@@ -17,7 +18,24 @@
    "flip": 1866
   }
  },
- "hypothesis_rejected": "amount-only undeterminacy does not explain the well-below failure",
+ "criterion_split_of_commits": {
+  "above": {
+   "amount_only": 0,
+   "flip": 208
+  },
+  "near-threshold": {
+   "amount_only": 89,
+   "flip": 143
+  },
+  "well-above": {
+   "amount_only": 77,
+   "flip": 308
+  },
+  "well-below": {
+   "amount_only": 834,
+   "flip": 331
+  }
+ },
  "score_profile": {
   "above": {
    "mean_log_distance": 0.1849380905017457,

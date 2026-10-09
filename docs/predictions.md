@@ -1,6 +1,6 @@
 # Every prediction, and what happened
 
-Forty-eight predictions across six pre-registrations, each written before the
+Fifty-two predictions across six pre-registrations, each written before the
 code that tested it. This table is the whole record: no prediction is omitted,
 and the outcome column is the one that was true at the time, not the one that
 would read best.
@@ -60,6 +60,10 @@ there were ten — so the number is derived from here rather than written twice.
 | **K2** | plug-in holds δ at 400 calibration cases | 16.0% and 6.3% | **missed** |
 | **K3** | plug-in violates >15% at the smallest fold | 36.3% | held |
 | **K4** | conformal holds δ at every size | 0.3–2.3%, declining where it cannot | held |
+| **L1** | concentration above 2× from $25 to flip-only | 4.07–4.11 up to $500, **1.55** at flip-only | **missed** |
+| **L2** | `well-below` worst at every setting | worst becomes `above` at flip-only | **missed** |
+| **L3** | flip-only concentration at least as large as $50 | **1.55 against 4.07** | **missed** |
+| **L4** | materiality $0 degenerates the benchmark | 57.3% open, 75.7% coverage — not degenerate | **missed** |
 
 ---
 
@@ -90,6 +94,20 @@ tolerance. Reporting them as failed would have been reporting noise.
 
 **J1 is the one that cost the most.** It was the test of the strongest form of
 the central claim, and the claim lost. The README states the narrowed version.
+
+**All four L predictions missed, and together they found a mistake of
+mine.** The concentration turns out to be *completely* insensitive to the
+materiality threshold across two orders of magnitude — 4.07 at $0 against 4.11
+at $500 — and then collapses to 1.55 when the award criterion is removed
+entirely. That combination is only possible if `well-below`'s failures are
+overwhelmingly award-driven, which contradicted a hypothesis I had tested and
+rejected two rounds earlier.
+
+The rejection had tested **all undetermined states** (31% award-only). The
+rule commits on the **high-scoring** ones, and there it is **72%**. I walked
+into the same selection effect that `calibrate_on_trajectories` exists to
+handle. The corrected mechanism is in the README and the original reasoning is
+kept, annotated, in `scripts/diagnose_mechanism.py`.
 
 **K1 and K2 missed in the method's favour, which is its own hazard.** I had
 described the Clopper–Pearson correction as a finite-sample fix that should

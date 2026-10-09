@@ -1,0 +1,39 @@
+  The hypothesis that was wrong
+  ----------------------------------------------------------------------
+  If well-below failed because the benefit AMOUNT moves while
+  eligibility is settled, it would be mostly amount-only.
+
+              band  undetermined  elig flips  amount only
+        well-below          2712        1866     846 (31%)
+    near-threshold          5388        3140    2248 (42%)
+             above          3380        2860     520 (15%)
+        well-above          5416        4656     760 (14%)
+
+  It is not -- on THIS population. But the rule does not meet
+  undetermined states uniformly; it commits on the high-scoring
+  ones. Asked of the states it actually commits on:
+
+              band  unsafe commits    flip  amount only
+        well-below            1165     331     834 (72%)
+    near-threshold             232     143      89 (38%)
+             above             208     208       0 ( 0%)
+        well-above             385     308      77 (20%)
+
+  72% for well-below, not 31%. The hypothesis was
+  rejected on the wrong population, and is substantially right.
+
+  What the scorer actually does
+  ----------------------------------------------------------------------
+              band  undet states  score==0   median  mean dist
+        well-below           588       0%   0.3767     0.8759
+    near-threshold          1159      34%   0.2884     0.5115
+             above           663      77%   0.0000     0.1849
+        well-above           667      19%   0.3073     0.6382
+
+  Not one undetermined well-below state scores zero, and their
+  median score is the highest of any band. The scorer's one real
+  feature is distance from the eligibility boundary, which is
+  maximal for households far BELOW the limit -- while eligibility
+  still flips for 69% of their undetermined states.
+
+  wrote evidence/mechanism.json

@@ -6,8 +6,39 @@ The write-up says "score levels are shifted between bands", which is true and
 is not a mechanism. This locates the cause, and rules out the alternative I
 expected to find.
 
-The hypothesis I expected, and rejected
----------------------------------------
+CORRECTION, added after addendum five
+-------------------------------------
+The rejection below tests the wrong population, and the hypothesis it
+rejects is substantially right.
+
+It asks what share of **all undetermined states** are amount-only, and finds
+31% for `well-below` — not a majority, so the hypothesis looked dead. But the
+rule does not meet undetermined states uniformly. It commits on the
+**high-scoring** ones, and for `well-below` those are exactly the states where
+eligibility is settled (far below the limit) and only the award moves.
+
+Measured on the states the rule actually commits on while undetermined:
+
+    well-below      1,165 unsafe commits,  72% amount-only
+    near-threshold    232                  38%
+    above             208                   0%
+    well-above        385                  20%
+
+**72%, not 31%.** The same selection effect that `calibrate_on_trajectories`
+exists to handle — the rule meets a selected population, not the population —
+and I walked into it while diagnosing the rule.
+
+Which is confirmed independently by the materiality sweep: removing the spread
+criterion entirely drops the concentration from 4.07 to 1.55 and moves the
+worst band. If `well-below`'s failures were mostly flips, that could not
+happen.
+
+The corrected mechanism is in the README. The original reasoning is kept
+below, because a rejection that was itself wrong is worth more visible than
+deleted.
+
+The hypothesis I expected, and rejected on the wrong population
+---------------------------------------------------------------
 Determinability here fires on two conditions: the eligibility verdict flips
 across the sweep, **or** the benefit amount moves by more than the materiality
 threshold while the verdict is stable. The obvious story was that
@@ -57,8 +88,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
 from abstain.conditional import BANDS, hardness  # noqa: E402
+from abstain.evaluate import OPENING  # noqa: E402
 from abstain.scorer import FIELDS, features, handcrafted_scorer  # noqa: E402
-from abstain.validate import states_of  # noqa: E402
+from abstain.validate import states_of, validate  # noqa: E402
 
 SWEEPABLE = {
     "dependents": [0, 1, 2, 3],
@@ -129,6 +161,50 @@ def score_profile(cases: list[dict]) -> dict:
     return out
 
 
+def commits_by_criterion(dev: list[dict], full_space: list[dict], *,
+                         alpha: float = 0.20, trials: int = 40,
+                         seed: int = 71) -> dict:
+    """
+    The same question, asked of the states the rule actually commits on.
+
+    This is the correction. Asking it of all undetermined states gives 31%
+    for `well-below` and the hypothesis looks dead; asking it of the states
+    the rule selects gives 72% and it is substantially right.
+
+    The rule commits on the HIGH-SCORING states, and for `well-below` those
+    are exactly the ones where eligibility is settled and only the award
+    moves. Same selection effect `calibrate_on_trajectories` exists to
+    handle.
+    """
+    verdict = {tuple(c["household"][f] for f in FIELDS):
+               c["states"]["|".join(sorted(FIELDS))]["truth"]
+               for c in full_space}
+    by_id = {c["id"]: c for c in dev}
+    captured: list[tuple] = []
+
+    def spy(cal, result, dep_cases):
+        for row in result.detail:
+            if row["outcome"] == "unsafe":
+                captured.append((row["case"],
+                                 tuple(sorted(set(OPENING) | set(row["asked"])))))
+
+    validate(dev, handcrafted_scorer, alpha=alpha, trials=trials, seed=seed,
+             calibration_share=0.30, on_trial=spy)
+
+    out: dict[str, dict] = {b: {"flip": 0, "amount_only": 0} for b in BANDS}
+    for cid, known in captured:
+        case = by_id[cid]
+        unknown = [f for f in FIELDS if f not in known]
+        seen = set()
+        for combo in itertools.product(*[SWEEPABLE[f] for f in unknown]):
+            trial = dict(case["household"])
+            trial.update(dict(zip(unknown, combo)))
+            seen.add(verdict[tuple(trial[f] for f in FIELDS)])
+        key = "flip" if len(seen) > 1 else "amount_only"
+        out[hardness(case)][key] += 1
+    return out
+
+
 def main() -> int:
     full = json.loads((ROOT / "evidence" / "cases_fine.json").read_text())
     dev = json.loads((ROOT / "evidence" / "fine_dev.json").read_text())
@@ -145,8 +221,24 @@ def main() -> int:
         tot = d["flip"] + d["amount_only"]
         print(f"  {b:>16} {tot:>13} {d['flip']:>11} "
               f"{d['amount_only']:>7} ({d['amount_only'] / tot:>3.0%})")
-    print("\n  It is not. near-threshold has the largest amount-only share")
-    print("  and takes none of the budget. Hypothesis rejected.\n")
+    print("\n  It is not -- on THIS population. But the rule does not meet")
+    print("  undetermined states uniformly; it commits on the high-scoring")
+    print("  ones. Asked of the states it actually commits on:\n")
+
+    commits = commits_by_criterion(dev, full)
+    print(f"  {'band':>16} {'unsafe commits':>15} {'flip':>7} "
+          f"{'amount only':>12}")
+    for b in BANDS:
+        d = commits[b]
+        tot = d["flip"] + d["amount_only"]
+        if not tot:
+            continue
+        print(f"  {b:>16} {tot:>15} {d['flip']:>7} "
+              f"{d['amount_only']:>7} ({d['amount_only'] / tot:>3.0%})")
+    wb = commits["well-below"]
+    share = wb["amount_only"] / (wb["flip"] + wb["amount_only"])
+    print(f"\n  {share:.0%} for well-below, not 31%. The hypothesis was")
+    print("  rejected on the wrong population, and is substantially right.\n")
 
     print("  What the scorer actually does")
     print("  " + "-" * 70)
@@ -169,9 +261,16 @@ def main() -> int:
     print("  maximal for households far BELOW the limit -- while eligibility")
     print(f"  still flips for {flip_share:.0%} of their undetermined states.")
 
-    payload = {"criterion_split": crit, "score_profile": prof,
-               "hypothesis_rejected": "amount-only undeterminacy does not "
-                                      "explain the well-below failure"}
+    payload = {
+        "criterion_split": crit,
+        "criterion_split_of_commits": commits,
+        "score_profile": prof,
+        "correction": (
+            "Asked of ALL undetermined states, well-below is 31% amount-only "
+            "and the hypothesis looked rejected. Asked of the states the rule "
+            "actually commits on, it is 72% and the hypothesis is "
+            "substantially right. The rule meets a selected population."),
+    }
     dest = ROOT / "evidence" / "mechanism.json"
     dest.write_text(json.dumps(payload, indent=1, sort_keys=True))
     print(f"\n  wrote {dest.relative_to(ROOT)}")

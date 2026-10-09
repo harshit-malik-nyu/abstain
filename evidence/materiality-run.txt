@@ -1,0 +1,19 @@
+  fine_dev: 672 cases, 200 trials, seed 71, alpha 0.2
+  re-labelling at $50 reproduces the committed labels exactly
+
+   materiality  open states   pooled  coverage      worst band  its rate    conc  hides
+            $0       57.3%   11.6%    75.7%      well-below    47.4%    4.07   True
+           $25       57.2%   11.6%    75.7%      well-below    47.4%    4.07   True
+           $50       57.2%   11.6%    75.7%      well-below    47.4%    4.07   True
+          $100       57.2%   11.6%    75.7%      well-below    47.4%    4.07   True
+          $200       57.2%   11.6%    75.7%      well-below    47.4%    4.07   True
+          $500       57.2%   11.6%    75.8%      well-below    47.7%    4.11   True
+     flip-only       34.2%   13.8%    82.2%           above    21.4%    1.55   True
+
+  Does the headline survive the parameter?
+  ----------------------------------------------------------------
+  non-degenerate settings: 7 of 7
+  worst band across them:  {'well-below', 'above'}
+  smallest concentration:  1.55
+
+  wrote evidence/materiality.json (341.2s)

@@ -41,6 +41,22 @@ def squash(path: str) -> str:
     return " ".join((ROOT / path).read_text().split())
 
 
+def count_forms(n: int) -> list[str]:
+    """
+    Both renderings of an integer the write-up uses.
+
+    Prose takes a thousands separator — "1,165" — and code does not. A
+    separator is formatting, not a different number, and a test that
+    insisted on one would be policing typography rather than checking
+    arithmetic. Same principle as `pct_forms`.
+    """
+    return [f"{n:,}", str(n)]
+
+
+def has_count(text: str, n: int) -> bool:
+    return any(form in text for form in count_forms(n))
+
+
 def pct_forms(x: float, places: int = 1) -> list[str]:
     """
     Every rendering of a rate the write-up legitimately uses.
@@ -617,29 +633,55 @@ def mechanism():
     return json.loads(p.read_text())
 
 
-def test_the_rejected_hypothesis_is_still_rejected(mechanism):
+def amount_share(split: dict, band: str) -> float:
+    d = split[band]
+    total = d["flip"] + d["amount_only"]
+    return d["amount_only"] / total if total else 0.0
+
+
+def test_the_two_populations_give_opposite_answers(mechanism):
     """
-    The explanation I expected, pinned as rejected.
+    The correction, pinned from both sides.
 
-    If `well-below` were dominated by amount-only undeterminacy — clearly
-    eligible households whose award still swings — the README's mechanism
-    would be wrong. It is not dominated by it, and the band with the largest
-    share of it takes none of the error budget.
+    Asked of ALL undetermined states, `well-below` is 31% amount-only and
+    the hypothesis looks rejected. Asked of the states the rule actually
+    COMMITS on, it is 72% and the hypothesis is substantially right.
 
-    Asserted rather than narrated, so that a regenerated benchmark which
-    *did* make the hypothesis true would fail here instead of leaving a wrong
-    explanation standing.
+    Both numbers have to stay true for the correction to make sense: if the
+    all-states figure ever rose above half, the original rejection would
+    never have happened and the story about walking into a selection effect
+    would be fiction.
     """
-    crit = mechanism["criterion_split"]
+    commits = mechanism.get("criterion_split_of_commits")
+    if not commits:
+        pytest.skip("this run predates the commit-population measurement")
 
-    def amount_share(band: str) -> float:
-        d = crit[band]
-        return d["amount_only"] / (d["flip"] + d["amount_only"])
+    assert amount_share(mechanism["criterion_split"], "well-below") < 0.5
+    assert amount_share(commits, "well-below") > 0.65
+    assert amount_share(commits, "well-below") > \
+        2 * amount_share(mechanism["criterion_split"], "well-below")
 
-    assert amount_share("well-below") < 0.5, \
-        "well-below would then be an amount-only story after all"
-    assert amount_share("near-threshold") > amount_share("well-below"), \
-        "the band taking none of the budget has the most amount-only states"
+
+def test_the_correction_is_stated_not_silently_applied(readme, mechanism):
+    """
+    An earlier conclusion was wrong. Replacing it quietly would be the one
+    move this repository argues against throughout.
+    """
+    commits = mechanism.get("criterion_split_of_commits")
+    if not commits:
+        pytest.skip("this run predates the commit-population measurement")
+
+    text = " ".join((ROOT / "README.md").read_text().split())
+    assert "the rejection was wrong" in text
+    assert "72%, not 31%" in text
+
+    wb = commits["well-below"]
+    assert has_count(text, wb["flip"] + wb["amount_only"])
+    assert has_count(text, wb["amount_only"])
+
+    source = (ROOT / "scripts" / "diagnose_mechanism.py").read_text()
+    assert "CORRECTION" in source, \
+        "the script carrying the wrong rejection has to carry the correction"
 
 
 def test_the_failing_band_never_scores_zero(mechanism, readme):
@@ -662,15 +704,20 @@ def test_the_failing_band_never_scores_zero(mechanism, readme):
     assert f"{wb['mean_log_distance']:.4f}" in readme
 
 
-def test_eligibility_really_does_flip_for_the_failing_band(mechanism, readme):
+def test_the_scorer_is_right_about_its_own_question(mechanism):
     """
-    Without this, "the scorer is wrong about them" has no content: the states
-    could be undetermined for a reason the scorer is not claiming to see.
+    The corrected mechanism in one assertion.
+
+    Most of what the rule gets wrong in `well-below` is not eligibility — it
+    is the award. So the scorer, which estimates whether *eligibility* is
+    settled, is largely correct about the question it answers and wrong
+    about the one it is scored on. If its commitments there were mostly
+    eligibility flips, that framing would be wrong.
     """
-    d = mechanism["criterion_split"]["well-below"]
-    flip_share = d["flip"] / (d["flip"] + d["amount_only"])
-    assert flip_share > 0.5
-    assert f"{flip_share:.0%}" in readme
+    commits = mechanism.get("criterion_split_of_commits")
+    if not commits:
+        pytest.skip("this run predates the commit-population measurement")
+    assert amount_share(commits, "well-below") > 0.5
 
 
 # ---------------------------------------------------------------------------

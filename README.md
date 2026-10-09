@@ -16,7 +16,7 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; thirteen pre-registered predictions that missed; and one result that
+it was; seventeen pre-registered predictions that missed; and one result that
 changes what the method is for.** The guarantee it delivers is not the
 guarantee its own README advertised for four rounds, and the gap is not small
 — and the strongest form of the claim that replaced it was refuted by its own
@@ -24,7 +24,7 @@ pre-registered test, two rounds later.
 
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
-fix, and **[all forty-eight predictions are listed with their
+fix, and **[all fifty-two predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
 wrong.
@@ -119,12 +119,30 @@ the second — households obviously eligible on income whose *award* still
 swings with household size — and that a scorer measuring distance from the
 *eligibility* boundary is blind to that by construction.
 
-Reconstructed from the complete enumeration, the share of undetermined states
-that are amount-only is `well-below` **31%**, `near-threshold` **42%**,
-`above` 15%, `well-above` 14%. **`well-below` is not dominated by it, and the
-band with the most of it takes none of the budget.** Hypothesis rejected, and
-recorded in [`scripts/diagnose_mechanism.py`](scripts/diagnose_mechanism.py)
-rather than quietly dropped.
+I rejected that, and the rejection was wrong — in a way worth reading, because
+it is the same mistake this project is built around.
+
+Across **all undetermined states**, the amount-only share is `well-below`
+31%, `near-threshold` 42%, `above` 15%, `well-above` 14%. Not a majority for
+the failing band, so the hypothesis looked dead.
+
+But the rule does not meet undetermined states uniformly. **It commits on the
+high-scoring ones**, and for `well-below` those are exactly the states where
+eligibility is settled — far below the limit — and only the award moves.
+Measured on the states the rule actually commits on while undetermined:
+
+| band | unsafe commitments | flip | **amount-only** |
+|---|---:|---:|---:|
+| **well-below** | 1,165 | 331 | **834 — 72%** |
+| near-threshold | 232 | 143 | 38% |
+| above | 208 | 208 | 0% |
+| well-above | 385 | 308 | 20% |
+
+**72%, not 31%.** The population that matters is the one the rule selects,
+which is the entire point of
+[`calibrate_on_trajectories`](src/abstain/rule.py) — and I walked into the
+same selection effect while diagnosing the rule that the rule itself had to
+be fixed for.
 
 What is actually happening, over undetermined states where income is known:
 
@@ -138,15 +156,28 @@ What is actually happening, over undetermined states where income is known:
 **Not one undetermined `well-below` state scores zero**, and their median score
 is the highest of any band. The scorer's one real feature is distance from the
 eligibility boundary, which is *maximal* for households far **below** the
-income limit — while eligibility still flips for **69%** of their undetermined
-states, because household size moves both the limit and the award.
+income limit.
 
-So the failure is not bad ranking. It is that the scorer's structural
-assumption — far from the boundary implies determinable — is **false in one
-direction, and false consistently rather than noisily.** A single global
-threshold cannot correct a bias that is systematic within a group and
-different between groups. A per-group threshold can, because inside a band the
-feature's relationship to determinability is at least stable.
+Put the two measurements together and the mechanism is sharper than "a feature
+that is wrong":
+
+> **The scorer answers a different question than the one it is scored on.** It
+> estimates whether *eligibility* is settled, and for households far below the
+> limit it is right — they are eligible. But determinability here requires the
+> *award* to be settled too, and far below the limit the award swings hardest
+> with household size. The scorer is confident, correct about its own
+> question, and wrong about the one that counts.
+
+That is why the failure is systematic rather than noisy, and why it is
+group-correlated: the two questions diverge most exactly where income is
+lowest. A single global threshold cannot correct a bias that is consistent
+within a group and different between groups. A per-group threshold can,
+because inside a band the gap between the two questions is at least stable.
+
+**Independently confirmed by removing the second question.** Re-label the
+benchmark so determinability means *eligibility settled* and nothing else, and
+the concentration falls from **4.07 to 1.55** with a different worst band. If
+`well-below`'s failures were mostly eligibility flips, that could not happen.
 
 > Which generalises past this benchmark: **a confidence feature encoding
 > "far from the decision boundary along dimension X" is systematically
@@ -879,6 +910,7 @@ python scripts/run_allocation.py        # questions per band, per scheme
 python scripts/check_confounds.py       # is it the stopping or asking rule?
 python scripts/diagnose_mechanism.py    # why the levels are shifted
 python scripts/run_plugin_scale.py      # does the baseline fail at scale?
+python scripts/run_materiality.py       # how much rides on the $50 parameter?
 python scripts/run_uncertainty.py       # cluster bootstrap over cases
 python scripts/make_figure.py           # regenerate docs/shift.svg
 
