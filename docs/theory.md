@@ -145,6 +145,21 @@ vertically shifted distributions, so it cuts each at a different quantile.
 > within every subgroup. Conditional validity needs conditional
 > **calibration**, not conditional ranking.
 
+And the reason the levels are shifted is sharper than a bad feature. The
+scorer estimates whether **eligibility** is settled; determinability here
+requires the **award** to be settled too. Far below the income limit
+eligibility is clear and the award swings hardest with household size, so the
+scorer is confident, correct about its own question, and wrong about the one
+it is scored on — and the two questions diverge most exactly where income is
+lowest.
+
+Measured two ways. Of the states the rule actually commits on while
+undetermined, **72%** of `well-below`'s are award-only against 0% of
+`above`'s. And re-labelling the benchmark so determinability means eligibility
+alone drops the concentration from **4.07 to 1.55**. Across materiality
+thresholds from $0 to $500 it does not move at all, so none of this is a
+property of where that threshold was set.
+
 **Status: measured, and it is a property of using one threshold rather than a
 property of this scorer.** A better-ranking scorer does not fix it; the fitted
 scorer, which ranks better, would be subject to exactly the same argument.

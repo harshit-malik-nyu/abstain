@@ -115,7 +115,18 @@ that and this one does not.
 A rule that holds a tolerance over sixteen states says little about one over
 a space large enough that the agent cannot enumerate it.
 
-## 6. The oracle defines the truth being bounded
+## 6. The oracle defines the truth being bounded, and so does one constant
+
+Determinability fires on an eligibility flip **or** an award move larger than
+`material = $50`. That constant was chosen in the first commit and is as much
+a definition of ground truth as the engine is.
+
+Swept from $0 to $500, the subgroup concentration does not move — 4.07 against
+4.11 — so the headline is not a property of where it was set. Removed
+entirely, so that only eligibility counts, the concentration falls to 1.55.
+Both facts are reported, and together they are what identified the mechanism.
+
+
 
 Determinability comes from PolicyEngine, an implementation of published SNAP
 rules with its own defects. Where it is wrong, this bounds **agreement with a
