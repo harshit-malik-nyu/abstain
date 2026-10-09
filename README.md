@@ -1027,7 +1027,7 @@ data was split.
 
 ## If you are building one of these
 
-Seven things this project measured that would have changed how I built it, in
+Nine things this project measured that would have changed how I built it, in
 the order they would bite.
 
 **1. Check whether your error budget is spent evenly before you ship the
@@ -1035,7 +1035,22 @@ number.** It takes one breakdown by whatever groups your deployment actually
 has. Here the pooled rate was inside budget in 98.5% of trials and some group
 was outside it in 98.2%, and nothing in the headline number hinted at that.
 
-**2. Do not pick the scorer by AUC.** Five independent results here show it
+**2. The check is only as good as the partition, and two groups is not a
+partition.** Nine groupings of the same trajectories: a neutral equal-count
+quartile split still flags the failure at α = 0.20, and a two-band split at the
+median reports **no hidden subgroup at all**, at either tolerance. Same runs,
+same rule, opposite conclusions. "We looked at subgroups" is not a finding
+without saying which, and a coarse split is the one that will tell you what you
+hoped to hear.
+
+**3. Count failures per deployment, not just rates across deployments.** The
+same arm, at α = 0.15: worst-band rate pooled across 200 trials, 11.65% against
+a 15% budget — and **24.5% of individual trials** put some band over it. Both
+numbers are correct. I published the first as "every band inside the budget"
+and it was false of a quarter of deployments. This is the third time in this
+repository that the unit of aggregation decided the answer.
+
+**4. Do not pick the scorer by AUC.** Five independent results here show it
 cannot see what a threshold-local rule does. One has it pointing backwards —
 of three scorers, the one with the **worst** AUC had the lowest unsafe rate and
 the highest coverage — and one has it moving in both directions across three
@@ -1043,13 +1058,18 @@ scorers whose deployed behaviour is identical in every float. Compare
 candidates on the deployed metric at the deployed tolerance, not on a ranking
 summary.
 
-**3. Look for a feature that is directionally wrong for a group before you
-reach for anything else.** Dropping the one feature that read "far below the
-income limit" as "safe to answer" cut the subgroup disparity from 4.13× to
-1.72× — and improved pooled safety and coverage at the same time. It beat every
-other intervention here, and it is cheaper than all of them.
+**5. Look for a feature that is directionally wrong for a group before you
+reach for anything else, and then do the other thing as well.** Dropping the
+one feature that read "far below the income limit" as "safe to answer" cut the
+subgroup disparity from 4.13× to 1.72× and improved pooled safety and coverage
+at once. It is the cheapest intervention measured here and the only one still
+available at a tight tolerance. It is **not** a substitute for per-group
+calibration: on the per-trial measure it matches conditioning at α = 0.20 and
+is three times worse at α = 0.15, while the two together beat either alone
+wherever both are feasible. I wrote that it beat every alternative; that was
+one estimator's answer, not the answer.
 
-**4. Calibrate per group if you can afford it, and do not expect recalibrating
+**6. Calibrate per group if you can afford it, and do not expect recalibrating
 to substitute.** On this benchmark conditioning was not a safety–coverage
 trade — safer in every group, higher coverage, fewer questions. And a freshly
 recalibrated single threshold still ran the worst group at 45.1% against a 20%
@@ -1058,19 +1078,26 @@ different failure.** The cost is sample size, and it is a hard floor —
 `1 − δ^(1/n) ≤ α` must hold **in your smallest group**, which is 29
 calibration cases for a 10% tolerance at 95% confidence, whatever your scorer.
 
-**5. Size the deployment fold, not just the calibration fold.** The default
+**"If you can afford it" is doing real work in that sentence.** At α = 0.10 on
+672 cases, conditioning is feasible in **3 trials out of 200** for the
+handcrafted scorer and **0 of 200** for the better-behaved one — so at that
+tolerance the per-group certificate is not expensive, it is unavailable, and
+the only thing left is a score that does not need it. Decide which tolerance
+you are actually buying before you decide how.
+
+**7. Size the deployment fold, not just the calibration fold.** The default
 60/40 split is tuned for a pooled check. A per-group rate has to be
 *resolvable* in every group, and that requirement grows much faster — the
 wrong split cost 1.7× the cases here, and a rate measured on 8 cases cannot
 answer whether a group exceeded 10%.
 
-**6. Make "infeasible" actually infeasible, and report it as its own
+**8. Make "infeasible" actually infeasible, and report it as its own
 outcome.** The refusal threshold has to be outside the score's range, not at
 the top of it. And a declined calibration is neither a pass nor a failure:
 pooling it with real trials hides the difference between "held", "broke" and
 "never certified".
 
-**7. Watch the deployed rate, not the certificate.** The bound is computed on
+**9. Watch the deployed rate, not the certificate.** The bound is computed on
 calibration data. When the population shifted here, the reported bound stayed
 at 0.175 while violations went from 0.7% to 98%. **An operator monitoring the
 guarantee would have seen nothing.** If you can only monitor one number,

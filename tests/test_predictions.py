@@ -403,3 +403,40 @@ def test_every_claimed_bug_has_its_own_writeup():
                 if lines[i].startswith("## ")), len(lines))
     subs = [ln for ln in lines[start:end] if ln.startswith("### ")]
     assert len(subs) == n, (n, subs)
+
+
+def test_the_advice_count_is_the_number_of_items():
+    """
+    The third hand-typed count in this README to go stale.
+
+    "Seven things this project measured" sat above nine items after two
+    rounds added two. Same failure as the prediction count, the bug count
+    and the AUC-result count: a number typed once beside a list that grows.
+
+    Derived from the numbered items, and the items must be consecutive from
+    one, so a renumbering slip shows up here rather than in a reader's
+    confusion.
+    """
+    lines = (ROOT / "README.md").read_text().splitlines()
+    start = next(i for i, ln in enumerate(lines)
+                 if ln.startswith("## If you are building one of these"))
+    end = next(i for i in range(start + 1, len(lines))
+               if lines[i].startswith("## "))
+
+    nums = [int(m.group(1)) for ln in lines[start:end]
+            if (m := re.match(r"^\*\*(\d+)\. ", ln))]
+    assert nums, "no numbered advice items found; the section format changed"
+    assert nums == list(range(1, len(nums) + 1)), nums
+
+    # Lower-cased: the sentence opens the paragraph, so the word is
+    # capitalised, and a case-sensitive match here would be checking
+    # typography rather than the count.
+    text = " ".join(" ".join(lines[start:end]).split()).lower()
+    assert f"{spell(len(nums))} things this project measured" in text, \
+        f"{len(nums)} items are listed"
+
+    for other in range(1, 13):
+        if other == len(nums):
+            continue
+        bad = re.compile(rf"(?<![\w-]){spell(other)} things this project")
+        assert not bad.search(text), (other, len(nums))
