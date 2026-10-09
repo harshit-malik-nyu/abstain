@@ -2453,3 +2453,81 @@ def test_the_materiality_sweep_is_the_measured_one(writeups,
                   max(r["worst_concentration"] for r in money),
                   flip["worst_concentration"]):
         assert f"{value:.2f}" in writeups, value
+
+
+@pytest.fixture(scope="module")
+def populations():
+    p = ROOT / "evidence" / "unit_populations.json"
+    if not p.exists():
+        pytest.skip("unit_populations.json not present")
+    return json.loads(p.read_text())
+
+
+def test_the_three_populations_table_is_computed_not_remembered(readme, theory,
+                                                                populations):
+    """
+    Claim 2's mechanism table, which had no evidence file at all until an
+    audit of every published percentage found two of its cells uncoupled —
+    and one of them wrong.
+
+    All three rows, in both documents, against the recorded computation.
+    """
+    pops = populations["populations"]
+    for key in ("calibration_population", "states_the_rule_visits",
+                "states_it_commits_at"):
+        d = pops[key]
+        for payload in (readme, theory):
+            assert has_count(payload, d["states"]), (key, d["states"])
+            assert any(f in payload
+                       for f in pct_forms(d["undetermined_share"], 1)), \
+                (key, d["undetermined_share"])
+
+    # The gradient is the claim: the rule's own trajectory is far cleaner
+    # than the population it was calibrated on, and what it commits on is
+    # clean outright.
+    a = pops["calibration_population"]["undetermined_share"]
+    b = pops["states_the_rule_visits"]["undetermined_share"]
+    c = pops["states_it_commits_at"]["undetermined_share"]
+    assert a > b > c, (a, b, c)
+    assert c == 0.0, c
+
+
+def test_the_superseded_middle_row_is_marked_not_replaced(readme, theory):
+    """
+    314 / 57.0% could not be reproduced and nothing recorded how it was
+    counted. Replacing it silently would be the fourth quiet correction in
+    a table that already carries two retractions.
+    """
+    for payload in (readme, theory):
+        assert "314" in payload, \
+            "the superseded count stays visible as what was superseded"
+        assert "57.0%" in payload, payload[:40]
+        assert "recomputed" in payload
+
+    t = " ".join((ROOT / "README.md").read_text().split())
+    assert "opening state plus one per question asked" in t, \
+        "the definition has to travel with the number, since its absence " \
+        "is why the old figure could not be checked"
+
+
+def test_the_band_undetermined_shares_are_recorded(populations):
+    """
+    The pre-registration's band table, two cells of which are slightly off.
+
+    A pre-registration is not edited, so the figures live here and the
+    document carries a correction note. This checks the recorded values
+    exist and that the note quotes them.
+    """
+    bands = populations["band_undetermined_share"]
+    assert set(bands) == {"dev", "fine_dev"}, sorted(bands)
+    fine = bands["fine_dev"]
+    assert set(fine) == {"well-below", "near-threshold", "above",
+                         "well-above"}, sorted(fine)
+    assert fine["well-below"] > fine["well-above"], fine
+
+    doc = " ".join(
+        (ROOT / "docs" / "preregistration-5.md").read_text().split())
+    assert "a pre-registration is not edited" in doc
+    for band in ("near-threshold", "well-above"):
+        assert any(f in doc for f in pct_forms(fine[band], 1)), \
+            (band, fine[band])

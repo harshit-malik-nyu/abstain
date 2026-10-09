@@ -1,0 +1,32 @@
+{
+ "band_undetermined_share": {
+  "dev": {
+   "above": 0.618421052631579,
+   "near-threshold": 0.75,
+   "well-above": 0.1875,
+   "well-below": 0.7573529411764706
+  },
+  "fine_dev": {
+   "above": 0.6474609375,
+   "near-threshold": 0.7545572916666666,
+   "well-above": 0.32568359375,
+   "well-below": 0.765625
+  }
+ },
+ "definition": "visited = opening state plus one per question asked, per case; committed = final state of a case that committed",
+ "populations": {
+  "calibration_population": {
+   "states": 1264,
+   "undetermined_share": 0.803006329113924
+  },
+  "states_it_commits_at": {
+   "states": 55,
+   "undetermined_share": 0.0
+  },
+  "states_the_rule_visits": {
+   "states": 268,
+   "undetermined_share": 0.48880597014925375
+  }
+ },
+ "threshold": 0.82
+}

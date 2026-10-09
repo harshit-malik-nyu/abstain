@@ -34,8 +34,13 @@ a threshold of 0.82 on dev:
 | | States | Undetermined |
 |---|---:|---:|
 | Calibration population | 1,264 | 80.3% |
-| States the rule visits | 314 | 57.0% |
+| States the rule visits | **268** | **48.9%** |
 | States it commits at | 55 | 0.0% |
+
+The middle row read 314 / 57.0% until it was recomputed; nothing recorded how
+those were counted. The outer rows reproduce exactly and the corrected middle
+row steepens the gradient rather than flattening it. Definition and figures:
+`evidence/unit_populations.json`.
 
 ### The evidence for this claim was wrong, and the claim survives in a sharper form
 

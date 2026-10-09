@@ -56,7 +56,7 @@ from one can contain a vacuous zero, and two did.
 | `uncertainty.json` | `run_uncertainty.py` | the cluster bootstrap, ±9.5 against ±0.6 |
 | `confounds.json` | `check_confounds.py` | the question-policy control |
 | `allocation.json` | `run_allocation.py` | the question-allocation result |
-| `unit_comparison.json`, `leakage.json` | `rerun_unit_and_leakage.py` | claim 2, **after its retraction** |
+| `unit_comparison.json`, `leakage.json`, `unit_populations.json` | `rerun_unit_and_leakage.py` | claim 2, **after its retraction**, and the three-populations table |
 
 ## Pre-correction — kept as the record of a defect
 

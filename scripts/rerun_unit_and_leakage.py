@@ -76,6 +76,81 @@ def leaked_scorer(cases: list[dict]):
     return FittedScorer().fit(list(states_of(cases)), epochs=250, lr=0.5)
 
 
+def population_table(cases: list[dict], tau: float = 0.82) -> dict:
+    """
+    The three populations claim 2 is about, computed rather than remembered.
+
+    This table — 1,264 calibration states against the 55 the rule commits
+    at — is the mechanism behind claim 2 and the part of it that survived
+    the retraction. Two of its three rows reproduce exactly from the
+    benchmark. The middle one did not: the write-up carried **314 states,
+    57.0% undetermined** and no script or evidence file recorded how that
+    was counted, so it could not be checked or reproduced. Same defect as
+    the 11%, in the same table.
+
+    The definition used here, stated so the number is checkable: a state the
+    rule **visits** is the opening state plus one state per question asked,
+    per case, counted once each. A state it **commits at** is the final
+    state of a case that committed.
+    """
+    from abstain.evaluate import OPENING
+    from abstain.rule import run_case
+    from abstain.scorer import handcrafted_scorer
+
+    allst = list(states_of(cases))
+    out = {
+        "threshold": tau,
+        "definition": ("visited = opening state plus one per question asked, "
+                       "per case; committed = final state of a case that "
+                       "committed"),
+        "calibration_population": {
+            "states": len(allst),
+            "undetermined_share": sum(1 for _, _, d in allst if not d)
+            / len(allst) if allst else 0.0,
+        },
+    }
+
+    visited = committed = v_und = c_und = 0
+    for c in cases:
+        t = run_case(c, handcrafted_scorer, tau)
+        known = set(OPENING)
+        seq = [frozenset(known)]
+        for f in t.asked:
+            known.add(f)
+            seq.append(frozenset(known))
+        for k in seq:
+            st = c["states"]["|".join(sorted(k))]
+            visited += 1
+            v_und += st["label"] != "determinable"
+        if t.committed:
+            st = c["states"]["|".join(sorted(seq[-1]))]
+            committed += 1
+            c_und += st["label"] != "determinable"
+
+    out["states_the_rule_visits"] = {
+        "states": visited,
+        "undetermined_share": v_und / visited if visited else 0.0,
+    }
+    out["states_it_commits_at"] = {
+        "states": committed,
+        "undetermined_share": c_und / committed if committed else 0.0,
+    }
+    return out
+
+
+def band_undetermined(cases: list[dict]) -> dict:
+    """
+    Each band's share of reachable states that are undecidable.
+
+    `docs/preregistration-5.md` carries this table and two of its four
+    cells are slightly off — 75.3% and 31.9% against a measured 75.5% and
+    32.6%. A pre-registration is not edited after the fact, so the figures
+    are recorded here and the document gets a correction note instead.
+    """
+    from abstain.conditional import undetermined_share
+    return undetermined_share(cases)
+
+
 def row(v, *, alpha: float, trials: int, **extra) -> dict:
     d = v.as_dict()
     feasible = sum(t.feasible for t in v.results)
@@ -153,12 +228,36 @@ def main() -> int:
             shutil.copy2(src, dst)
             print(f"  kept the pre-correction run as {dst.name}")
 
+    pop = population_table(cases)
+    print("\n  claim 2's mechanism — the three populations, at tau = 0.82")
+    for key in ("calibration_population", "states_the_rule_visits",
+                "states_it_commits_at"):
+        d = pop[key]
+        print(f"  {key:>26}  {d['states']:>5,} states  "
+              f"{d['undetermined_share']:>6.1%} undetermined")
+
+    fine = json.loads((ROOT / "evidence" / "fine_dev.json").read_text())
+    bands = {"dev": band_undetermined(cases),
+             "fine_dev": band_undetermined(fine)}
+    print("\n  share of reachable states undetermined, per band")
+    for name, d in bands.items():
+        print(f"  {name:>9}  " +
+              "  ".join(f"{b}={v:.1%}" for b, v in d.items()))
+
     units = unit_comparison(cases)
     leaks = leakage(cases)
 
-    for name, rows in (("unit_comparison", units), ("leakage", leaks)):
+    for name, payload in (("unit_comparison", units), ("leakage", leaks),
+                          ("unit_populations",
+                           {"threshold": pop["threshold"],
+                            "definition": pop["definition"],
+                            "populations": {k: pop[k] for k in
+                                            ("calibration_population",
+                                             "states_the_rule_visits",
+                                             "states_it_commits_at")},
+                            "band_undetermined_share": bands})):
         dest = ROOT / "evidence" / f"{name}.json"
-        dest.write_text(json.dumps(rows, indent=1, sort_keys=True))
+        dest.write_text(json.dumps(payload, indent=1, sort_keys=True))
         print(f"\n  wrote {dest.relative_to(ROOT)}")
 
     print(f"\n  {round(time.time() - t0, 1)}s")

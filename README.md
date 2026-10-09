@@ -1044,8 +1044,17 @@ threshold, which is selected by construction. At a threshold of 0.82:
 | | States | Undetermined |
 |---|---:|---:|
 | Calibration population | 1,264 | **80.3%** |
-| States the rule visits | 314 | 57.0% |
+| States the rule visits | 268 | 48.9% |
 | States it **commits at** | 55 | **0.0%** |
+
+The middle row read **314 / 57.0%** until it was recomputed, and no script or
+evidence file recorded how those were counted, so they could not be checked —
+the same defect as the retracted figures above, in the same table. The outer
+two rows reproduce exactly. The recomputed row makes the gradient *steeper*,
+not shallower, and the definition is now recorded with the numbers: a state
+the rule **visits** is the opening state plus one per question asked, per
+case; a state it **commits at** is the final state of a case that committed
+(`evidence/unit_populations.json`).
 
 **This is the same failure `knowing-when-to-doubt` measures when a human
 reviewer routes on model confidence — there the router is a person, here it is

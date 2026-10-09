@@ -1,0 +1,35 @@
+  dev: 79 cases  (the half these experiments used)
+  arms, tolerances and trial counts read off the files being replaced
+
+  claim 2's mechanism — the three populations, at tau = 0.82
+      calibration_population  1,264 states   80.3% undetermined
+      states_the_rule_visits    268 states   48.9% undetermined
+        states_it_commits_at     55 states    0.0% undetermined
+
+  share of reachable states undetermined, per band
+        dev  well-below=75.7%  near-threshold=75.0%  above=61.8%  well-above=18.8%
+   fine_dev  well-below=76.6%  near-threshold=75.5%  above=64.7%  well-above=32.6%
+
+  claim 2 — calibration unit, with the scorer refit per trial
+          unit  alpha  feas  viol|feas  viol pooled     cov
+         state   0.10    80      0.0%        0.0%  94.7%
+         state   0.05    12     75.0%       11.2%  92.0%
+    trajectory   0.10    58      5.2%        3.8%  94.0%
+    trajectory   0.05     0 n/a        0.0%   0.0%
+
+  leakage — a scorer fit on the pool it is scored on
+                         arrangement  alpha  feas  viol|feas  viol pooled     cov
+   fitted on the whole pool (leaked)   0.10   100      4.0%        4.0%  95.2%
+   fitted on the whole pool (leaked)   0.05     0 n/a        0.0%   0.0%
+   fitted on the whole pool (leaked)   0.02     0 n/a        0.0%   0.0%
+            refit on a disjoint fold   0.10    73      5.5%        4.0%  94.1%
+            refit on a disjoint fold   0.05     0 n/a        0.0%   0.0%
+            refit on a disjoint fold   0.02     0 n/a        0.0%   0.0%
+
+  wrote evidence/unit_comparison.json
+
+  wrote evidence/leakage.json
+
+  wrote evidence/unit_populations.json
+
+  289.5s

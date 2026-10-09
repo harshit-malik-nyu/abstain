@@ -331,6 +331,14 @@ bands differ sharply in how often a given knowledge state is undecidable:
 | above | 64.7% |
 | well-above | **31.9%** |
 
+*Corrected after the fact, and the table above is left as written because a
+pre-registration is not edited: two of these four cells are slightly off. The
+measured values on `fine_dev` are **75.5%** for `near-threshold` and **32.6%**
+for `well-above`; the other two are exact. Recorded in
+`evidence/unit_populations.json` and nothing in the round turns on the
+difference — the ordering and the spread, which are what the argument uses,
+are unchanged.*
+
 A score that cannot tell the bands apart gets one threshold calibrated to the
 pooled mixture, which is too permissive for the bands above the average and
 too strict for those below it. That is the same mechanism arriving by a
