@@ -37,13 +37,24 @@ is exactly why they are worth checking: an assumption that holds and is never
 stated is one edit away from an assumption that does not hold and is never
 noticed.
 
-A note on the holdout
----------------------
-Two of these files are holdouts. Reading them here does not break the lock:
-these assertions make no decision about the method and measure no performance
-on it. They check that the data is self-consistent, which was true before the
-method existed. The lock is on using holdout *results* to choose anything, and
-nothing here is chosen.
+A note on the holdout, and a carve-out I did not take
+-----------------------------------------------------
+The first version of this file checked all four benchmarks, holdouts
+included, and `test_preregistration.py` failed it — the guard that whitelists
+which files may read a holdout does not whitelist this one.
+
+The argument for an exception was easy to make and I had already written it
+down: a structural invariant decides nothing about the method and measures no
+performance on it, so reading a holdout to check that its labels are coherent
+spends none of it. That is probably true. It is also exactly the shape of
+reasonable-sounding carve-out that turns a holdout guard into a formality, and
+the whitelist's value comes from a reader being able to see at a glance which
+code ever touched those files.
+
+So the sets below are the development halves only. 751 cases and roughly
+5,500 label pairs are ample for an internal-consistency check, and if a
+holdout half were ever inconsistent it would show when that half was opened —
+by the script that is allowed to open it.
 """
 
 from __future__ import annotations
@@ -59,9 +70,10 @@ ROOT = Path(__file__).resolve().parents[1]
 FIELDS = ("age", "dependents", "employment_income", "state_name")
 FULL = "|".join(sorted(FIELDS))
 
-# dev and holdout are the 79/81-case originals; the `fine_` pair is the
-# eight-times-larger benchmark every current result uses.
-SETS = ("dev.json", "fine_dev.json", "holdout.json", "fine_holdout.json")
+# The development halves only — see the note above on the carve-out this file
+# does not take. `dev` is the 79-case original, `fine_dev` the 672-case
+# benchmark every current result uses.
+SETS = ("dev.json", "fine_dev.json")
 
 
 def load(name: str) -> list[dict]:
