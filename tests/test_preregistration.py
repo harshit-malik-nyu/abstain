@@ -8,12 +8,41 @@ sink the project, so a later softening is visible in a diff.
 
 from __future__ import annotations
 
+import re
 import subprocess
 
 import pytest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+_ONES = ("zero one two three four five six seven eight nine ten eleven "
+         "twelve thirteen fourteen fifteen sixteen seventeen").split()
+
+
+def _spell(n: int) -> str:
+    return _ONES[n] if n < len(_ONES) else str(n)
+
+
+def _auc_result_count() -> int:
+    """
+    How many AUC results the README enumerates.
+
+    The list sits under the sentence that states the count, as numbered
+    markdown items, and ends at the next blank-line-separated paragraph that
+    is not a continuation. Counting the items rather than reading the word
+    is the whole point: the word is what went stale.
+    """
+    lines = (ROOT / "README.md").read_text().splitlines()
+    start = next(i for i, ln in enumerate(lines)
+                 if "independent results here saying AUC cannot see" in ln)
+    n = 0
+    for ln in lines[start:]:
+        if re.match(r"^\d+\. ", ln):
+            n += 1
+        elif n and ln.startswith("A test counts that list"):
+            break
+    return n
 
 
 def prereg() -> str:
@@ -279,24 +308,42 @@ class TestTheSecondaryResultIsReported:
 
     def test_all_the_auc_results_are_reported_together(self):
         """
-        Four independent results now say AUC cannot see what this method
-        does, and they are only persuasive together.
+        The results that say AUC cannot see what this method does are only
+        persuasive together, so the write-up has to carry all of them and a
+        count that matches.
 
-        The excluded scorer winning at a near-identical AUC; a strictly
-        monotone corruption leaving AUC unchanged to the floating-point bit;
-        every income band above 0.93 while one absorbs 4.1x its share of the
-        budget; and -- the one that points backwards rather than merely
-        failing to discriminate -- the scorer with the WORST AUC of three
-        beating both others on pooled safety and on coverage.
+        This assertion has gone stale twice. It said "third" until the
+        fourth arrived; it was then changed to "four" and went stale again
+        when the fifth did -- so a test written to catch a stale count was
+        the thing holding one in place, which is the same shape as the
+        passing test that pinned the refusal-threshold bug.
 
-        Any one is a curiosity. Together they are a claim about the metric,
-        so the write-up has to carry the count. It said "third" until the
-        fourth arrived, which is the kind of number that goes stale silently.
+        So the count is derived now. The README carries a numbered list of
+        the results, this parses it, and every prose mention of the number
+        has to agree with its length. Adding a sixth result means adding a
+        list item; nothing else has to be remembered.
         """
         t = " ".join((ROOT / "README.md").read_text().split())
-        assert "four independent results" in t.lower()
-        assert "0.9976" in t, "the per-band AUC table is the third result"
-        assert "4.1" in t, "the concentration figure is what it is set against"
+        n = _auc_result_count()
+        assert n >= 4, n
+        assert f"{_spell(n)} independent results" in t.lower(), n
+
+        # And NO other count anywhere. The first version of this assertion
+        # checked only that the right word appears somewhere, which passed
+        # while a second sentence carried a stale one -- the same hole as a
+        # substring match. Every mention has to agree.
+        for other in _ONES:
+            if other == _spell(n):
+                continue
+            bad = re.compile(rf"(?<![\w-]){other} independent results", re.I)
+            assert not bad.search(t), (other, n)
+
+        # Each result is pinned to the figure that makes it a result, so the
+        # list cannot be padded to raise the count.
+        assert "0.9976" in t, "the per-band AUC range is one of them"
+        assert "4.1" in t, "the concentration it is set against"
+        assert "0.8888" in t, "the worst-AUC scorer that wins on both axes"
+        assert "0.9604" in t, "the arm whose AUC moved while nothing did"
 
 
 class TestTheCaseAgainstLeadsWithTheRealLimit:

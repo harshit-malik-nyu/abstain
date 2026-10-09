@@ -1225,7 +1225,9 @@ def test_the_worst_auc_scorer_wins_on_both_deployed_axes(readme,
     assert all(worst_auc["mean_coverage"] >= d["mean_coverage"]
                for d in arms.values())
     assert f"{worst_auc['auc']:.4f}" in readme
-    assert "four independent results" in readme.lower()
+    # The count is derived in tests/test_preregistration.py from the README's
+    # own numbered list; asserting the word here is what let it go stale.
+    assert "independent results here saying AUC cannot see" in readme
 
 
 def test_j3_and_j4_are_recorded_as_misses(readme, fitted_cond):

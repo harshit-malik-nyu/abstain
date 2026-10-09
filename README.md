@@ -283,9 +283,9 @@ Look at the first two columns of that table together. **The scorer with the
 worst AUC has the lowest pooled unsafe rate and the highest coverage.** 0.8888
 against 0.9555, and it is better on both axes the method actually optimises.
 
-That is the fourth independent result here that AUC cannot see what this method
-does, and the first where it points in the wrong direction rather than merely
-failing to discriminate. A ranking metric scores a scorer on pairs it will
+That is the fourth of five independent results here that AUC cannot see what
+this method does, and the first where it points in the wrong direction rather
+than merely failing to discriminate. A ranking metric scores a scorer on pairs it will
 never be asked about; a threshold-local rule is judged on one cut.
 
 ### A fifth, and the one that should change how these things are measured
@@ -826,11 +826,30 @@ the two score almost identically on ordering — **AUC 0.9644 against 0.9631.** 
 one-point AUC difference producing twenty-three points of coverage means the
 ordering that matters is entirely local to the threshold.
 
-**That is one of four independent results here saying AUC cannot see what this
-method does.** The second: the `sharpen` corruption leaves AUC identical to the
-floating-point bit. The third: every band above 0.93 while one absorbs 4.1× its
-share of the budget. The fourth is the sharpest — the scorer with the *worst*
-AUC of three turns out to have the best pooled safety *and* the best coverage.
+**That is one of five independent results here saying AUC cannot see what this
+method does.** Any one is a curiosity; together they are a claim about the
+metric, so all five are listed in one place:
+
+1. **A one-point AUC gap producing twenty-three points of coverage** — 0.9644
+   against 0.9631, the table immediately above. The ordering that matters is
+   local to the threshold.
+2. **A corruption that leaves AUC identical to the floating-point bit** —
+   `sharpen` is strictly monotone, so AUC and Kendall's τ are unchanged, and
+   the deployed threshold and coverage are not.
+3. **Per-band AUC of 0.9345 to 0.9976 while one band absorbs 4.1× its share of
+   the budget** — near-perfect ranking *inside* the group the rule fails on.
+4. **The scorer with the worst AUC of three has the best pooled safety and the
+   best coverage** — 0.8888, and it wins on both axes the rule optimises. The
+   first of these that points backwards rather than merely failing to
+   discriminate.
+5. **Three scorers spanning 0.9425 to 0.9604 produce deployed behaviour
+   identical under `==`** — [above](#a-fifth-and-the-one-that-should-change-how-these-things-are-measured).
+   AUC moved in both directions while nothing moved at all, which is worse
+   than pointing backwards: it moved when there was nothing to see.
+
+A test counts that list and requires every mention of the number elsewhere to
+match it, because this count said "third", then "four", and was stale both
+times — including inside the test that was pinning it.
 
 ---
 
@@ -896,11 +915,13 @@ number.** It takes one breakdown by whatever groups your deployment actually
 has. Here the pooled rate was inside budget in 98.5% of trials and some group
 was outside it in 98.2%, and nothing in the headline number hinted at that.
 
-**2. Do not pick the scorer by AUC.** Four independent results here show it
-cannot see what a threshold-local rule does, and one of them has it pointing
-backwards: of three scorers, the one with the **worst** AUC had the lowest
-unsafe rate and the highest coverage. Compare candidates on the deployed metric
-at the deployed tolerance, not on a ranking summary.
+**2. Do not pick the scorer by AUC.** Five independent results here show it
+cannot see what a threshold-local rule does. One has it pointing backwards —
+of three scorers, the one with the **worst** AUC had the lowest unsafe rate and
+the highest coverage — and one has it moving in both directions across three
+scorers whose deployed behaviour is identical in every float. Compare
+candidates on the deployed metric at the deployed tolerance, not on a ranking
+summary.
 
 **3. Look for a feature that is directionally wrong for a group before you
 reach for anything else.** Dropping the one feature that read "far below the
