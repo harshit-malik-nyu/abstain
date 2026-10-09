@@ -529,3 +529,90 @@ disqualifying.
 One run on `fine_dev`, written to `evidence/materiality.json`. Neither holdout
 is touched. The re-labelling is checked against the committed labels at
 $50 — it must reproduce them exactly, or it is re-labelling something else.
+
+---
+
+# Addendum six — the fix the mechanism implies
+
+Written before `award_aware_scorer` exists. The git history shows it.
+
+## Why this round exists
+
+Addendum five established what goes wrong, and it is not a bad feature. The
+scorer estimates whether **eligibility** is settled; determinability here
+requires the **award** to be settled too. Far below the income limit
+eligibility is obvious and the award swings hardest with household size, so
+the scorer is confident, right about its own question, and wrong about the one
+it is scored on. 72% of its commitments in the failing band are award-only.
+
+Every repair measured so far works *around* that. Group-conditional
+calibration gives the failing band its own threshold. Removing the distance
+feature blinds the scorer so it stops being confident anywhere. Neither
+addresses the actual defect, which is a **missing feature**: nothing in the
+score represents how much the award could move.
+
+That is a concrete, agent-computable thing. The award depends strongly on
+household size, and the agent knows whether it has been told the household
+size. It does not need the oracle to know that an unknown dependent count
+makes the award uncertain — only to know that it is unknown.
+
+## What is added
+
+`award_aware_scorer`: the handcrafted scorer plus one term.
+
+The current scorer multiplies by 0.45 when `dependents` is unknown, uniformly.
+That is the right *direction* and the wrong *shape*: near the income boundary
+the unknown count threatens **eligibility**, which `log_distance` already
+handles, while far below it threatens the **award**, which nothing handles.
+So the penalty should be **largest where distance is largest** — exactly
+inverted from how the current score behaves.
+
+Written out, with `d` the normalised distance from the boundary:
+
+    award_risk = d  if dependents unknown else 0
+    score      = handcrafted × (1 − award_risk × k)
+
+with `k = 0.8` fixed here, before any run. No tuning: one value, chosen
+because it makes the penalty nearly total at maximal distance, which is where
+the measurement says the scorer is most wrong.
+
+## Predictions
+
+**M1.** The concentration on `well-below` will fall **below 2.0**, from 4.13.
+This is the mechanism's own prediction and the point of the round.
+
+**M2.** It will do so **without the coverage collapse** that blinding caused.
+Coverage will stay **above 70%** — the no-distance scorer reached 1.72 by
+giving up the feature entirely, and this keeps it.
+
+**M3.** The pooled unsafe rate will be **at or below** the handcrafted
+scorer's 11.1%. Fixing the band that produces most of the failures should
+improve the pooled figure, not merely redistribute it.
+
+**M4.** `well-below` will **stop being the worst band**. If the award term
+works, the band whose failures were 72% award-only should no longer lead.
+
+**M5.** Group-conditional calibration on top will still help, but by **less**
+than it helps the handcrafted scorer — the worst-band improvement should be
+smaller than 45.8% → 13.0%, because there is less left to fix.
+
+## What would falsify the mechanism
+
+**M1 fails.** The fix the diagnosis implies does not work, which means the
+diagnosis is wrong or incomplete even though two independent measurements
+support it. That would go at the top of the README, and the mechanism section
+would be rewritten as describing a correlation rather than a cause.
+
+## What would not falsify it
+
+**M3 or M5 missing.** Both are about magnitude rather than direction.
+
+**M4 missing while M1 holds.** A concentration below 2.0 with `well-below`
+still nominally worst is the fix working and the band ordering being noisy.
+
+## Analysis plan
+
+One run on `fine_dev`, 200 trials, seed 83, α = 0.20 and 0.15, written to
+`evidence/award_aware.json`. Neither holdout is touched. `k = 0.8` is fixed
+in this document and is not adjusted afterwards; if the first run disappoints,
+that is the result.
