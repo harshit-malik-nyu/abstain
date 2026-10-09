@@ -139,9 +139,37 @@ def main() -> int:
           "stay distinct\n")
 
     t0 = time.time()
+
+    # Checkpointed per draw.
+    #
+    # The first attempt at this round was killed at draw 32 of 40 by the
+    # session it was running in, losing half an hour of work that was already
+    # computed. Each draw is a pure function of its seed, so appending them to
+    # a JSONL as they finish costs nothing and makes an interruption cost one
+    # draw instead of all of them. Round four hit the same thing on the
+    # holdout and the response there was a verifier; this is the cheaper half
+    # of the same lesson.
+    ckpt = ROOT / "evidence" / "pool_bootstrap.partial.jsonl"
+    done: dict[int, dict] = {}
+    if ckpt.exists():
+        for line in ckpt.read_text().splitlines():
+            if line.strip():
+                r = json.loads(line)
+                done[r["seed"]] = r
+        print(f"  resuming: {len(done)} draw(s) already in "
+              f"{ckpt.name}\n")
+
     rows = []
     for b in range(DRAWS):
-        row = one_draw(cases, ROOT_SEED + b)
+        seed = ROOT_SEED + b
+        if seed in done:
+            row = done[seed]
+            mark = "  (cached)"
+        else:
+            row = one_draw(cases, seed)
+            with ckpt.open("a") as fh:
+                fh.write(json.dumps(row, sort_keys=True) + "\n")
+            mark = ""
         rows.append(row)
         p, g = row["pooled"], row["by-band"]
         pv = p["group_violation_rate_when_feasible"]
@@ -150,7 +178,7 @@ def main() -> int:
               f"{'n/a' if pv is None else f'{pv:>6.1%}'}  "
               f"by-band {'n/a' if gv is None else f'{gv:>6.1%}'}  "
               f"(feasible {p['feasible_trials']:>3} / "
-              f"{g['feasible_trials']:>3})")
+              f"{g['feasible_trials']:>3}){mark}")
 
     out: dict = {"alpha": ALPHA, "draws": DRAWS, "trials_per_draw": TRIALS,
                  "root_seed": ROOT_SEED,
@@ -225,6 +253,11 @@ def main() -> int:
     dest = ROOT / "evidence" / "pool_bootstrap.json"
     dest.write_text(json.dumps(out, indent=1, sort_keys=True))
     print(f"\n  wrote {dest.relative_to(ROOT)} ({out['elapsed_seconds']}s)")
+
+    # The checkpoint has served its purpose once the real output exists, and
+    # leaving it would invite a later run to resume from a stale half of a
+    # superseded experiment.
+    ckpt.unlink(missing_ok=True)
     return 0
 
 
