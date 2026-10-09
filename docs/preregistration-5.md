@@ -624,24 +624,48 @@ that is the result.
 Written before `signed_scorer` exists. M1 failed first; this is why, and what
 follows from it.
 
-## M1 failed, and the reason was already measured in this repository
+## M1 failed — and the first explanation I published for it was wrong
 
 `award_aware_scorer` multiplied the score down wherever the award was at risk.
 It produced results **identical to the handcrafted scorer in every digit** —
 pooled 11.5%, coverage 75.8%, concentration 4.07, band by band.
 
-Because it is a monotone transform. Measured: **zero order flips in 106,365
-state pairs.** The term was `base × (1 − 0.8·d)` where `base ∝ d`, so it was
-a function of `d` alone — and `d` already ordered those states.
+### The wrong explanation, and how it got here
 
-> A threshold rule reads only the **order**. Make the score smaller where it
-> is wrong and calibration simply picks a smaller threshold. Nothing moves.
+I first wrote that it is a monotone transform, citing **zero order flips in
+106,365 state pairs**, and committed that to this document as a measured fact.
 
-That is not a new result here. The `sharpen` corruption established exactly it
-two rounds earlier — a strictly monotone transform leaves behaviour unchanged
-— and I designed a fix that violated my own finding. **M1 is recorded as
-failed and the scorer is kept**, because a repair that cannot work for a
-reason the repository already proved is worth more visible than deleted.
+**It is false.** The sample was `states_of(cases)[:700]`, which covers only
+the first ~44 cases — and `states_of` iterates in case order, so every one of
+them fell in the `above` band, where the term does not apply at all. A random
+sample of the same size gives **1.41%** flips, and restricted to the states
+the rule can actually occupy, **4.65%**.
+
+The claim is retracted. It is left here struck through rather than deleted,
+because an unbiased-looking sample that happened to cover one stratum is
+exactly the failure mode this repository is about, and I walked into it while
+writing about walking into it.
+
+### The real explanation
+
+Both terms apply **only while `dependents` is unknown**, and the greedy
+question-selector asks for `dependents` **first, in every case that asks
+anything** — 447 of 447.
+
+So the term fires on the opening state and nowhere else. At the opening state
+it works, sharply: at τ = 0.3 the handcrafted scorer commits immediately on
+225 cases and the award-aware one on **zero**. But an agent that does not
+commit immediately simply asks for the household size, the term switches off,
+and it commits on the next state — which all three scorers score identically,
+because `dependents` is now known.
+
+> **In a sequential rule, a caution term conditioned on an unknown is defeated
+> by the agent resolving that unknown.** It bought one extra question and
+> changed nothing about what the agent then concluded.
+
+That is a different lesson from the one I first published, and a sharper one.
+**M1 is recorded as failed and the scorer is kept**, along with both
+explanations, because the retraction is more instructive than the result.
 
 ## What the failure points at
 
@@ -675,8 +699,12 @@ difference is where it applies.
 ## Predictions
 
 **N1.** The ordering will **genuinely change**: more than 1% of state pairs
-will flip relative to the handcrafted scorer. If this fails the term is
-another monotone transform and nothing downstream can differ.
+will flip relative to the handcrafted scorer.
+
+*Scored after the retraction above: N1 **held** — 2.78% of reachable pairs
+flip — and it was the wrong guard. The ordering was never the problem. The
+problem is that the term switches off at the agent's first question, which
+N1 cannot detect.*
 
 **N2.** The concentration on `well-below` will fall **below 2.5**, from 4.07.
 

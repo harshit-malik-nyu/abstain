@@ -317,3 +317,62 @@ def award_aware_scorer(case: dict, known: frozenset[str]) -> float:
     f = features(case, known)
     award_risk = f["log_distance"] if f["income_known"] else 1.0
     return max(0.0, base * (1.0 - award_risk * AWARD_RISK_WEIGHT))
+
+
+def signed_scorer(case: dict, known: frozenset[str]) -> float:
+    """
+    `handcrafted_scorer` with the award penalty applied **only below** the
+    boundary — the version of `award_aware_scorer` that can change anything.
+
+    Why the first attempt did not work, and why this one does not either
+    --------------------------------------------------------------------
+    `award_aware_scorer` scaled the score down wherever the award was at
+    risk, and produced results identical to the handcrafted scorer in every
+    digit. I first attributed that to it being a monotone transform and
+    retracted the claim: the sample behind it covered one stratum. On the
+    states the rule can occupy, **4.65%** of pairs flip.
+
+    The real reason applies to this scorer too. Both terms fire **only while
+    `dependents` is unknown**, and the greedy selector asks for `dependents`
+    first in every case that asks anything — 447 of 447. So the term acts on
+    the opening state and nowhere else. It works there, sharply: at τ = 0.3
+    the handcrafted scorer commits immediately on 225 cases, this one on 129,
+    `award_aware_scorer` on zero. But an agent that does not commit
+    immediately just asks for the household size, the term switches off, and
+    it commits on the next state — scored identically by all three.
+
+    **In a sequential rule, a caution term conditioned on an unknown is
+    defeated by the agent resolving that unknown.** It buys one more question
+    and changes nothing about what the agent concludes.
+
+    What this scorer adds, which is real but insufficient
+    ----------------------------------------------------
+    The handcrafted score uses the **absolute** distance from the boundary,
+    which makes two unlike situations identical:
+
+        $3,000   distance 0.861   settled eligible,   award swings with size
+        $48,000  distance 0.817   settled ineligible, award zero either way
+
+    Only one is award-undetermined. Adding the sign separates them, and it
+    does — 2.78% of reachable pairs reorder, and the opening-state commits
+    split 129 against 225. It is the right feature on the wrong state.
+
+    Kept rather than deleted. A fix that is correct about the world and
+    useless against the rule is the most informative thing in this file.
+    """
+    base = handcrafted_scorer(case, known)
+    if base <= 0.0 or "dependents" in known:
+        return base
+
+    f = features(case, known)
+    if not f["income_known"]:
+        return base
+
+    income = case["household"]["employment_income"]
+    # With the household size unknown the limit is a range; being below its
+    # lower edge is what makes eligibility settled and the award open.
+    below = income < ROUGH_LIMIT_BASE
+
+    if not below:
+        return base
+    return max(0.0, base * (1.0 - f["log_distance"] * AWARD_RISK_WEIGHT))
