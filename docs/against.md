@@ -157,6 +157,65 @@ the same generator, the same four fields and the same oracle. **A replication
 on more cases from the same space is not an independent test**, and the thing
 it rules out is a lucky split rather than a wrong design.
 
+## 9. You swept the partition after you knew the answer
+
+Round Q asks whether the subgroup finding is a property of the method or of
+three income cutoffs. It is the right question and the round has an obvious
+weakness: **I chose which nine partitions to sweep, and I chose them knowing
+what the result was.** A sweep whose members are selected after the fact can
+be made to say almost anything.
+
+Three things limit that, and none of them removes it:
+
+**The cutoffs predate every measurement.** `scripts/split.py` is the first
+commit in this repository and the cutoffs are in it, untouched. They cannot
+have been chosen to produce a result that did not exist yet, and a test
+asserts the file still matches the analysis code that duplicates it.
+
+**The neutral partition is not a choice.** Equal-count quartiles of income
+have a canonical definition — the data's own quartiles, 15,000 / 30,000 /
+45,000 here — and no reference to any outcome. That is the arm the conclusion
+rests on, and it splits 191/162/155/164 against the hand-drawn
+96/192/128/256.
+
+**The partitions that weaken the finding are reported in the same table.** A
+median split shows no hidden subgroup at either tolerance, and the neutral
+quartile split misses it at α = 0.15 by 0.46 points. A selected sweep would
+not have included those.
+
+What remains unanswered: every partition here is a partition **of income**.
+The impossibility result stands and no finite collection covers every
+subgroup.
+
+## 10. You predicted one estimator, missed, then reported another
+
+The fair version of this is sharper than it sounds. Round O predicted that the
+no-distance scorer would break a 10% budget for some band (O1). It did not —
+3.79%. I then reported that **24.5% of individual trials** break the budget at
+α = 0.15, which supports the concern O1 was written to express. Choosing a
+measure after seeing that the pre-registered one failed is textbook post-hoc
+selection and it would be reasonable to discount round O entirely for it.
+
+Two facts cut against that reading, and both are checkable rather than
+asserted:
+
+**The estimator is older than the round by fifty-five commits.**
+`group_violation_rate_when_feasible` enters at commit 15 and is the headline
+metric of the pooled-versus-conditioned comparison by commit 20 — the 98.2%
+in [`theory.md`](theory.md) §4 is that metric. Round O's pre-registration is
+commit 70. It was not built to rescue a failed prediction.
+
+**Not reporting it for that arm was the omission.** Every other arm in the
+repository is compared on it. The no-distance arm was reported on the
+across-trial rate alone, which is how "brings every band inside the budget"
+got written. Round O did not find a new metric; it found an arm that had been
+scored on the wrong one.
+
+What I cannot claim is that I would have reported it had O1 held. The honest
+position is that the pre-registered prediction **missed**, it is recorded as a
+miss, and the figure that came out of looking harder is reported beside it
+with this objection attached.
+
 ---
 
 ## What survives

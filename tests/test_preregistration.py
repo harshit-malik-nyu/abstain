@@ -544,3 +544,79 @@ class TestEveryRoundWasPreRegisteredBeforeItsCode:
         docs = {p.name for p in (ROOT / "docs").glob("preregistration*.md")}
         checked = {Path(p).name for p, _ in self.PAIRS}
         assert docs == checked, docs ^ checked
+
+
+class TestTheCaseAgainstAnswersObjectionsToItself:
+    """
+    The two objections that are about this repository's own method of
+    arguing, rather than about the rule.
+    """
+
+    def _against(self) -> str:
+        return " ".join((ROOT / "docs" / "against.md").read_text().split())
+
+    def test_the_post_hoc_estimator_objection_is_raised(self):
+        """
+        Round O predicted one measure, missed, and reported another that
+        supported the same concern. That is post-hoc selection and the
+        case-against has to say so in its own voice rather than leave it to
+        a reader to notice.
+        """
+        t = self._against()
+        assert "post-hoc selection" in t
+        assert "24.5%" in t
+        assert "I cannot claim that I would have reported it had O1 held" \
+            in t or "cannot claim" in t
+
+    def test_the_estimator_really_does_predate_the_round(self):
+        """
+        Objection 10's defence is a claim about git history, so it is
+        checked against git rather than trusted.
+
+        `group_violation_rate_when_feasible` has to be older than round O's
+        pre-registration. If a future rearrangement makes that false, the
+        defence is worthless and this fails rather than the prose quietly
+        becoming wrong.
+        """
+        def first_commit_adding(pattern: str, path: str) -> str | None:
+            out = subprocess.run(
+                ["git", "log", "--format=%H", "-S", pattern, "--reverse",
+                 "--", path],
+                cwd=ROOT, capture_output=True, text=True)
+            if out.returncode != 0:
+                pytest.skip("git history unavailable")
+            lines = [ln for ln in out.stdout.split() if ln]
+            return lines[0] if lines else None
+
+        metric = first_commit_adding("group_violation_rate_when_feasible",
+                                     "src/abstain/group.py")
+        prereg = first_commit_adding("Addendum eight",
+                                     "docs/preregistration-5.md")
+        if metric is None or prereg is None:
+            pytest.skip("one of the two changes is not in this history")
+
+        def depth(sha: str) -> int:
+            out = subprocess.run(["git", "rev-list", "--count", sha],
+                                 cwd=ROOT, capture_output=True, text=True)
+            return int(out.stdout.strip())
+
+        m, p = depth(metric), depth(prereg)
+        assert m < p, (
+            f"the per-trial estimator must predate round O's "
+            f"pre-registration; got metric at #{m}, pre-registration at #{p}")
+
+        t = self._against()
+        assert f"commit {m}" in t, (
+            f"the case-against quotes the commit number; measured #{m}")
+
+    def test_the_partition_sweep_objection_names_its_own_weakness(self):
+        """
+        Objection 9 has to concede the thing that is actually conceded — the
+        partitions were chosen after the result was known — rather than only
+        listing the defences.
+        """
+        t = self._against()
+        assert "I chose them knowing" in t or "knowing what the result was" \
+            in t
+        assert "partition of income" in t.lower() or \
+            "partition **of income**" in t
