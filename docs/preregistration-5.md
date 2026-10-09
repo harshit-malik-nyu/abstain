@@ -450,3 +450,82 @@ justification for the whole method rests on one small pool.
 
 One run on `fine_dev`, written to `evidence/plugin_scale.json`. Neither
 holdout is touched.
+
+---
+
+# Addendum five — how much rides on a free parameter in the ground truth?
+
+Written before any code re-labels the benchmark. The git history shows it.
+
+## The parameter nobody has questioned
+
+`build_cases.assess` calls a knowledge state **undetermined** when sweeping
+the unknown fields either flips the eligibility verdict **or** moves the
+benefit amount by more than `material = 50.0` dollars.
+
+That $50 is a choice. It was made once, in the first commit, for a reasonable
+reason — an award difference smaller than it is not worth another question —
+and it has been the definition of ground truth for every number in this
+repository since. **Nothing has ever tested how much the headline depends on
+it.**
+
+A reviewer's version of the question: *your ground truth has a free parameter;
+is the 49% subgroup failure a property of the world or of the fifty?*
+
+It can be answered with no oracle calls at all. Every state records its
+`spread`, and whether the verdict flipped is reconstructible from the complete
+enumeration — every household the sweep produces is itself in the benchmark.
+So the benchmark can be re-labelled at any materiality and re-run.
+
+## The design
+
+| | |
+|---|---|
+| **Set** | `evidence/fine_dev.json`, 672 cases, re-labelled per threshold |
+| **Materiality** | $0, $25, **$50**, $100, $200, $500, and flip-only (∞) |
+| **α** | 0.20 |
+| **Trials** | 200 |
+| **Seed** | 71 |
+
+`flip-only` is the limit where the amount is ignored entirely and
+determinability means the verdict is settled. It is the cleanest test, because
+the scorer's diagnosed blindness — far below the income limit, where
+eligibility still flips 69% of the time — is about the *flip* criterion, not
+the spread one.
+
+## Predictions
+
+**L1.** The concentration on `well-below` will **persist across the whole
+non-degenerate range**: above 2× at every materiality from $25 to flip-only.
+
+**L2.** `well-below` will remain the **worst band** at every setting.
+
+**L3.** At **flip-only** the concentration will be **at least as large** as at
+$50. The mechanism is about eligibility flipping, so removing the spread
+criterion should sharpen it rather than dissolve it.
+
+**L4.** At **$0** the benchmark will degenerate — nearly every state
+undetermined, coverage near zero — and that endpoint will be reported as
+degenerate rather than as a data point.
+
+## What would falsify the headline
+
+**L1 fails.** If the concentration disappears at some plausible materiality,
+then the 49% is a property of the fifty rather than of the problem, and the
+README's central result has to be restated as conditional on a parameter
+chosen before any of this was known. That would be a serious weakening and it
+would go at the top.
+
+## What would not falsify it
+
+**L3 failing** — the concentration shrinking but surviving at flip-only. That
+would mean the spread criterion contributes, which is interesting and not
+disqualifying.
+
+**L4** in any direction. It is a sanity endpoint.
+
+## Analysis plan
+
+One run on `fine_dev`, written to `evidence/materiality.json`. Neither holdout
+is touched. The re-labelling is checked against the committed labels at
+$50 — it must reproduce them exactly, or it is re-labelling something else.
