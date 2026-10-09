@@ -106,6 +106,15 @@ class Breakdown:
     alpha: float
     tallies: dict[str, StratumTally] = field(default_factory=dict)
     trials: int = 0
+    order: tuple[str, ...] | None = None
+    """
+    Output order for the bands, when the partition is not the default one.
+
+    `None` means `BANDS`. Set it alongside a non-default `partition` passed to
+    `collector`, so the rows come out in the grouping's own order rather than
+    dictionary-insertion order, which depends on which band the first trial
+    happened to deploy.
+    """
     per_case: dict = field(default_factory=dict)
     """
     Per CASE, not per case-trial. The unit the uncertainty lives at.
@@ -188,12 +197,31 @@ class Breakdown:
             "worst_band": self.worst_band,
             "hides_a_subgroup": self.hides_a_subgroup,
             "concentration": self.concentration,
-            "bands": [self.tallies[b].as_dict() for b in BANDS
+            "bands": [self.tallies[b].as_dict() for b in self.band_order()
                       if b in self.tallies],
         }
 
+    def band_order(self) -> tuple[str, ...]:
+        """
+        The order bands appear in output: income-ascending, not alphabetical.
 
-def collector(breakdown: Breakdown):
+        `BANDS` when the default partition is in use, which is every result in
+        the repository. `order` overrides it for a breakdown computed over
+        some other grouping — round Q sweeps the partition, and a quartile
+        called `q0` is not in `BANDS`, so without this its row would be
+        silently dropped from `as_dict` and the evidence file would carry an
+        empty `bands` list beside a populated `concentration` dict.
+
+        Anything tallied but unlisted is appended rather than discarded, so a
+        partition that returns an unexpected label shows up in the output
+        instead of vanishing from it.
+        """
+        listed = tuple(self.order) if self.order else BANDS
+        extra = tuple(b for b in self.tallies if b not in listed)
+        return listed + extra
+
+
+def collector(breakdown: Breakdown, partition=None):
     """
     An `on_trial` callback that accumulates the per-stratum tally.
 
@@ -202,7 +230,23 @@ def collector(breakdown: Breakdown):
     not from a second run that could differ. The outcome labels are
     `evaluate`'s own, which keeps the definition of "unsafe" in exactly one
     place.
+
+    `partition` groups the same trajectories differently
+    -----------------------------------------------------
+    Defaults to `hardness`, which is what every published result uses. Round Q
+    asks whether the subgroup finding is a property of the method or of three
+    income cutoffs written by hand in `scripts/split.py` before any of this
+    was measured, and that question needs the *same* trajectories re-tallied
+    under a different grouping — not a second run, which would differ for
+    reasons having nothing to do with the partition.
+
+    Any callable `case -> str` works. It must depend only on fields the agent
+    knows when it decides, for the reason
+    `tests/test_benchmark_invariants.py` spells out: a group the rule cannot
+    observe is not a group it can be calibrated within.
     """
+    group = partition or hardness
+
     def on_trial(cal, result, dep_cases):
         breakdown.trials += 1
         by_id = {c.get("id"): c for c in dep_cases}
@@ -212,7 +256,7 @@ def collector(breakdown: Breakdown):
             if case is None:
                 continue
             outcome = row["outcome"]
-            band = hardness(case)
+            band = group(case)
             t = breakdown.tally(band)
             t.deployed += 1
 
@@ -234,19 +278,27 @@ def collector(breakdown: Breakdown):
     return on_trial
 
 
-def population_shares(cases: list[dict]) -> dict[str, float]:
+def population_shares(cases: list[dict], partition=None) -> dict[str, float]:
     """
     Each band's share of the case pool.
 
     Context for `concentration`: a band holding 40% of the cases and 40% of
     the unsafe commitments is not a finding, and the ratio already says so,
     but the reader wants the denominator in front of them.
+
+    `partition` has the same meaning as in `collector`, and the keys follow it
+    rather than `BANDS` — otherwise a swept partition would report shares for
+    four bands that no longer exist.
     """
+    if not cases:
+        return {}
+    group = partition or hardness
     counts: dict[str, int] = {}
     for c in cases:
-        b = hardness(c)
+        b = group(c)
         counts[b] = counts.get(b, 0) + 1
-    return {b: counts.get(b, 0) / len(cases) for b in BANDS} if cases else {}
+    keys = BANDS if partition is None else tuple(counts)
+    return {b: counts.get(b, 0) / len(cases) for b in keys}
 
 
 def undetermined_share(cases: list[dict]) -> dict[str, float]:

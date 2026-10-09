@@ -2,3 +2,10 @@
   alphas (0.2, 0.15, 0.1); the scorer is refit per trial on a disjoint third
 
   fitted-no-distance: AUC 0.8888 (fit and scored on disjoint folds)
+
+  fitted-no-distance, alpha = 0.20   pooled 7.25%   coverage 92.75%   worst band well-below at 12.48%   hides a subgroup: False
+              band   unsafe      cov    conc
+        well-below  12.48%  87.52%    1.72
+    near-threshold   5.18%  94.82%    0.71
+             above   8.37%  91.63%    1.15
+        well-above   6.28%  93.72%    0.87
