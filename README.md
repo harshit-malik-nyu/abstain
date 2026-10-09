@@ -1382,22 +1382,42 @@ benchmark, and the committed benchmark means you do not have to.
 
 ```bash
 pip install -e ".[dev]"
-pytest -q                               # ~170 tests, including every claim
-                                        # in this README checked against the
-                                        # evidence file that produced it
+pytest -q                               # every figure in this README,
+                                        # checked against the evidence
+                                        # file that produced it
 
-python scripts/run_secondary.py         # rounds 2-3: plug-in baseline,
-                                        # corruptions, conditional coverage
+# Rounds two to five
+python scripts/run_secondary.py         # plug-in baseline, corruptions,
+                                        # conditional coverage
 python scripts/rerun_corruption.py      # round 2 after the sentinel fix
 python scripts/run_round4.py --set dev  # replication + schemes, dev
 python scripts/run_round5.py            # per-band detail + the shift sweep
+python scripts/open_holdout.py          # the original holdout, opened once
+
+# Addenda: what is the subgroup failure, and what fixes it
 python scripts/run_recalibration.py     # does recalibrating alone fix it?
 python scripts/run_allocation.py        # questions per band, per scheme
 python scripts/check_confounds.py       # is it the stopping or asking rule?
 python scripts/diagnose_mechanism.py    # why the levels are shifted
-python scripts/run_plugin_scale.py      # does the baseline fail at scale?
+python scripts/run_fitted_conditional.py  # learned + no-distance scorers
+python scripts/run_no_distance_groups.py  # round O: the arm round J skipped
+python scripts/run_partition_sweep.py   # round Q: is it the partition?
 python scripts/run_materiality.py       # how much rides on the $50 parameter?
+
+# Repairs that did not work, and the result that came out of them
+python scripts/run_award_aware.py       # round M: add the missing feature
+python scripts/run_signed.py            # round N: add its sign too
+python scripts/measure_opening_state.py # why both are no-ops in deployment
+
+# Uncertainty, and the claims that needed correcting
 python scripts/run_uncertainty.py       # cluster bootstrap over cases
+python scripts/run_pool_bootstrap.py    # round R: pool-level, the headline
+python scripts/run_plugin_scale.py      # does the baseline fail at scale?
+python scripts/rerun_unit_and_leakage.py  # claim 2, after its retraction
+
+# Verifiers: a relaunched run must be the same run
+python scripts/verify_resumed_run.py       # round four's holdout
+python scripts/verify_bootstrap_resume.py  # round R's 40 draws
 python scripts/make_figure.py           # regenerate docs/shift.svg
 
 # Rebuilding the benchmark needs the pinned oracle, and takes ~12 minutes.
@@ -1414,6 +1434,54 @@ rerun is the same run.
 
 `scripts/run_round4.py --set holdout` is deliberately not in that list. It
 opens the fine holdout, which has been opened once.
+
+### What the discipline actually caught, which is the argument for it
+
+A repository that argues for pre-registration and figure-coupling should
+report the yield rather than assert the principle. Over a hundred of the tests
+above check prose against evidence, which is a lot of machinery to defend on
+first principles. So: everything those guards found that reading did not.
+
+**Pre-registration caught the claims.** Twenty-six predictions missed, and the
+three that cost the most were all cases where the method looked better than it
+was until its own test said otherwise — J1 refuting the central claim, E6
+finding that group conditioning *gains* coverage where a cost was predicted,
+and K1/K2 showing the plug-in never holds δ at any calibration size tested.
+Without the prediction written down first, each of those is a result that
+quietly becomes a confirmation.
+
+**Figure-coupling caught the numbers.** Four published figures were wrong and
+none was found by reading:
+
+| what | how it was found |
+|---|---|
+| `314 states / 57.0%` in claim 2's table | every published percentage checked against every evidence number; this one matched nothing |
+| `9.9%` for a Clopper–Pearson floor of 9.81% | the same audit, then a test requiring each cell to equal the library call |
+| two cells of a band table, off by tenths | the same audit |
+| `11%` and `0%`, claim 2's headline pair | an audit of which evidence files had a producing script and a reading test; these had neither |
+
+**Metric-level guards caught the worst of it.** The last row above is the one
+that matters: the `0%` was zero violations over **zero certified trials** — the
+vacuous zero this repository documents as its own third bug — in evidence
+committed seven commits *before* that fix, inside a numbered claim, surviving
+sixteen rounds because nothing in the pipeline read the file. The same pattern
+turned up a second time in `theory.md` §3, and a third time latent in the
+holdout's α = 0.05 row, where the README's convention had always been right
+and nothing enforced it.
+
+**And derived counts caught the bookkeeping.** Five counts in this README were
+typed once beside a growing record and went stale: the predictions that missed
+("five" when there were ten), the bugs ("three" in a section heading while the
+opening said four), the AUC results ("four" — asserted by a test whose own
+docstring warned the number goes stale), the theory claims ("three" above four
+bullets), and the advice items ("seven" above nine). All five are derived now.
+One of the tests pinning a stale count **was the reason it stayed stale**,
+which is the same shape as the passing test that held the refusal-threshold
+bug in place.
+
+The honest summary: **scrutiny found four bugs and four wrong figures, and
+review found none of them.** That is the case for the machinery, and it is
+measured rather than argued.
 
 ## Status
 

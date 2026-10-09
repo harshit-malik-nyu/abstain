@@ -189,3 +189,72 @@ def test_the_retracted_entries_are_marked_as_retracted_in_the_documents():
         assert figure in corpus, (figure, "allow-listed but not published")
     for word in ("retracted", "superseded"):
         assert word in corpus.lower(), word
+
+
+# ---------------------------------------------------------------------------
+# The reproducing section, and the yield it reports
+# ---------------------------------------------------------------------------
+
+def test_every_script_is_listed_in_the_reproducing_section():
+    """
+    A script nobody can find is a result nobody can reproduce.
+
+    Eleven of twenty-five scripts were missing from this list, all added in
+    later rounds — the same drift as a hand-typed count, and the same fix:
+    derive it.
+    """
+    text = (ROOT / "README.md").read_text()
+    listed = set(re.findall(r"python (scripts/[\w.]+\.py)", text))
+    have = {f"scripts/{p.name}" for p in (ROOT / "scripts").glob("*.py")}
+
+    # run_round4.py --set holdout is deliberately absent; its dev form is
+    # listed and the README says why.
+    missing = sorted(have - listed)
+    assert not missing, ("scripts not listed in the reproducing section",
+                         missing)
+    assert not sorted(listed - have), sorted(listed - have)
+
+
+def test_the_readme_does_not_state_a_test_count():
+    """
+    Not every count should be derived; some should not be stated.
+
+    This started as a derived count — the README said "~170 tests" at 389,
+    the sixth stale count found in it. The fix looked identical to the other
+    five: assert the stated number equals the collected number. It failed
+    immediately, because adding that test changed the suite size it
+    asserts.
+
+    That is the distinction worth recording. The other derived counts
+    measure things that change only when an experiment runs — predictions,
+    bugs, AUC results, claims, advice items. A test suite's size changes
+    whenever a test is added, including by the test doing the counting, so
+    deriving it is circular and stating it is churn. A suite's size is not
+    a result, so the README names what the suite checks and not how many
+    checks there are.
+    """
+    text = (ROOT / "README.md").read_text()
+    stated = re.search(r"pytest -q\s+#\s*(?:~)?(\d[\d,]*) tests", text)
+    assert stated is None, (
+        "the README states a test count; it will go stale on the next test "
+        f"added, and a test asserting it changes what it counts: "
+        f"{stated.group(0)!r}")
+    assert "checked against the evidence" in " ".join(text.split()), \
+        "say what the suite checks instead"
+
+
+def test_the_yield_section_reports_what_the_guards_found():
+    """
+    A repository arguing for this machinery has to report what it caught,
+    or the argument is unfalsifiable.
+
+    Pinned on the specifics rather than the claim, so the section cannot
+    decay into a general endorsement of its own method.
+    """
+    text = " ".join((ROOT / "README.md").read_text().split())
+    for figure in ("314 states / 57.0%", "9.9%", "11%"):
+        assert figure in text, figure
+    for word in ("vacuous zero", "seven commits", "sixteen rounds"):
+        assert word in text, word
+    assert "review found none of them" in text, \
+        "the comparison is the point: scrutiny found them, reading did not"
