@@ -1,6 +1,6 @@
 # Every prediction, and what happened
 
-Seventy-three predictions across nine pre-registrations, each written before the
+Seventy-eight predictions across ten pre-registrations, each written before the
 code that tested it. This table is the whole record: no prediction is omitted,
 and the outcome column is the one that was true at the time, not the one that
 would read best.
@@ -89,6 +89,11 @@ there were ten — so the number is derived from here rather than written twice.
 | **O3** | conditioning still fixes what is left at α = 0.10 | **feasible in 0 of 200 trials** | **missed** |
 | **O4** | conditioning costs feasibility at α = 0.10 | 0 of 200 | held |
 | **O5** | `well-below` stays worst at every tolerance | all three | held |
+| **R1** | the pooled arm's pool-level interval stays above 90% | [94.0%, 100.0%] | held |
+| **R2** | the by-band arm's stays below 20% | [1.0%, 11.1%] | held |
+| **R3** | the two do not overlap | 11.1% against 94.0% | held |
+| **R4** | resampling cases widens the interval | **1.11× both arms** | held |
+| **R5** | by-band feasibility varies across resampled pools | 66 to 100 of 100 | held |
 
 ---
 
@@ -133,6 +138,41 @@ rule commits on the **high-scoring** ones, and there it is **72%**. I walked
 into the same selection effect that `calibrate_on_trajectories` exists to
 handle. The corrected mechanism is in the README and the original reasoning is
 kept, annotated, in `scripts/diagnose_mechanism.py`.
+
+**Round R is the only clean round in this ledger, and the thing worth taking
+from it is a comparison rather than the five passes.**
+
+It put a case-level bootstrap under the figure this repository quotes most —
+the per-trial rate at which some income band exceeds α. Forty resampled pools,
+100 trials each:
+
+| | point | pool-level 95% | exact, fixed pool | widening |
+|---|---:|---|---|---:|
+| one global threshold | 98.2% | [94.0%, 100.0%] | [94.6%, 100.0%] | **1.11×** |
+| one per band | 5.1% | [1.0%, 11.1%] | [1.1%, 10.2%] | **1.11×** |
+
+**Resampling the 672 cases widens these intervals by eleven percent.** The
+same operation on the across-trial *band* rates widened them **sixteenfold** —
+±0.6 points to ±9.5 — which is why `bootstrap_band_rate` exists. The contrast
+is the result:
+
+> A per-trial rate averages over the **whole pool** in every trial. A per-band
+> rate is driven by the **96 cases in one band**. Resampling 672 cases barely
+> moves the first and dominates the second.
+
+So the caveat round O attached to the exact intervals is real and small, and
+quoting them is justified — for *these* figures. The same reasoning says
+nothing about any per-band number, where the narrow interval remains
+indefensible. **It is not that one estimator is right; it is that the unit of
+aggregation has to be matched to the quantity, and the fourth time this has
+come up here is the first time it came out in the method's favour.**
+
+Two smaller things. R1 was live: the lowest of the 40 draws was 90.0%, exactly
+on the predicted boundary, and the 2.5th percentile came in at 94.0%. And R5
+is the design working — by-band feasibility ranged from 66 to 100 trials
+across resampled pools, because group conditioning binds on the smallest
+group and a resampled pool can be short there. A constant feasible count
+would have meant the bootstrap was not reaching what limits the method.
 
 **Round O attacked the result that had refuted this repository's central
 claim, lost three of five predictions, and found an error in the claim it was

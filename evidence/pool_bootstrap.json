@@ -1,0 +1,693 @@
+{
+ "alpha": 0.2,
+ "calibration_share": 0.3,
+ "draws": 40,
+ "elapsed_seconds": 2387.3,
+ "level": 0.95,
+ "predictions": {
+  "R1": {
+   "claim": "pooled interval entirely above 90%",
+   "held": true,
+   "interval": [
+    0.94,
+    1.0
+   ]
+  },
+  "R2": {
+   "claim": "by-band interval entirely below 20%",
+   "held": true,
+   "interval": [
+    0.01,
+    0.1111111111111111
+   ]
+  },
+  "R3": {
+   "claim": "the two intervals do not overlap",
+   "held": true
+  },
+  "R4": {
+   "claim": "the pool interval is wider than the exact one for at least one arm",
+   "held": true,
+   "widths": {
+    "by-band": [
+     0.10111111111111111,
+     0.09087919372957624
+    ],
+    "pooled": [
+     0.06000000000000005,
+     0.05420623935910318
+    ]
+   }
+  },
+  "R5": {
+   "claim": "by-band feasibility varies across draws",
+   "held": true,
+   "range": [
+    66,
+    100
+   ]
+  }
+ },
+ "root_seed": 101,
+ "rows": [
+  {
+   "by-band": {
+    "feasible_trials": 98,
+    "group_violation_rate_when_feasible": 0.04081632653061224,
+    "mean_coverage": 0.7971315914900993,
+    "mean_worst_group_rate": 0.12263517067333267
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7540764331210192,
+    "mean_worst_group_rate": 0.4836577331455161
+   },
+   "seed": 101
+  },
+  {
+   "by-band": {
+    "feasible_trials": 91,
+    "group_violation_rate_when_feasible": 0.03296703296703297,
+    "mean_coverage": 0.8125568698817106,
+    "mean_worst_group_rate": 0.11724251128417311
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7656687898089173,
+    "mean_worst_group_rate": 0.4428372054191584
+   },
+   "seed": 102
+  },
+  {
+   "by-band": {
+    "feasible_trials": 91,
+    "group_violation_rate_when_feasible": 0.10989010989010989,
+    "mean_coverage": 0.8237325307389001,
+    "mean_worst_group_rate": 0.13141575809584138
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7742675159235669,
+    "mean_worst_group_rate": 0.4495759530224979
+   },
+   "seed": 103
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.04,
+    "mean_coverage": 0.8615711252653928,
+    "mean_worst_group_rate": 0.12283142874906006
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7710403397027601,
+    "mean_worst_group_rate": 0.4853838139577632
+   },
+   "seed": 104
+  },
+  {
+   "by-band": {
+    "feasible_trials": 92,
+    "group_violation_rate_when_feasible": 0.021739130434782608,
+    "mean_coverage": 0.8049016892827471,
+    "mean_worst_group_rate": 0.11949804451640234
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.98,
+    "mean_coverage": 0.7571762208067939,
+    "mean_worst_group_rate": 0.44231026642289456
+   },
+   "seed": 105
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.07,
+    "mean_coverage": 0.8319320594479827,
+    "mean_worst_group_rate": 0.12964351644231525
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.98,
+    "mean_coverage": 0.7692569002123143,
+    "mean_worst_group_rate": 0.4952983320248404
+   },
+   "seed": 106
+  },
+  {
+   "by-band": {
+    "feasible_trials": 98,
+    "group_violation_rate_when_feasible": 0.05102040816326531,
+    "mean_coverage": 0.8175614194722474,
+    "mean_worst_group_rate": 0.13011770684326227
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.98,
+    "mean_coverage": 0.7583227176220807,
+    "mean_worst_group_rate": 0.49609211228579725
+   },
+   "seed": 107
+  },
+  {
+   "by-band": {
+    "feasible_trials": 97,
+    "group_violation_rate_when_feasible": 0.020618556701030927,
+    "mean_coverage": 0.8256615667476526,
+    "mean_worst_group_rate": 0.1281789069148256
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.96,
+    "mean_coverage": 0.7702760084925688,
+    "mean_worst_group_rate": 0.47114762717879377
+   },
+   "seed": 108
+  },
+  {
+   "by-band": {
+    "feasible_trials": 66,
+    "group_violation_rate_when_feasible": 0.10606060606060606,
+    "mean_coverage": 0.7806408029337967,
+    "mean_worst_group_rate": 0.12555580160761637
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.95,
+    "mean_coverage": 0.7422292993630574,
+    "mean_worst_group_rate": 0.355861624942356
+   },
+   "seed": 109
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.07,
+    "mean_coverage": 0.8369426751592357,
+    "mean_worst_group_rate": 0.12590805267392105
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.99,
+    "mean_coverage": 0.7904246284501066,
+    "mean_worst_group_rate": 0.5545530945468037
+   },
+   "seed": 110
+  },
+  {
+   "by-band": {
+    "feasible_trials": 98,
+    "group_violation_rate_when_feasible": 0.030612244897959183,
+    "mean_coverage": 0.8214177390701505,
+    "mean_worst_group_rate": 0.12813092660320016
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.97,
+    "mean_coverage": 0.748174097664543,
+    "mean_worst_group_rate": 0.43292534805762756
+   },
+   "seed": 111
+  },
+  {
+   "by-band": {
+    "feasible_trials": 93,
+    "group_violation_rate_when_feasible": 0.021505376344086023,
+    "mean_coverage": 0.8119763486519187,
+    "mean_worst_group_rate": 0.12221937118735614
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.94,
+    "mean_coverage": 0.7523566878980891,
+    "mean_worst_group_rate": 0.3957686742481753
+   },
+   "seed": 112
+  },
+  {
+   "by-band": {
+    "feasible_trials": 93,
+    "group_violation_rate_when_feasible": 0.043010752688172046,
+    "mean_coverage": 0.7951281875670619,
+    "mean_worst_group_rate": 0.12699398732630038
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.96,
+    "mean_coverage": 0.7530360934182587,
+    "mean_worst_group_rate": 0.4076973306619784
+   },
+   "seed": 113
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.07,
+    "mean_coverage": 0.8169426751592358,
+    "mean_worst_group_rate": 0.13688553921226668
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.99,
+    "mean_coverage": 0.7619108280254778,
+    "mean_worst_group_rate": 0.5128320199057094
+   },
+   "seed": 114
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.02,
+    "mean_coverage": 0.8376433121019111,
+    "mean_worst_group_rate": 0.125396320349581
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7651380042462841,
+    "mean_worst_group_rate": 0.45056799033916406
+   },
+   "seed": 115
+  },
+  {
+   "by-band": {
+    "feasible_trials": 99,
+    "group_violation_rate_when_feasible": 0.08080808080808081,
+    "mean_coverage": 0.8010251131270238,
+    "mean_worst_group_rate": 0.12521871812825128
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7571549893842886,
+    "mean_worst_group_rate": 0.4800967800625745
+   },
+   "seed": 116
+  },
+  {
+   "by-band": {
+    "feasible_trials": 99,
+    "group_violation_rate_when_feasible": 0.050505050505050504,
+    "mean_coverage": 0.8238864226125373,
+    "mean_worst_group_rate": 0.12995738203688612
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.99,
+    "mean_coverage": 0.7447346072186835,
+    "mean_worst_group_rate": 0.49260575965259384
+   },
+   "seed": 117
+  },
+  {
+   "by-band": {
+    "feasible_trials": 97,
+    "group_violation_rate_when_feasible": 0.061855670103092786,
+    "mean_coverage": 0.806881607459452,
+    "mean_worst_group_rate": 0.1313234802760413
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7390870488322716,
+    "mean_worst_group_rate": 0.5230603160572302
+   },
+   "seed": 118
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.06,
+    "mean_coverage": 0.8112526539278134,
+    "mean_worst_group_rate": 0.12822259561231836
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7468577494692146,
+    "mean_worst_group_rate": 0.47892682859064045
+   },
+   "seed": 119
+  },
+  {
+   "by-band": {
+    "feasible_trials": 99,
+    "group_violation_rate_when_feasible": 0.050505050505050504,
+    "mean_coverage": 0.8007248707885649,
+    "mean_worst_group_rate": 0.1292229439613517
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7623142250530784,
+    "mean_worst_group_rate": 0.488180580872606
+   },
+   "seed": 120
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.06,
+    "mean_coverage": 0.8067940552016986,
+    "mean_worst_group_rate": 0.12836705123256487
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.96,
+    "mean_coverage": 0.7695329087048834,
+    "mean_worst_group_rate": 0.47838117301622207
+   },
+   "seed": 121
+  },
+  {
+   "by-band": {
+    "feasible_trials": 95,
+    "group_violation_rate_when_feasible": 0.010526315789473684,
+    "mean_coverage": 0.7796848809922895,
+    "mean_worst_group_rate": 0.12352262888109682
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.95,
+    "mean_coverage": 0.7313800424628449,
+    "mean_worst_group_rate": 0.4508668829102272
+   },
+   "seed": 122
+  },
+  {
+   "by-band": {
+    "feasible_trials": 97,
+    "group_violation_rate_when_feasible": 0.020618556701030927,
+    "mean_coverage": 0.8221157003086214,
+    "mean_worst_group_rate": 0.12323594429905357
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.99,
+    "mean_coverage": 0.7652441613588111,
+    "mean_worst_group_rate": 0.526101489088943
+   },
+   "seed": 123
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.02,
+    "mean_coverage": 0.7497876857749468,
+    "mean_worst_group_rate": 0.12325481061804373
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.9,
+    "mean_coverage": 0.7454989384288747,
+    "mean_worst_group_rate": 0.2785302036577012
+   },
+   "seed": 124
+  },
+  {
+   "by-band": {
+    "feasible_trials": 98,
+    "group_violation_rate_when_feasible": 0.01020408163265306,
+    "mean_coverage": 0.8522682958533735,
+    "mean_worst_group_rate": 0.12296652392703614
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7698726114649683,
+    "mean_worst_group_rate": 0.5106347296202212
+   },
+   "seed": 125
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.06,
+    "mean_coverage": 0.8339278131634821,
+    "mean_worst_group_rate": 0.12574434999755688
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7750106157112531,
+    "mean_worst_group_rate": 0.4993003834524055
+   },
+   "seed": 126
+  },
+  {
+   "by-band": {
+    "feasible_trials": 99,
+    "group_violation_rate_when_feasible": 0.0,
+    "mean_coverage": 0.8190825451971949,
+    "mean_worst_group_rate": 0.1274405933107361
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.94,
+    "mean_coverage": 0.7685774946921442,
+    "mean_worst_group_rate": 0.4047411288689469
+   },
+   "seed": 127
+  },
+  {
+   "by-band": {
+    "feasible_trials": 86,
+    "group_violation_rate_when_feasible": 0.09302325581395349,
+    "mean_coverage": 0.7840813706611366,
+    "mean_worst_group_rate": 0.1324379945573715
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.99,
+    "mean_coverage": 0.738747346072187,
+    "mean_worst_group_rate": 0.4903108759944451
+   },
+   "seed": 128
+  },
+  {
+   "by-band": {
+    "feasible_trials": 98,
+    "group_violation_rate_when_feasible": 0.07142857142857142,
+    "mean_coverage": 0.7766800987911093,
+    "mean_worst_group_rate": 0.1397239086431591
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.98,
+    "mean_coverage": 0.7539702760084928,
+    "mean_worst_group_rate": 0.40817655046438334
+   },
+   "seed": 129
+  },
+  {
+   "by-band": {
+    "feasible_trials": 77,
+    "group_violation_rate_when_feasible": 0.05194805194805195,
+    "mean_coverage": 0.7702594645269806,
+    "mean_worst_group_rate": 0.1225170057087939
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7512951167728239,
+    "mean_worst_group_rate": 0.442032757135025
+   },
+   "seed": 130
+  },
+  {
+   "by-band": {
+    "feasible_trials": 99,
+    "group_violation_rate_when_feasible": 0.04040404040404041,
+    "mean_coverage": 0.8019901777863563,
+    "mean_worst_group_rate": 0.12616471447680913
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.98,
+    "mean_coverage": 0.7681316348195331,
+    "mean_worst_group_rate": 0.34089098601809875
+   },
+   "seed": 131
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.14,
+    "mean_coverage": 0.8126114649681524,
+    "mean_worst_group_rate": 0.13347292429737168
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.755859872611465,
+    "mean_worst_group_rate": 0.4799527356928464
+   },
+   "seed": 132
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.01,
+    "mean_coverage": 0.8263481953290871,
+    "mean_worst_group_rate": 0.12706106314063054
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7521656050955419,
+    "mean_worst_group_rate": 0.5803959289494903
+   },
+   "seed": 133
+  },
+  {
+   "by-band": {
+    "feasible_trials": 97,
+    "group_violation_rate_when_feasible": 0.041237113402061855,
+    "mean_coverage": 0.8041455994046446,
+    "mean_worst_group_rate": 0.12224049027357511
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7727813163481955,
+    "mean_worst_group_rate": 0.44286478979197447
+   },
+   "seed": 134
+  },
+  {
+   "by-band": {
+    "feasible_trials": 96,
+    "group_violation_rate_when_feasible": 0.10416666666666667,
+    "mean_coverage": 0.8200415782024059,
+    "mean_worst_group_rate": 0.131599284804765
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7678768577494692,
+    "mean_worst_group_rate": 0.441897131668593
+   },
+   "seed": 135
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.02,
+    "mean_coverage": 0.8275796178343947,
+    "mean_worst_group_rate": 0.12684185968817027
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7794692144373674,
+    "mean_worst_group_rate": 0.4461259963346275
+   },
+   "seed": 136
+  },
+  {
+   "by-band": {
+    "feasible_trials": 99,
+    "group_violation_rate_when_feasible": 0.1111111111111111,
+    "mean_coverage": 0.8382122713332905,
+    "mean_worst_group_rate": 0.13330275425288385
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 1.0,
+    "mean_coverage": 0.7698938428874734,
+    "mean_worst_group_rate": 0.5286513605607739
+   },
+   "seed": 137
+  },
+  {
+   "by-band": {
+    "feasible_trials": 94,
+    "group_violation_rate_when_feasible": 0.05319148936170213,
+    "mean_coverage": 0.800514974928852,
+    "mean_worst_group_rate": 0.12453086832604482
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.98,
+    "mean_coverage": 0.7738216560509552,
+    "mean_worst_group_rate": 0.4894844062180825
+   },
+   "seed": 138
+  },
+  {
+   "by-band": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.01,
+    "mean_coverage": 0.7981316348195326,
+    "mean_worst_group_rate": 0.1298321174739003
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.98,
+    "mean_coverage": 0.7391082802547773,
+    "mean_worst_group_rate": 0.5530449262024669
+   },
+   "seed": 139
+  },
+  {
+   "by-band": {
+    "feasible_trials": 98,
+    "group_violation_rate_when_feasible": 0.07142857142857142,
+    "mean_coverage": 0.7977815329953638,
+    "mean_worst_group_rate": 0.12736993911182948
+   },
+   "pooled": {
+    "feasible_trials": 100,
+    "group_violation_rate_when_feasible": 0.95,
+    "mean_coverage": 0.7607855626326967,
+    "mean_worst_group_rate": 0.4726460749263627
+   },
+   "seed": 140
+  }
+ ],
+ "summary": {
+  "by-band": {
+   "draws_usable": 40,
+   "exact_interval": [
+    0.011348272568833973,
+    0.10222746629841022
+   ],
+   "exact_point": 0.041237113402061855,
+   "exact_width": 0.09087919372957624,
+   "feasible_max": 100,
+   "feasible_min": 66,
+   "feasible_varies": true,
+   "mean": 0.0512800555571705,
+   "pool_interval": [
+    0.01,
+    0.1111111111111111
+   ],
+   "pool_width": 0.10111111111111111
+  },
+  "pooled": {
+   "draws_usable": 40,
+   "exact_interval": [
+    0.9455406146079195,
+    0.9997468539670227
+   ],
+   "exact_point": 0.99,
+   "exact_width": 0.05420623935910318,
+   "feasible_max": 100,
+   "feasible_min": 100,
+   "feasible_varies": false,
+   "mean": 0.98225,
+   "pool_interval": [
+    0.94,
+    1.0
+   ],
+   "pool_width": 0.06000000000000005
+  }
+ },
+ "trials_per_draw": 100
+}

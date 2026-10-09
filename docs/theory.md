@@ -133,6 +133,41 @@ cases gives ±9.5. The conclusion is unchanged — the lower bound is 39.9%
 against a 20% budget — and the width is reported so a reader is not quietly
 given sixteen times more precision than the design supports.
 
+#### And the 98.2% carries its own width, which is the smaller surprise
+
+The pair at the top of this section is a **per-trial** rate, and for a long
+time it was quoted with no interval at all. It has two now, measuring
+different things, and the gap between them is much smaller than the one above:
+
+| | point | pool-level 95% | exact, this pool | widening |
+|---|---:|---|---|---:|
+| one global threshold | 98.2% | [94.0%, 100.0%] | [94.6%, 100.0%] | **1.11×** |
+| one per band | 5.1% | [1.0%, 11.1%] | [1.1%, 10.2%] | **1.11×** |
+
+The exact interval is Clopper–Pearson over trials, which is correct
+*conditional on these 672 cases* — each trial is an independent split of a
+fixed pool. The pool-level interval resamples the 672 cases themselves, 40
+bootstrap pools of 100 trials each, and **widens the result by eleven
+percent.**
+
+Eleven percent, where the same operation on the band rates above widened them
+**sixteenfold.** That contrast is the point:
+
+> A per-trial rate averages over the **whole pool** in every trial. A per-band
+> rate is driven by the **96 cases in one band.** Resampling 672 cases barely
+> moves the first and dominates the second.
+
+So the two intervals are both honest and neither is the right one to quote in
+general: **the unit of aggregation has to be matched to the quantity.** Here
+that licenses quoting the per-trial figures as they stand, and it licenses
+nothing about any per-band number, where the narrow interval remains
+indefensible.
+
+All five of round R's predictions held, which makes it the only clean round in
+the ledger, and the comparison above is worth more than the five passes. Run,
+seeds and scoring: [`preregistration-5.md`](preregistration-5.md) addendum ten
+and `evidence/pool_bootstrap.json`.
+
 ### The mechanism, and the version of it that was refuted
 
 Per-band AUC is 0.9345 to **0.9976** — the scorer orders states almost

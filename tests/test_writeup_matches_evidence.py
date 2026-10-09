@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
 
 import pytest
@@ -1938,3 +1939,153 @@ def test_the_readme_says_what_the_trial_intervals_do_not_cover(readme):
     """
     assert "narrower than" in readme
     assert "Monte Carlo" in readme
+
+
+# ---------------------------------------------------------------------------
+# Round R: pool-level uncertainty for the headline per-trial rate
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def pool_boot():
+    p = ROOT / "evidence" / "pool_bootstrap.json"
+    if not p.exists():
+        pytest.skip("the pool bootstrap has not been run in this checkout")
+    return json.loads(p.read_text())
+
+
+def test_the_pool_level_intervals_quoted_are_the_measured_ones(readme, theory,
+                                                               pool_boot):
+    """
+    Both arms, both intervals, in both documents.
+
+    The README and theory.md carry the same four-cell table, so a figure
+    that moves has to move in both or they disagree — which is exactly how
+    theory.md came to carry a claim the README had already retracted.
+    """
+    for scheme in ("pooled", "by-band"):
+        v = pool_boot["summary"][scheme]
+        for payload in (readme, theory):
+            assert any(f in payload
+                       for f in pct_forms(v["mean"], 1)), (scheme, v["mean"])
+            for bound in v["pool_interval"] + v["exact_interval"]:
+                assert any(f in payload for f in pct_forms(bound, 1)), \
+                    (scheme, bound)
+
+
+def test_the_widening_ratio_is_the_headline_and_it_is_small(readme, theory,
+                                                            pool_boot):
+    """
+    The result of the round: resampling cases widens these intervals by
+    about a tenth, against sixteenfold for the per-band rates.
+
+    Both ratios have to be in the write-up. Quoting only the small one
+    would read as a licence to use narrow intervals everywhere, which is
+    the opposite of what the comparison supports.
+    """
+    ratios = [pool_boot["summary"][s]["pool_width"]
+              / pool_boot["summary"][s]["exact_width"]
+              for s in ("pooled", "by-band")]
+    for r in ratios:
+        assert 1.0 < r < 1.3, r
+        assert f"{r:.2f}" in readme, r
+
+    # Scoped to the sentence that draws the contrast, not to the word
+    # appearing anywhere. The first version checked `"sixteen" in payload`
+    # and passed after the contrast was deleted, because the word also
+    # appears two sections earlier about the band rates — the third
+    # too-broad guard in this suite, and the only one that failed in the
+    # dangerous direction: it would have let the write-up quote the small
+    # ratio alone, which reads as a licence to use narrow intervals
+    # everywhere and is the opposite of what the comparison supports.
+    # Scoped to the section that draws the contrast, by heading, rather than
+    # to the word appearing anywhere in the file. Two weaker versions of
+    # this assertion passed after the contrast was deleted -- first because
+    # "sixteen" appears two sections earlier about the band rates, then
+    # because "sixteenfold" appears twice within this one. Third too-broad
+    # guard in this suite and the only one that failed in the dangerous
+    # direction: it would have let the write-up quote the small ratio alone,
+    # which reads as a licence to use narrow intervals everywhere and is the
+    # opposite of what the comparison supports.
+    for name, head in (("README.md", "### The same treatment for the 98.2%"),
+                       ("docs/theory.md",
+                        "#### And the 98.2% carries its own width")):
+        lines = (ROOT / name).read_text().splitlines()
+        start = next(i for i, ln in enumerate(lines) if ln.startswith(head))
+        depth = len(head) - len(head.lstrip("#"))
+        end = next((i for i in range(start + 1, len(lines))
+                    if lines[i].startswith("#")
+                    and len(lines[i]) - len(lines[i].lstrip("#")) <= depth),
+                   len(lines))
+        section = " ".join(" ".join(lines[start:end]).split())
+
+        assert "sixteenfold" in section, (
+            name, "the per-band contrast has to sit inside this section")
+        assert "whole pool" in section, (
+            name, "and the mechanism, or the small ratio is a free pass")
+        for r in ratios:
+            assert f"{r:.2f}" in section, (name, r)
+
+
+def test_round_r_predictions_all_held(pool_boot):
+    """
+    The only clean round in the ledger. If a re-run breaks one, the ledger
+    is wrong and this says so before a reader finds it.
+    """
+    preds = pool_boot["predictions"]
+    assert set(preds) == {"R1", "R2", "R3", "R4", "R5"}, sorted(preds)
+    failed = [k for k, v in preds.items() if not v["held"]]
+    assert not failed, failed
+
+
+def test_the_arms_do_not_overlap_at_the_pool_level(pool_boot):
+    """
+    R3, and the most load-bearing comparison in the repository. If these
+    intervals overlapped, every pooled-versus-conditioned table would need
+    a width beside it and the recommendation would weaken to "measure it
+    yourself".
+    """
+    p = pool_boot["summary"]["pooled"]["pool_interval"]
+    g = pool_boot["summary"]["by-band"]["pool_interval"]
+    assert g[1] < p[0], (g, p)
+
+
+def test_group_feasibility_varies_across_resampled_pools(pool_boot):
+    """
+    R5, which is the design working rather than a finding.
+
+    Group conditioning binds on the smallest group, so a resampled pool
+    short in one band should be harder to certify. A constant feasible
+    count would mean the bootstrap never reached what limits the method.
+    """
+    v = pool_boot["summary"]["by-band"]
+    assert v["feasible_varies"] is True
+    assert v["feasible_min"] < v["feasible_max"], v
+    assert pool_boot["summary"]["pooled"]["feasible_min"] == \
+        pool_boot["summary"]["pooled"]["feasible_max"], \
+        "the pooled arm has one group and should always be feasible"
+
+
+def test_the_interrupted_run_is_preserved_and_verified(readme):
+    """
+    The relaunch discipline, asserted rather than described.
+
+    The interrupted log has to still be in the repository — it is the only
+    thing that makes "the relaunch is the same draw" checkable — and the
+    verifier has to actually agree.
+    """
+    import subprocess
+
+    old = ROOT / "evidence" / "pool-bootstrap-interrupted.txt"
+    new = ROOT / "evidence" / "pool-bootstrap-run.txt"
+    if not (old.exists() and new.exists()):
+        pytest.skip("the interrupted or completed log is not in this checkout")
+
+    assert old.read_text().count("  draw ") >= 30, \
+        "the interrupted log should hold the draws completed before the kill"
+
+    out = subprocess.run([sys.executable,
+                          str(ROOT / "scripts" / "verify_bootstrap_resume.py")],
+                         capture_output=True, text=True, cwd=ROOT)
+    assert out.returncode == 0, out.stdout + out.stderr
+    assert "matches character for character" in out.stdout, out.stdout
+    assert "verify_bootstrap_resume" in readme

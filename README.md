@@ -43,7 +43,7 @@ it:
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
 fix, both retractions are left visible rather than edited away, and **[all
-seventy-three predictions are listed with their
+seventy-eight predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
 wrong.
@@ -130,6 +130,44 @@ the finding clears its tolerance at both α on both halves:
 
 Nothing in that bootstrap is novel. What would have been novel is reporting
 the naive interval.
+
+### The same treatment for the 98.2%, and it comes out the other way
+
+The pair this section opens with — 98.5% of trials inside budget overall,
+98.2% outside it for some band — is a **per-trial** rate, and it was quoted
+bare for longer than the band rates were. Given the sixteenfold correction
+just above, the obvious expectation is that it needs the same discipline and
+will move just as much.
+
+It needs the discipline. It does not move. Forty bootstrap pools of 672
+resampled cases, 100 trials each:
+
+| | point | pool-level 95% | exact, this pool | widening |
+|---|---:|---|---|---:|
+| one global threshold | 98.2% | [94.0%, 100.0%] | [94.6%, 100.0%] | **1.11×** |
+| one per band | 5.1% | [1.0%, 11.1%] | [1.1%, 10.2%] | **1.11×** |
+
+**Eleven percent, against sixteenfold for the band rates.** And the reason is
+structural rather than lucky:
+
+> A per-trial rate averages over the **whole pool** in every trial. A per-band
+> rate is driven by the **96 cases in one band.** Resampling 672 cases barely
+> moves the first and dominates the second.
+
+Which is the fourth time in this repository that the unit of aggregation
+decided an answer, and the first time it came out in the method's favour. The
+rule it supports is not "use the wide interval" but **match the unit to the
+quantity** — so the per-trial figures above stand as quoted, and that licenses
+nothing about any per-band number, where the narrow interval is still
+indefensible.
+
+All five of round R's pre-registered predictions held, which makes it the only
+clean round in the ledger; the comparison is worth more than the passes. Its
+first run was killed at draw 32 of 40, the interrupted log was committed before
+the relaunch, and
+[`scripts/verify_bootstrap_resume.py`](scripts/verify_bootstrap_resume.py)
+requires all 32 overlapping draws to reappear character for character — they
+do, so the relaunch is the same draw rather than a second look.
 
 ### And it is not an artefact of where the lines were drawn
 
