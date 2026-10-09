@@ -1,0 +1,50 @@
+[
+  {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 80,
+    "violation_rate": 0.0,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.717578125,
+    "mean_questions": 2.376953125,
+    "holds": true,
+    "unit": "state",
+    "scorer": "handcrafted"
+  },
+  {
+    "alpha": 0.05,
+    "delta": 0.05,
+    "trials": 80,
+    "violation_rate": 0.0,
+    "infeasible_rate": 0.1,
+    "mean_coverage": 0.6775173611111112,
+    "mean_questions": 2.4184027777777777,
+    "holds": true,
+    "unit": "state",
+    "scorer": "handcrafted"
+  },
+  {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 80,
+    "violation_rate": 0.0,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.694140625,
+    "mean_questions": 2.35625,
+    "holds": true,
+    "unit": "trajectory",
+    "scorer": "handcrafted"
+  },
+  {
+    "alpha": 0.05,
+    "delta": 0.05,
+    "trials": 80,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "unit": "trajectory",
+    "scorer": "handcrafted"
+  }
+]

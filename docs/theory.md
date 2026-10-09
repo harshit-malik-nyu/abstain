@@ -37,13 +37,70 @@ a threshold of 0.82 on dev:
 | States the rule visits | 314 | 57.0% |
 | States it commits at | 55 | 0.0% |
 
-Measured consequence: 11% of trials violated a 5% target, with the scorer
-refit on a disjoint fold so leakage is excluded. Calibrating on commitments
-instead takes it to 0%.
+### The evidence for this claim was wrong, and the claim survives in a sharper form
 
-**Status: measured, and the mechanism is the one
-`knowing-when-to-doubt` identifies for human routers.** The agent's stopping
-rule plays the role the reviewer plays there.
+What this section said until round S:
+
+> ~~Measured consequence: 11% of trials violated a 5% target, with the scorer
+> refit on a disjoint fold so leakage is excluded. Calibrating on commitments
+> instead takes it to 0%.~~
+
+**Retracted.** Both figures came from `evidence/leakage.json` and
+`evidence/unit_comparison.json`, added at commit 6 — and the fix for this
+repository's third bug, `violation_rate_when_feasible`, landed at commit 13.
+Those files report violations **pooled over trials the procedure declined**,
+which is the exact defect the README documents, in evidence that predates its
+fix. Read off the old files:
+
+| the figure | what it actually was |
+|---|---|
+| 11% violated a 5% target | 11 of 100 trials, of which **76 were infeasible** |
+| commitments take it to 0% | zero violations in **100% infeasible** trials |
+
+The second is the vacuous zero the bug-3 fix exists to prevent, sitting inside
+a numbered claim. And the sentence compared two different experiments — 100
+trials against 80 — as though they were two arms of one.
+
+Worse for the record: **neither file was written by any script**, so neither
+could be regenerated, and **no test read them**, so the figure-coupling
+discipline never reached them. So the 11% is not restated below, only
+retracted — the original fold construction is not recoverable, which makes a
+re-run a new experiment rather than a correction.
+
+### What a clean run shows instead
+
+`scripts/rerun_unit_and_leakage.py`, dev's 79 cases, scorer refit per trial,
+the feasibility-conditioned metric:
+
+| unit | α | certified | violated **when certified** |
+|---|---:|---:|---:|
+| state | 0.10 | 80 of 80 | **0.0%** |
+| trajectory | 0.10 | 58 of 80 | 5.2% |
+| **state** | **0.05** | **12 of 80** | **75.0%** |
+| **trajectory** | **0.05** | **0 of 80** | — |
+
+At α = 0.10 both units hold. At α = 0.05 the difference is not a violation
+rate at all:
+
+> **Using the wrong unit does not bias the estimate. It manufactures
+> feasibility.** Calibrating over states gives ~1,264 calibration points
+> against the trajectory unit's ~47, so its Clopper–Pearson bound clears
+> easily — and the bound is on the wrong population. It issues a 5% threshold
+> in 12 trials and the deployed rate breaks it in **nine of those twelve**.
+> The trajectory unit finds that no threshold achieves 5% on 47 commitments,
+> which is true, and declines in every trial.
+
+That is a stronger claim than the one it replaces, and the reason is worth
+stating: **a procedure that declines is not a procedure that failed.** The
+honest comparison is between a unit that certifies what it cannot deliver and
+one that refuses, not between two violation rates.
+
+**Status: measured, after the first measurement was retracted. The mechanism
+is the one `knowing-when-to-doubt` identifies for human routers** — the
+agent's stopping rule plays the role the reviewer plays there — and the
+feasibility arithmetic is the one [`power.py`](../src/abstain/power.py) gives
+in closed form: 47 commitments cannot certify 5% at δ = 0.05, and no amount of
+implementation care changes it.
 
 ## 3. The deployed rule holds its tolerance
 

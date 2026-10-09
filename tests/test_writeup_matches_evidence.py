@@ -2089,3 +2089,197 @@ def test_the_interrupted_run_is_preserved_and_verified(readme):
     assert out.returncode == 0, out.stdout + out.stderr
     assert "matches character for character" in out.stdout, out.stdout
     assert "verify_bootstrap_resume" in readme
+
+
+# ---------------------------------------------------------------------------
+# The contribution section: every figure in it, against its own evidence
+# ---------------------------------------------------------------------------
+
+def _contribution_section() -> str:
+    lines = (ROOT / "README.md").read_text().splitlines()
+    start = next(i for i, ln in enumerate(lines)
+                 if ln.startswith("## What is new here"))
+    end = next(i for i in range(start + 1, len(lines))
+               if lines[i].startswith("## "))
+    return " ".join(" ".join(lines[start:end]).split())
+
+
+def test_the_contribution_section_names_the_prior_art(readme):
+    """
+    A section claiming what is new is only worth reading if it is explicit
+    about what is not, and the prior art was named in four module docstrings
+    and nowhere a reader would look first.
+    """
+    s = _contribution_section()
+    for name in ("Clopper", "conformal", "Mondrian", "Vovk",
+                 "cluster bootstrap", "Weighted conformal"):
+        assert name in s, name
+    assert "not presented as new" in s
+    assert "not implemented" in s, \
+        "weighted conformal is named as the right tool and absent; both halves"
+
+
+def test_every_figure_in_the_contribution_section_is_measured(readme, round4,
+                                                              ndg, sweep):
+    """
+    The section is a summary, which is where figures drift fastest — it is
+    written once and the runs keep arriving.
+
+    Each claim is checked against the evidence it summarises rather than
+    against the body of the README, so a stale summary cannot be propped up
+    by an equally stale section elsewhere.
+    """
+    s = _contribution_section()
+
+    # The marginal/conditional pair, from round four.
+    pooled = next(x for x in round4["E4_E7_schemes"]
+                  if x["scheme"] == "pooled" and x["alpha"] == 0.20)
+    overall = 1.0 - pooled["violation_rate_when_feasible"]
+    conditional = pooled["group_violation_rate_when_feasible"]
+    assert any(f in s for f in pct_forms(overall, 1)), overall
+    assert any(f in s for f in pct_forms(conditional, 1)), conditional
+
+    # Group conditioning is unavailable at the tight tolerance, from round O.
+    tight = nd_scheme(ndg, "handcrafted", 0.10, "by-band")
+    assert has_count(s, tight["feasible_trials"]), tight["feasible_trials"]
+
+    # The AUC span, from round N.
+    assert "0.9425" in s and "0.9604" in s
+
+    # The neutral partition survives, from round Q.
+    assert sweep["by_alpha"]["0.20"]["equal-count-quartiles"][
+        "hides_a_subgroup"] is True
+    assert "equal-count partition" in s or "equal-count" in s
+
+
+def test_the_contribution_section_leads_with_the_limitation(readme):
+    """
+    "No model was run" has to be in this section, not only eleven hundred
+    lines down. A summary of contributions that omits the governing
+    limitation is the most natural place for this repository to overstate
+    itself.
+    """
+    s = _contribution_section()
+    assert "No model was run" in s
+    assert "cannot\nanswer" in (ROOT / "README.md").read_text() or \
+        "cannot answer" in s
+    assert "substitute rather than an answer" in s
+
+
+# ---------------------------------------------------------------------------
+# Claim 2's evidence, which had no script and no test until it was wrong
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def unit_cmp():
+    p = ROOT / "evidence" / "unit_comparison.json"
+    if not p.exists():
+        pytest.skip("unit_comparison.json not present")
+    return json.loads(p.read_text())
+
+
+def unit_row(payload: list[dict], unit: str, alpha: float) -> dict:
+    return next(r for r in payload
+                if r["unit"] == unit and r["alpha"] == alpha)
+
+
+def test_the_unit_evidence_carries_the_feasibility_conditioned_metric(
+        unit_cmp):
+    """
+    The field whose absence is the whole defect.
+
+    The pre-correction files had `violation_rate` only, pooled over trials the
+    procedure declined, so a 100%-infeasible arm reported 0% and read as a
+    pass. Every row must now carry the conditioned metric, and it must be
+    None rather than 0.0 where nothing was certified.
+    """
+    for r in unit_cmp:
+        assert "violation_rate_when_feasible" in r, r
+        assert "feasible_trials" in r, r
+        if r["feasible_trials"] == 0:
+            assert r["violation_rate_when_feasible"] is None, r
+            assert r["holds"] is None, \
+                "never certified is not held; `holds` must not be True"
+
+
+def test_the_wrong_unit_manufactures_feasibility(readme, theory, unit_cmp):
+    """
+    The replacement claim, which is sharper than the retracted one.
+
+    At the tight tolerance the state unit certifies and then violates in most
+    of the trials it certified, while the trajectory unit declines in all of
+    them. The difference is not a violation rate — it is that one unit issues
+    a threshold it cannot honour.
+    """
+    state = unit_row(unit_cmp, "state", 0.05)
+    traj = unit_row(unit_cmp, "trajectory", 0.05)
+
+    assert state["feasible_trials"] > 0
+    assert traj["feasible_trials"] == 0, traj
+    assert state["violation_rate_when_feasible"] > 0.5, state
+
+    for payload in (readme, theory):
+        assert has_count(payload, state["feasible_trials"]), state
+        assert any(f in payload for f in
+                   pct_forms(state["violation_rate_when_feasible"], 1)), state
+        assert "manufactures feasibility" in payload, \
+            "the mechanism, not just the numbers"
+
+
+def test_both_documents_retract_the_old_figures_rather_than_replacing_them(
+        readme, theory):
+    """
+    "11% against 0%" was wrong in a way that flattered the method, and it sat
+    inside a numbered claim. Replacing it quietly would be the one move this
+    repository argues against throughout — and it would be the third time,
+    which is why both documents have to say so and a test has to require it.
+    """
+    for name, payload in (("README.md", readme), ("docs/theory.md", theory)):
+        low = payload.lower()
+        assert "retracted" in low, name
+        assert "11%" in payload, \
+            (name, "the retracted figure stays visible as what was retracted")
+        assert "76 were infeasible" in payload or \
+            "**76 were infeasible**" in payload, name
+
+    t = (ROOT / "docs" / "theory.md").read_text()
+    assert "~~" in t, "theory.md strikes the old sentence through"
+
+
+def test_the_orphaned_evidence_now_has_a_script(readme):
+    """
+    The deeper defect: no script wrote those two files, so they could not be
+    regenerated, and no test read them, so nothing checked them.
+
+    Every other evidence file in this repository is produced by a committed
+    script. These two were the exception and it is the reason the error
+    survived sixteen rounds.
+    """
+    script = ROOT / "scripts" / "rerun_unit_and_leakage.py"
+    assert script.exists(), "claim 2's evidence needs a script like the rest"
+    src = script.read_text()
+    assert "violation_rate_when_feasible" in src
+    assert "precorrection" in src, \
+        "the pre-fix run is kept beside the fix, as everywhere else here"
+
+    for name in ("unit_comparison-precorrection.json",
+                 "leakage-precorrection.json"):
+        assert (ROOT / "evidence" / name).exists(), name
+
+
+def test_the_precorrection_files_show_the_defect_they_are_kept_for(unit_cmp):
+    """
+    The old files are only worth keeping if they still demonstrate the bug.
+    If a future tidy-up regenerates them with the new metric, the record of
+    what was wrong disappears.
+    """
+    p = ROOT / "evidence" / "unit_comparison-precorrection.json"
+    if not p.exists():
+        pytest.skip("pre-correction file not in this checkout")
+    old = json.loads(p.read_text())
+
+    vacuous = [r for r in old
+               if r["infeasible_rate"] == 1.0 and r["violation_rate"] == 0.0]
+    assert vacuous, "the kept file should still show the vacuous zero"
+    assert all("violation_rate_when_feasible" not in r for r in old), \
+        "the pre-correction file must stay pre-correction"

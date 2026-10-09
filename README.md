@@ -24,9 +24,10 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; twenty-six pre-registered predictions that missed; two claims
-published here and then retracted; and one result that changes what the
-method is for.**
+it was; twenty-six pre-registered predictions that missed; three claims
+published here and then retracted — one of them inside a numbered claim in
+[`theory.md`](docs/theory.md), resting on evidence no script could regenerate
+and no test ever read; and one result that changes what the method is for.**
 
 The central claim has been attacked three levels deep, and every level moved
 it:
@@ -42,7 +43,7 @@ it:
 
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
-fix, both retractions are left visible rather than edited away, and **[all
+fix, all three retractions are left visible rather than edited away, and **[all
 seventy-eight predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
@@ -52,12 +53,14 @@ wrong.
 
 ## Contents
 
-Thirteen sections and a license. The three worth reading if you read
-nothing else are **the finding that matters most**, **the case
-against**, and the [prediction ledger](docs/predictions.md) — in that
-order, because the first is the result, the second is why it might not
-hold, and the third is every time I was wrong about it.
+Fourteen sections and a license. The three worth reading if you read
+nothing else are **what is new here**, **the finding that matters
+most**, and **the case against** — in that order, because the first
+says what is mine, the second is the result, and the third is why it
+might not hold. The [prediction ledger](docs/predictions.md) is every
+time I was wrong about any of it.
 
+- [What is new here, and what is not](#what-is-new-here-and-what-is-not)
 - [The finding that matters most](#the-finding-that-matters-most)
 - [Why not just pick a threshold?](#why-not-just-pick-a-threshold)
 - [Does the bound survive a bad score?](#does-the-bound-survive-a-bad-score)
@@ -75,6 +78,60 @@ hold, and the third is every time I was wrong about it.
 
 ---
 
+## What is new here, and what is not
+
+Worth settling before anything below, because most of the machinery is
+standard and the parts that are not are easy to miss.
+
+**Not new, and not presented as new.** The Clopper–Pearson exact binomial
+bound. Split conformal prediction and the conformal-risk-control framing of
+"choose a threshold so a bounded loss holds with high probability". Mondrian
+conformal prediction — one threshold per group, Vovk and colleagues,
+mid-2000s — which is exactly what [`group.py`](src/abstain/group.py) does. The
+impossibility of distribution-free *conditional* coverage, which is why §4 of
+[`theory.md`](docs/theory.md) is a limitation rather than a bug. The cluster
+bootstrap. Weighted conformal methods for covariate shift, which are the right
+tool for the shift results here and are **not implemented** — the shift round
+prices the failure instead of fixing it.
+
+**What this repository actually does**, none of which is a new construction:
+
+- **Applies the calibration-unit question to a *sequential* agent.** Conformal
+  calibration assumes exchangeability between calibration and deployment. An
+  agent that commits at the *first* state to clear its threshold selects the
+  states it is scored on, so calibrating over states uniformly is the wrong
+  unit. Measured cost of getting it wrong: calibrating over states
+  **manufactures feasibility** — it certifies a 5% threshold in 12 of 80
+  trials and the deployed rate breaks it in **nine of those twelve**, while
+  calibrating on commitments correctly declines in all 80. (The figures this
+  bullet carried before — 11% against 0% — are **retracted**; see
+  [`theory.md` §2](docs/theory.md).)
+- **Measures the marginal-versus-conditional gap where it has a consequence.**
+  Not as a caveat: **98.5% of trials honour the budget overall and 98.2% break
+  it for some income band**, and the result survives a neutral equal-count
+  partition of income as well as the hand-drawn one.
+- **Prices group conditioning on all three axes.** It costs **no** coverage
+  here (it gains 4.7 points) and **fewer** questions; the binding constraint
+  is sample size, in closed form, and at α = 0.10 on 672 cases it is feasible
+  in **3 trials out of 200** — unavailable rather than expensive.
+- **Finds a larger term than the single threshold, by pre-registering the
+  opposite.** A confidence feature that is directionally wrong for one group
+  explains most of the disparity; removing it ties conditioning at α = 0.20
+  and loses badly at α = 0.15, so the two are complements.
+- **Five independent results that AUC cannot see a threshold-local
+  decision**, including three scorers spanning 0.9425 to 0.9604 whose deployed
+  behaviour is identical in every float.
+- **An attempt at making the reporting checkable.** Pre-registration ordering
+  enforced against git timestamps, every count derived from the record rather
+  than typed, every published figure coupled by test to the file that produced
+  it, and both retracted claims left visible.
+
+**What is not demonstrated: anything a language model does.** No model was
+run. That is [the one objection this project cannot
+answer](docs/against.md#1-there-is-no-model-in-it), and the corruption study
+is a substitute rather than an answer.
+
+---
 
 ## The finding that matters most
 
@@ -968,14 +1025,21 @@ runs survive.
 
 ### Validation found two failures before the holdout was opened
 
-**Leakage, as expected.** A scorer fit on the whole pool then validated on
-splits of that pool violated a 5% target in **40%** of trials. Refitting on a
-disjoint fold cut it to **11%**.
+> **The figures this subsection carried for sixteen rounds are retracted.**
+> "40%", "11%" and "takes it to 0%" came from two evidence files added at
+> commit 6, using the violation metric that this repository's own third bug
+> fixed at commit 13 — violations **pooled over trials the procedure
+> declined**. The 11% was 11 of 100 trials of which **76 were infeasible**;
+> the 0% was zero violations in **100% infeasible** trials, which is the
+> vacuous zero the fix exists to prevent. Neither file was written by a
+> script, so neither could be regenerated, and no test read either, so the
+> figure-coupling discipline never reached them. Details and the replacement
+> run are in [`theory.md` §2](docs/theory.md).
 
-**The agent's own stopping rule breaks exchangeability.** The remaining 11% was
-not leakage. Calibration observed every knowledge state uniformly; the rule
-commits at the **first** state to clear the threshold, which is selected by
-construction. At a threshold of 0.82:
+**The agent's own stopping rule breaks exchangeability.** That part stands, and
+it is the mechanism rather than a number. Calibration observed every knowledge
+state uniformly; the rule commits at the **first** state to clear the
+threshold, which is selected by construction. At a threshold of 0.82:
 
 | | States | Undetermined |
 |---|---:|---:|
@@ -985,9 +1049,27 @@ construction. At a threshold of 0.82:
 
 **This is the same failure `knowing-when-to-doubt` measures when a human
 reviewer routes on model confidence — there the router is a person, here it is
-the rule itself, and the mechanism is identical.** Making the calibration unit
-the deployment unit takes violations to **0%**, at the cost of calibrating on
-cases rather than states, which loosens the finite-sample bound.
+the rule itself, and the mechanism is identical.**
+
+What a clean re-run shows, with the scorer refit per trial and violations
+conditioned on the trials that were actually certified:
+
+| unit | α | certified | violated when certified |
+|---|---:|---:|---:|
+| state | 0.10 | 80 of 80 | **0.0%** |
+| trajectory | 0.10 | 58 of 80 | 5.2% |
+| **state** | **0.05** | **12 of 80** | **75.0%** |
+| **trajectory** | **0.05** | **0 of 80** | — |
+
+**Using the wrong unit does not bias the estimate — it manufactures
+feasibility.** Calibrating over states gives ~1,264 calibration points against
+~47 commitments, so its bound clears easily and is computed on the wrong
+population: it certifies a 5% threshold in 12 trials and the deployed rate
+breaks it in **nine of them.** The trajectory unit correctly finds that 47
+commitments cannot certify 5% at δ = 0.05 — [`power.py`](src/abstain/power.py)
+says so in closed form — and declines in every trial. A procedure that
+declines is not a procedure that failed, and that is a sharper claim than the
+violation-rate comparison it replaces.
 
 ### The holdout, opened once
 

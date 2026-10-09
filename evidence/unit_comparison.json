@@ -1,50 +1,58 @@
 [
-  {
-    "alpha": 0.1,
-    "delta": 0.05,
-    "trials": 80,
-    "violation_rate": 0.0,
-    "infeasible_rate": 0.0,
-    "mean_coverage": 0.717578125,
-    "mean_questions": 2.376953125,
-    "holds": true,
-    "unit": "state",
-    "scorer": "handcrafted"
-  },
-  {
-    "alpha": 0.05,
-    "delta": 0.05,
-    "trials": 80,
-    "violation_rate": 0.0,
-    "infeasible_rate": 0.1,
-    "mean_coverage": 0.6775173611111112,
-    "mean_questions": 2.4184027777777777,
-    "holds": true,
-    "unit": "state",
-    "scorer": "handcrafted"
-  },
-  {
-    "alpha": 0.1,
-    "delta": 0.05,
-    "trials": 80,
-    "violation_rate": 0.0,
-    "infeasible_rate": 0.0,
-    "mean_coverage": 0.694140625,
-    "mean_questions": 2.35625,
-    "holds": true,
-    "unit": "trajectory",
-    "scorer": "handcrafted"
-  },
-  {
-    "alpha": 0.05,
-    "delta": 0.05,
-    "trials": 80,
-    "violation_rate": 0.0,
-    "infeasible_rate": 1.0,
-    "mean_coverage": 0.0,
-    "mean_questions": 0.0,
-    "holds": true,
-    "unit": "trajectory",
-    "scorer": "handcrafted"
-  }
+ {
+  "alpha": 0.1,
+  "delta": 0.05,
+  "feasible_trials": 80,
+  "holds": true,
+  "infeasible_rate": 0.0,
+  "mean_coverage": 0.9471590909090908,
+  "mean_questions": 2.034659090909091,
+  "scorer": "fitted, refit per trial",
+  "trials": 80,
+  "unit": "state",
+  "violation_rate_pooled_over_declined": 0.0,
+  "violation_rate_when_feasible": 0.0
+ },
+ {
+  "alpha": 0.05,
+  "delta": 0.05,
+  "feasible_trials": 12,
+  "holds": false,
+  "infeasible_rate": 0.85,
+  "mean_coverage": 0.9204545454545454,
+  "mean_questions": 2.0075757575757573,
+  "scorer": "fitted, refit per trial",
+  "trials": 80,
+  "unit": "state",
+  "violation_rate_pooled_over_declined": 0.1125,
+  "violation_rate_when_feasible": 0.75
+ },
+ {
+  "alpha": 0.1,
+  "delta": 0.05,
+  "feasible_trials": 58,
+  "holds": true,
+  "infeasible_rate": 0.275,
+  "mean_coverage": 0.9396551724137931,
+  "mean_questions": 2.2648902821316614,
+  "scorer": "fitted, refit per trial",
+  "trials": 80,
+  "unit": "trajectory",
+  "violation_rate_pooled_over_declined": 0.0375,
+  "violation_rate_when_feasible": 0.05172413793103448
+ },
+ {
+  "alpha": 0.05,
+  "delta": 0.05,
+  "feasible_trials": 0,
+  "holds": null,
+  "infeasible_rate": 1.0,
+  "mean_coverage": 0.0,
+  "mean_questions": 0.0,
+  "scorer": "fitted, refit per trial",
+  "trials": 80,
+  "unit": "trajectory",
+  "violation_rate_pooled_over_declined": 0.0,
+  "violation_rate_when_feasible": null
+ }
 ]

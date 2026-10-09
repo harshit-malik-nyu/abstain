@@ -1,0 +1,68 @@
+[
+  {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.0,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.9609375,
+    "mean_questions": 2.0171875,
+    "holds": true,
+    "arrangement": "fitted on the whole pool (leaked)"
+  },
+  {
+    "alpha": 0.1,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.03,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.9431818181818181,
+    "mean_questions": 2.0377272727272726,
+    "holds": true,
+    "arrangement": "refit on a disjoint fold"
+  },
+  {
+    "alpha": 0.05,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.4,
+    "infeasible_rate": 0.0,
+    "mean_coverage": 0.9528125,
+    "mean_questions": 2.231875,
+    "holds": false,
+    "arrangement": "fitted on the whole pool (leaked)"
+  },
+  {
+    "alpha": 0.05,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.11,
+    "infeasible_rate": 0.76,
+    "mean_coverage": 0.9318181818181818,
+    "mean_questions": 2.009469696969697,
+    "holds": false,
+    "arrangement": "refit on a disjoint fold"
+  },
+  {
+    "alpha": 0.02,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "arrangement": "fitted on the whole pool (leaked)"
+  },
+  {
+    "alpha": 0.02,
+    "delta": 0.05,
+    "trials": 100,
+    "violation_rate": 0.0,
+    "infeasible_rate": 1.0,
+    "mean_coverage": 0.0,
+    "mean_questions": 0.0,
+    "holds": true,
+    "arrangement": "refit on a disjoint fold"
+  }
+]
