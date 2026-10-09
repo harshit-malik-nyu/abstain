@@ -29,16 +29,29 @@ becomes decoration.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 
+# A `>` that begins a line is a blockquote marker, which the renderer drops.
+# Leaving it in meant a phrase inside a blockquote failed to match depending
+# on where the line happened to wrap — "…is defeated > by the agent…" — which
+# is the typography-policing this file's own comments warn against. Stripping
+# it only ever makes matching more permissive, so no existing assertion can
+# be weakened by it.
+_QUOTE = re.compile(r"^\s*>\s?", re.M)
+
 
 def squash(path: str) -> str:
-    """Whitespace-normalised, so line wrapping in the prose is irrelevant."""
-    return " ".join((ROOT / path).read_text().split())
+    """
+    Whitespace-normalised and blockquote-stripped, so neither line wrapping
+    nor markdown structure affects whether a phrase is found.
+    """
+    text = _QUOTE.sub("", (ROOT / path).read_text())
+    return " ".join(text.split())
 
 
 def count_forms(n: int) -> list[str]:
@@ -437,6 +450,58 @@ def test_theory_and_readme_agree_on_the_headline_pair(theory, readme, round4):
                   pct(pooled["group_violation_rate_when_feasible"])):
         assert value in readme, value
         assert value in theory, value
+
+
+def test_theory_does_not_carry_a_claim_the_readme_retracted(theory, readme,
+                                                            fitted_cond):
+    """
+    The specific way these two documents came apart.
+
+    `theory.md` claimed the concentration is "a property of using one
+    threshold rather than a property of this scorer" and kept claiming it for
+    two rounds after J1 refuted it and the README said so. A stale claim in
+    the theory file is worse than one in a write-up, because the theory file
+    is what a reader checks the write-up against — so the agreement is
+    asserted rather than hoped for.
+
+    Pinned on the refutation's own numbers, which come from the J-round run,
+    plus the absence of the retracted sentence outside its strike-through.
+    """
+    raw = (ROOT / "docs" / "theory.md").read_text()
+    squashed = squash("docs/theory.md")
+
+    claim = ("property of using one threshold rather than a "
+             "property of this scorer")
+    # Strip the struck-through block before looking: the old claim is SUPPOSED
+    # to appear there. What must not happen is it appearing as live prose.
+    live = re.sub(r"~~.*?~~", "", squashed, flags=re.S)
+    assert claim not in live, "the retracted claim is being asserted again"
+    assert claim in squashed, \
+        "and it must still be visible as the thing that was retracted"
+
+    assert "Refuted by its own pre-registered test (J1)" in squashed
+    assert "~~" in raw, \
+        "the retraction strikes the old claim through rather than deleting it"
+
+    nodist = arm(fitted_cond, "fitted-no-distance", 0.20)
+    hand = arm(fitted_cond, "handcrafted", 0.20)
+    for name, payload in (("theory", theory), ("readme", readme)):
+        for row in (nodist, hand):
+            value = f"{row['concentration'][row['worst_band']]:.2f}"
+            assert value in payload, (name, value)
+
+
+def test_theory_carries_the_sequential_caution_result(theory):
+    """
+    Rounds M and N belong in the theory document too, not only the README.
+
+    The result is about what a confidence function means for a sequential
+    rule, which is a claim about the method rather than about this benchmark,
+    so it is §4's business.
+    """
+    assert "defeated by the agent resolving that unknown" in theory
+    assert "0.9604" in theory and "0.9425" in theory
+    assert "447" in theory
 
 
 def test_theory_states_the_marginal_limit_as_a_numbered_claim(theory):

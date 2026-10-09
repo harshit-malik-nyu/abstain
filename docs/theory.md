@@ -133,7 +133,7 @@ cases gives ±9.5. The conclusion is unchanged — the lower bound is 39.9%
 against a 20% budget — and the width is reported so a reader is not quietly
 given sixteen times more precision than the design supports.
 
-### The mechanism, which is not a scorer defect
+### The mechanism, and the version of it that was refuted
 
 Per-band AUC is 0.9345 to **0.9976** — the scorer orders states almost
 perfectly *inside the band it fails on*. What differs is the score **level**:
@@ -160,9 +160,67 @@ alone drops the concentration from **4.07 to 1.55**. Across materiality
 thresholds from $0 to $500 it does not move at all, so none of this is a
 property of where that threshold was set.
 
-**Status: measured, and it is a property of using one threshold rather than a
-property of this scorer.** A better-ranking scorer does not fix it; the fitted
-scorer, which ranks better, would be subject to exactly the same argument.
+#### What this section claimed for two rounds, and why it was wrong
+
+> ~~It is a property of using one threshold rather than a property of this
+> scorer. A better-ranking scorer does not fix it.~~
+
+**Refuted by its own pre-registered test (J1).** A scorer refit without the
+distance feature cuts the concentration from **4.13 to 1.72** and brings every
+band inside the budget. The strong form of the claim does not survive, and
+this document carried it after the README had already recorded the
+refutation — a stale claim in the theory file is worse than one in a
+write-up, because this is the document a reader checks the write-up against.
+
+What survives, and it is narrower:
+
+> The concentration is driven **primarily by a score feature that is
+> systematically wrong for one group**, and a single threshold cannot absorb
+> that. It is not an artefact of the hand-built functional form — learning the
+> weights over the same features leaves **3.31**. Removing the feature shrinks
+> the disparity 2.4× and does not eliminate it: the same band is still worst
+> at **1.72×** its share.
+
+So a single threshold contributes and here it is not the dominant term.
+
+#### And the feature-level repair does not work either
+
+The diagnosis implies a fix: add a term for how much the award could move.
+Two were pre-registered and built — `award_aware_scorer`, then
+`signed_scorer`, which applies the term only below the boundary so that it
+reorders states rather than rescaling them. Both failed, and the way they
+failed is the most transferable result here.
+
+| | AUC | reachable pairs reordered | immediate commits at τ = 0.3 |
+|---|---:|---:|---:|
+| handcrafted | 0.9555 | — | 225 |
+| award-aware | 0.9425 | 4.77% | **0** |
+| signed | **0.9604** | 3.04% | 129 |
+
+Three different functions, and **one policy**: pooled 11.29%, `well-below`
+45.93%, coverage 76.04%, 2.0525 questions per case, concentration 4.0691 —
+identical under `==` for all three, at both tolerances, including the
+group-conditional arms.
+
+Both terms are gated on `dependents` being unknown, and the greedy selector
+asks for `dependents` first in **all 447 cases that ask anything**. The terms
+act on the opening state and nowhere else; an agent that does not commit
+immediately asks the one question that switches them off.
+
+> **In a sequential rule, a caution term conditioned on an unknown is defeated
+> by the agent resolving that unknown.** And a confidence function for such a
+> rule cannot be evaluated on the state space — only on the states the agent
+> reaches under the rule. AUC moved by 0.0179 in both directions while
+> behaviour did not move in any digit.
+
+**Status: measured, and narrowed twice.** The subgroup failure is real. Of the
+three remedies measured, **removing** the offending feature was the best on
+every axis the rule optimises — 7.3% pooled, 92.7% coverage, worst band 12.5%,
+nothing hidden — while scoring the *worst* AUC of any arm, 0.8888. Conditional
+calibration works without touching the scorer. **Adding** the missing feature
+does nothing at all. So the practical ordering is the reverse of the intuitive
+one: look for a feature that is directionally wrong for a group before
+reaching for a better one.
 
 ### The fix, its status, and its cost
 
