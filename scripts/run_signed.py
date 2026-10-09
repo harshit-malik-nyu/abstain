@@ -19,10 +19,16 @@ so the term acts on the opening state and nowhere else.
 
 `signed_scorer` is the one change that escapes that argument on paper: it
 applies the penalty only *below* the boundary, so it reorders states rather
-than rescaling them. N1 was scored before this run — 2.78% of reachable pairs
-flip — and recorded as **the wrong guard**, because reordering was never the
-thing that was broken. This run scores N2–N4, which are about whether the
-reordering reaches the deployed rule.
+than rescaling them. N1 was scored before this run and recorded as **the wrong
+guard**, because reordering was never the thing that was broken. This run
+scores N2–N4, which are about whether the reordering reaches the deployed
+rule.
+
+(The figure first published for N1 was 2.78%, measured ad hoc and never
+written to `evidence/`. This script's own `flip_rate` records **3.04%** with a
+stated estimator, and `evidence/opening_state.json` records it again. N1 holds
+under both; the discrepancy and why the earlier figure is superseded rather
+than corrected are in `docs/preregistration-5.md`.)
 
 The honest prior, written here before the run: the term still switches off at
 the agent's first question, so N2 is expected to fail for the same reason M1
