@@ -16,7 +16,7 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; twenty-two pre-registered predictions that missed; and one result that
+it was; twenty-three pre-registered predictions that missed; and one result that
 changes what the method is for.** The guarantee it delivers is not the
 guarantee its own README advertised for four rounds, and the gap is not small
 — and the strongest form of the claim that replaced it was refuted by its own
@@ -24,7 +24,7 @@ pre-registered test, two rounds later.
 
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
-fix, and **[all sixty-one predictions are listed with their
+fix, and **[all sixty-eight predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
 wrong.
@@ -85,6 +85,60 @@ the finding clears its tolerance at both α on both halves:
 
 Nothing in that bootstrap is novel. What would have been novel is reporting
 the naive interval.
+
+### And it is not an artefact of where the lines were drawn
+
+The finding above is stated **per band**, and `well-below` is `income ≤
+6,000` — three values out of twenty-one on this benchmark's income grid, 96 of
+672 cases, under three cutoffs written by hand in
+[`scripts/split.py`](scripts/split.py). Round five swept the *other*
+hand-chosen constant, materiality, across two orders of magnitude and found
+the concentration unmoved. The partition had never been swept, and it is the
+more dangerous of the two because the finding is phrased in its terms.
+
+`split.py` is the first commit in this repository, so the cutoffs cannot have
+been tuned to the result. That rules out tuning. It does not rule out luck.
+
+Nine partitions, tallied from the **same trajectories** — one deployment pass
+per tolerance with the collectors fanned out, so the only thing varying is the
+grouping — at α = 0.20:
+
+| partition | poorest band | its rate | concentration | subgroup hidden? |
+|---|---|---:|---:|:--:|
+| **equal-count quartiles** *(neutral)* | ≤ 15,000 | **27.3%** | **2.46** | **yes** |
+| published | ≤ 6,000 | 45.9% | 4.13 | yes |
+| bottom cutoff at 3,000 | ≤ 3,000 | **53.7%** | **4.83** | yes |
+| bottom cutoff at 9,000 | ≤ 9,000 | 41.8% | 3.76 | yes |
+| bottom cutoff at 12,000 | ≤ 12,000 | 33.9% | 3.05 | yes |
+| **two bands at the median** | ≤ 30,000 | 15.8% | 1.42 | **no** |
+
+**The neutral partition is the one that matters.** Equal-count quartiles are
+chosen by the income distribution with no reference to any result, and they
+split 191/162/155/164 against the hand-drawn 96/192/128/256. The poorest
+quartile still runs at 27.3% against a 20% budget while the pooled rate is
+inside it. **The subgroup result is not an artefact of three constants.**
+
+Two things the sweep found that were not predicted:
+
+**A coarse partition hides it completely.** Two bands at the median report a
+worst group of 15.8% and no hidden subgroup, at *both* tolerances. An operator
+who checks for subgroup failure with two groups concludes there is none. If you
+take one practical thing from this section, take that: **the check is only as
+good as the partition, and "we looked at subgroups" is not a finding without
+saying which.**
+
+**Under the neutral partition the detection is tolerance-sensitive.** At
+α = 0.15 the poorest quartile comes in at **14.54% against 15%** — inside the
+budget by 0.46 points, so nothing is flagged, while the published partition
+flags it at both tolerances. The quartile is twice as wide as `well-below` and
+dilutes accordingly. That is a real limit on the claim and 0.46 points is not
+a margin to rely on in either direction.
+
+The monotone fall from 4.83 to 2.46 as the bottom cutoff widens is dilution,
+and the direction is the point: **the effect lives at the bottom of the income
+range**, not spread evenly through `well-below`. Six of seven predictions held;
+the one that missed is in [the ledger](docs/predictions.md) with why it could
+not have passed.
 
 ### The mechanism is not what it looks like
 

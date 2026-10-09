@@ -9,3 +9,10 @@
     near-threshold   5.18%  94.82%    0.71
              above   8.37%  91.63%    1.15
         well-above   6.28%  93.72%    0.87
+
+  fitted-no-distance, alpha = 0.15   pooled 6.76%   coverage 93.24%   worst band well-below at 11.65%   hides a subgroup: False
+              band   unsafe      cov    conc
+        well-below  11.65%  88.35%    1.72
+    near-threshold   4.81%  95.19%    0.71
+             above   7.78%  92.22%    1.15
+        well-above   5.87%  94.13%    0.87

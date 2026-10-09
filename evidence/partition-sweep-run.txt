@@ -1,0 +1,36 @@
+  fine_dev: 672 cases, 200 trials, seed 53
+  9 partitions tallied from the same trajectories
+
+  alpha = 0.20
+               published  bands  4  worst     well-below at 45.92%  conc  4.13  hides yes
+   equal-count-quartiles  bands  4  worst     q1-poorest at 27.32%  conc  2.46  hides yes
+            bottom-at-3k  bands  4  worst     bottom<=3k at 53.69%  conc  4.83  hides yes
+            bottom-at-6k  bands  4  worst     bottom<=6k at 45.92%  conc  4.13  hides yes
+            bottom-at-9k  bands  4  worst     bottom<=9k at 41.75%  conc  3.76  hides yes
+           bottom-at-12k  bands  4  worst    bottom<=12k at 33.91%  conc  3.05  hides yes
+           bottom-at-15k  bands  4  worst    bottom<=15k at 27.32%  conc  2.46  hides yes
+     two-bands-at-median  bands  2  worst   below-median at 15.83%  conc  1.42  hides  no
+             eight-bands  bands  8  worst             b0 at 45.92%  conc  4.13  hides yes
+
+  alpha = 0.15
+               published  bands  4  worst     well-below at 28.28%  conc  3.86  hides yes
+   equal-count-quartiles  bands  4  worst     q1-poorest at 14.54%  conc  1.99  hides  no
+            bottom-at-3k  bands  4  worst     bottom<=3k at 36.88%  conc  5.04  hides yes
+            bottom-at-6k  bands  4  worst     bottom<=6k at 28.28%  conc  3.86  hides yes
+            bottom-at-9k  bands  4  worst     bottom<=9k at 23.21%  conc  3.17  hides yes
+           bottom-at-12k  bands  4  worst    bottom<=12k at 18.08%  conc  2.47  hides yes
+           bottom-at-15k  bands  4  worst    bottom<=15k at 14.54%  conc  1.99  hides  no
+     two-bands-at-median  bands  2  worst   below-median at  8.88%  conc  1.21  hides  no
+             eight-bands  bands  8  worst             b0 at 28.28%  conc  3.86  hides yes
+
+
+  Q1-Q7, scored against addendum nine
+  Q1    held   a band still exceeds alpha under equal-count quartiles
+  Q2    held   the worst quartile is the poorest
+  Q3    held   its concentration is above 2.0
+  Q4    held   concentration falls monotonically as the bottom cutoff rises
+  Q5    held   a 3k cutoff concentrates more than the published 6k
+  Q6    held   two bands at the median show concentration below 2.0
+  Q7  MISSED   eight bands localise further than four
+
+  wrote evidence/partition_sweep.json (132.4s)

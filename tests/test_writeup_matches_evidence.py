@@ -1567,3 +1567,149 @@ def test_the_readme_counts_theory_claims_from_theory(readme):
             continue
         bad = re.compile(rf"(?<![\w-]){other} claims", re.I)
         assert not bad.search(readme), (other, n)
+
+
+# ---------------------------------------------------------------------------
+# Round Q: the partition the finding is phrased in
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def sweep():
+    p = ROOT / "evidence" / "partition_sweep.json"
+    if not p.exists():
+        pytest.skip("the partition sweep has not been run in this checkout")
+    return json.loads(p.read_text())
+
+
+def worst_of(row: dict) -> tuple[str, float, float]:
+    w = row["worst_band"]
+    rate = next((b["unsafe_rate"] for b in row["bands"]
+                 if b["band"] == w), 0.0)
+    return w, rate, row["concentration"].get(w, 0.0)
+
+
+def test_the_control_partition_reproduces_the_published_breakdown(sweep,
+                                                                  round4):
+    """
+    The sweep's own control, which makes the rest of it a comparison.
+
+    `published` in the sweep is a reimplementation of `hardness` as a
+    cutoff list. If it disagreed with the breakdown every other result in
+    the repository uses, the eight other partitions would be measured
+    against the wrong baseline and the whole round would be noise.
+
+    Pinned against round four's figure rather than against the sweep's own
+    other arms, so this cannot pass by being self-consistently wrong.
+    """
+    pub = sweep["by_alpha"]["0.20"]["published"]
+    w, rate, conc = worst_of(pub)
+    assert w == "well-below", w
+
+    # bottom-at-6k is the same grouping under a different band name, so the
+    # two must agree to every digit -- an internal check the round gets free.
+    same = sweep["by_alpha"]["0.20"]["bottom-at-6k"]
+    assert worst_of(same)[1] == rate
+    assert worst_of(same)[2] == conc
+
+    ref = next(r for r in round4["E1_E3_dev"] if r["alpha"] == 0.20) \
+        if "E1_E3_dev" in round4 else None
+    if ref is not None:
+        assert abs(ref["concentration"]["well-below"] - conc) < 0.05, \
+            (ref["concentration"]["well-below"], conc)
+
+
+def test_the_finding_survives_a_neutral_partition(readme, sweep):
+    """
+    Q1 to Q3, and the claim the section rests on.
+
+    Equal-count quartiles are chosen from the income distribution with no
+    reference to any result. If the poorest quartile were inside budget, the
+    subgroup finding would be a property of three constants in `split.py`
+    and the README would have to say so at the top.
+    """
+    neutral = sweep["by_alpha"]["0.20"]["equal-count-quartiles"]
+    w, rate, conc = worst_of(neutral)
+
+    assert neutral["hides_a_subgroup"] is True, "Q1"
+    assert w == "q1-poorest", ("Q2", w)
+    assert rate > 0.20, ("the quartile must exceed the budget", rate)
+    assert conc > 2.0, ("Q3", conc)
+
+    assert any(f in readme for f in pct_forms(rate, 1)), rate
+    assert f"{conc:.2f}" in readme, conc
+
+
+def test_the_readme_reports_the_tolerance_limit_it_found(readme, sweep):
+    """
+    The unpredicted result that cuts against the finding.
+
+    At α = 0.15 the neutral partition's poorest quartile lands inside the
+    budget, by less than half a point. Omitting that would make the sweep
+    read as a clean confirmation, which it is not, so the figure has to
+    appear and the word has to be there.
+    """
+    at15 = sweep["by_alpha"]["0.15"]["equal-count-quartiles"]
+    _, rate, _ = worst_of(at15)
+    assert at15["hides_a_subgroup"] is False, \
+        "this test exists because the neutral partition misses at 0.15"
+    assert rate < 0.15, rate
+
+    assert any(f in readme for f in pct_forms(rate, 2)), rate
+    assert "tolerance-sensitive" in readme, \
+        "a limit found and not named is a limit not reported"
+
+
+def test_a_coarse_partition_hides_the_finding(readme, sweep):
+    """
+    The most actionable thing the round produced, and it was not predicted.
+
+    Two bands at the median report no hidden subgroup at either tolerance.
+    An operator checking with two groups concludes there is nothing there.
+    """
+    for alpha in ("0.20", "0.15"):
+        two = sweep["by_alpha"][alpha]["two-bands-at-median"]
+        assert two["hides_a_subgroup"] is False, alpha
+        assert len(two["bands"]) == 2, two["bands"]
+
+    _, rate, conc = worst_of(sweep["by_alpha"]["0.20"]["two-bands-at-median"])
+    assert conc < 2.0, conc
+    assert f"{conc:.2f}" in readme, conc
+    assert any(f in readme for f in pct_forms(rate, 1)), rate
+
+
+def test_the_effect_concentrates_toward_the_bottom_of_the_range(readme,
+                                                                sweep):
+    """
+    Q4 and Q5 together: the concentration is monotone in the bottom cutoff
+    and highest at the narrowest band.
+
+    Monotone-and-falling alone would be explained by dilution. What makes it
+    a statement about where the effect lives is that the narrowest cutoff
+    exceeds the published one rather than matching it.
+    """
+    edges = (3, 6, 9, 12, 15)
+    series = [worst_of(sweep["by_alpha"]["0.20"][f"bottom-at-{e}k"])[2]
+              for e in edges]
+    assert series == sorted(series, reverse=True), series
+    assert series[0] > series[1], ("Q5", series[:2])
+
+    for conc in (series[0], series[-1]):
+        assert f"{conc:.2f}" in readme, conc
+
+
+def test_every_partition_is_tallied_from_one_run(sweep):
+    """
+    The design property that makes this a partition comparison.
+
+    All nine breakdowns come from one `validate` pass per tolerance, so
+    their pooled rates, coverage and trial counts must be identical. If they
+    differ, the collectors were not fanned out over shared trajectories and
+    every difference between partitions is confounded with run-to-run noise.
+    """
+    for alpha, rows in sweep["by_alpha"].items():
+        pooled = {r["pooled_unsafe_rate"] for r in rows.values()}
+        cov = {r["mean_coverage"] for r in rows.values()}
+        trials = {r["trials"] for r in rows.values()}
+        assert len(pooled) == 1, (alpha, sorted(pooled))
+        assert len(cov) == 1, (alpha, sorted(cov))
+        assert len(trials) == 1, (alpha, sorted(trials))

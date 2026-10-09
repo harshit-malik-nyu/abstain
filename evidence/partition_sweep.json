@@ -1,0 +1,1399 @@
+{
+ "by_alpha": {
+  "0.15": {
+   "bottom-at-12k": {
+    "alpha": 0.15,
+    "bands": [
+     {
+      "abstained": 1264,
+      "band": "bottom<=12k",
+      "coverage": 0.7603890362511052,
+      "decidable": 21489,
+      "deployed": 21489,
+      "resolved": 16340,
+      "unsafe": 3885,
+      "unsafe_rate": 0.18079017171576156
+     },
+     {
+      "abstained": 4349,
+      "band": "near-threshold",
+      "coverage": 0.7550029350552324,
+      "decidable": 18739,
+      "deployed": 18739,
+      "resolved": 14148,
+      "unsafe": 242,
+      "unsafe_rate": 0.012914243022573242
+     },
+     {
+      "abstained": 5210,
+      "band": "above",
+      "coverage": 0.6580523513753327,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 11866,
+      "unsafe": 956,
+      "unsafe_rate": 0.053016858917480036
+     },
+     {
+      "abstained": 2342,
+      "band": "well-above",
+      "coverage": 0.8845019476905954,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31789,
+      "unsafe": 1809,
+      "unsafe_rate": 0.050333889816360604
+     }
+    ],
+    "concentration": {
+     "above": 0.7246355354072286,
+     "bottom<=12k": 2.471043844402893,
+     "near-threshold": 0.17651214346001154,
+     "well-above": 0.6879646576757353
+    },
+    "cuts": [
+     12000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7870806794055203,
+    "pooled_unsafe_rate": 0.07316348195329087,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=12k": 0.22916666666666666,
+     "near-threshold": 0.19940476190476192,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.0,
+    "worst_band": "bottom<=12k"
+   },
+   "bottom-at-15k": {
+    "alpha": 0.15,
+    "bands": [
+     {
+      "abstained": 2683,
+      "band": "bottom<=15k",
+      "coverage": 0.7541179994010183,
+      "decidable": 26712,
+      "deployed": 26712,
+      "resolved": 20144,
+      "unsafe": 3885,
+      "unsafe_rate": 0.14544025157232704
+     },
+     {
+      "abstained": 2930,
+      "band": "near-threshold",
+      "coverage": 0.7653151820065108,
+      "decidable": 13516,
+      "deployed": 13516,
+      "resolved": 10344,
+      "unsafe": 242,
+      "unsafe_rate": 0.01790470553418171
+     },
+     {
+      "abstained": 5210,
+      "band": "above",
+      "coverage": 0.6580523513753327,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 11866,
+      "unsafe": 956,
+      "unsafe_rate": 0.053016858917480036
+     },
+     {
+      "abstained": 2342,
+      "band": "well-above",
+      "coverage": 0.8845019476905954,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31789,
+      "unsafe": 1809,
+      "unsafe_rate": 0.050333889816360604
+     }
+    ],
+    "concentration": {
+     "above": 0.7246355354072286,
+     "bottom<=15k": 1.9878803972886254,
+     "near-threshold": 0.24472188933835132,
+     "well-above": 0.6879646576757353
+    },
+    "cuts": [
+     15000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": false,
+    "mean_coverage": 0.7870806794055203,
+    "pooled_unsafe_rate": 0.07316348195329087,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=15k": 0.28422619047619047,
+     "near-threshold": 0.14434523809523808,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.0,
+    "worst_band": "bottom<=15k"
+   },
+   "bottom-at-3k": {
+    "alpha": 0.15,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "bottom<=3k",
+      "coverage": 0.6311533052039381,
+      "decidable": 8532,
+      "deployed": 8532,
+      "resolved": 5385,
+      "unsafe": 3147,
+      "unsafe_rate": 0.36884669479606186
+     },
+     {
+      "abstained": 5613,
+      "band": "near-threshold",
+      "coverage": 0.791992680464412,
+      "decidable": 31696,
+      "deployed": 31696,
+      "resolved": 25103,
+      "unsafe": 980,
+      "unsafe_rate": 0.030918727915194347
+     },
+     {
+      "abstained": 5210,
+      "band": "above",
+      "coverage": 0.6580523513753327,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 11866,
+      "unsafe": 956,
+      "unsafe_rate": 0.053016858917480036
+     },
+     {
+      "abstained": 2342,
+      "band": "well-above",
+      "coverage": 0.8845019476905954,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31789,
+      "unsafe": 1809,
+      "unsafe_rate": 0.050333889816360604
+     }
+    ],
+    "concentration": {
+     "above": 0.7246355354072286,
+     "bottom<=3k": 5.041404331077921,
+     "near-threshold": 0.42259781915428135,
+     "well-above": 0.6879646576757353
+    },
+    "cuts": [
+     3000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7870806794055203,
+    "pooled_unsafe_rate": 0.07316348195329087,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=3k": 0.09077380952380952,
+     "near-threshold": 0.33779761904761907,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.0,
+    "worst_band": "bottom<=3k"
+   },
+   "bottom-at-6k": {
+    "alpha": 0.15,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "bottom<=6k",
+      "coverage": 0.7172403494362727,
+      "decidable": 13393,
+      "deployed": 13393,
+      "resolved": 9606,
+      "unsafe": 3787,
+      "unsafe_rate": 0.2827596505637273
+     },
+     {
+      "abstained": 5613,
+      "band": "near-threshold",
+      "coverage": 0.7781628470281349,
+      "decidable": 26835,
+      "deployed": 26835,
+      "resolved": 20882,
+      "unsafe": 340,
+      "unsafe_rate": 0.01267002049562139
+     },
+     {
+      "abstained": 5210,
+      "band": "above",
+      "coverage": 0.6580523513753327,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 11866,
+      "unsafe": 956,
+      "unsafe_rate": 0.053016858917480036
+     },
+     {
+      "abstained": 2342,
+      "band": "well-above",
+      "coverage": 0.8845019476905954,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31789,
+      "unsafe": 1809,
+      "unsafe_rate": 0.050333889816360604
+     }
+    ],
+    "concentration": {
+     "above": 0.7246355354072286,
+     "bottom<=6k": 3.864764811825756,
+     "near-threshold": 0.17317410485889942,
+     "well-above": 0.6879646576757353
+    },
+    "cuts": [
+     6000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7870806794055203,
+    "pooled_unsafe_rate": 0.07316348195329087,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=6k": 0.14285714285714285,
+     "near-threshold": 0.2857142857142857,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.0,
+    "worst_band": "bottom<=6k"
+   },
+   "bottom-at-9k": {
+    "alpha": 0.15,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "bottom<=9k",
+      "coverage": 0.767935009856042,
+      "decidable": 16741,
+      "deployed": 16741,
+      "resolved": 12856,
+      "unsafe": 3885,
+      "unsafe_rate": 0.23206499014395796
+     },
+     {
+      "abstained": 5613,
+      "band": "near-threshold",
+      "coverage": 0.7507131604717503,
+      "decidable": 23487,
+      "deployed": 23487,
+      "resolved": 17632,
+      "unsafe": 242,
+      "unsafe_rate": 0.010303572188870439
+     },
+     {
+      "abstained": 5210,
+      "band": "above",
+      "coverage": 0.6580523513753327,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 11866,
+      "unsafe": 956,
+      "unsafe_rate": 0.053016858917480036
+     },
+     {
+      "abstained": 2342,
+      "band": "well-above",
+      "coverage": 0.8845019476905954,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31789,
+      "unsafe": 1809,
+      "unsafe_rate": 0.050333889816360604
+     }
+    ],
+    "concentration": {
+     "above": 0.7246355354072286,
+     "bottom<=9k": 3.1718691340047647,
+     "near-threshold": 0.1408294399581537,
+     "well-above": 0.6879646576757353
+    },
+    "cuts": [
+     9000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7870806794055203,
+    "pooled_unsafe_rate": 0.07316348195329087,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=9k": 0.17857142857142858,
+     "near-threshold": 0.25,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.0,
+    "worst_band": "bottom<=9k"
+   },
+   "eight-bands": {
+    "alpha": 0.15,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "b0",
+      "coverage": 0.7172403494362727,
+      "decidable": 13393,
+      "deployed": 13393,
+      "resolved": 9606,
+      "unsafe": 3787,
+      "unsafe_rate": 0.2827596505637273
+     },
+     {
+      "abstained": 1264,
+      "band": "b1",
+      "coverage": 0.8317687747035574,
+      "decidable": 8096,
+      "deployed": 8096,
+      "resolved": 6734,
+      "unsafe": 98,
+      "unsafe_rate": 0.012104743083003952
+     },
+     {
+      "abstained": 2809,
+      "band": "b2",
+      "coverage": 0.710143432050356,
+      "decidable": 9691,
+      "deployed": 9691,
+      "resolved": 6882,
+      "unsafe": 0,
+      "unsafe_rate": 0.0
+     },
+     {
+      "abstained": 1540,
+      "band": "b3",
+      "coverage": 0.803050397877984,
+      "decidable": 9048,
+      "deployed": 9048,
+      "resolved": 7266,
+      "unsafe": 242,
+      "unsafe_rate": 0.02674624226348364
+     },
+     {
+      "abstained": 2235,
+      "band": "b4",
+      "coverage": 0.728282168517309,
+      "decidable": 9186,
+      "deployed": 9186,
+      "resolved": 6690,
+      "unsafe": 261,
+      "unsafe_rate": 0.028412802090137166
+     },
+     {
+      "abstained": 2975,
+      "band": "b5",
+      "coverage": 0.5851232195342527,
+      "decidable": 8846,
+      "deployed": 8846,
+      "resolved": 5176,
+      "unsafe": 695,
+      "unsafe_rate": 0.0785665837666742
+     },
+     {
+      "abstained": 2342,
+      "band": "b6",
+      "coverage": 0.7992176585638446,
+      "decidable": 17895,
+      "deployed": 17895,
+      "resolved": 14302,
+      "unsafe": 1251,
+      "unsafe_rate": 0.06990779547359598
+     },
+     {
+      "abstained": 0,
+      "band": "b7",
+      "coverage": 0.969077306733167,
+      "decidable": 18045,
+      "deployed": 18045,
+      "resolved": 17487,
+      "unsafe": 558,
+      "unsafe_rate": 0.030922693266832918
+     }
+    ],
+    "concentration": {
+     "b0": 3.864764811825756,
+     "b1": 0.1654478813724568,
+     "b2": 0.0,
+     "b3": 0.36556819808766094,
+     "b4": 0.38834677261911216,
+     "b5": 1.0738497084765974,
+     "b6": 0.9555012091719008,
+     "b7": 0.4226520176633286
+    },
+    "cuts": [
+     6000,
+     12000,
+     18000,
+     24000,
+     30000,
+     36000,
+     48000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7870806794055203,
+    "pooled_unsafe_rate": 0.07316348195329087,
+    "shares": {
+     "b0": 0.14285714285714285,
+     "b1": 0.08630952380952381,
+     "b2": 0.10267857142857142,
+     "b3": 0.09672619047619048,
+     "b4": 0.09672619047619048,
+     "b5": 0.09375,
+     "b6": 0.18898809523809523,
+     "b7": 0.19196428571428573
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.0,
+    "worst_band": "b0"
+   },
+   "equal-count-quartiles": {
+    "alpha": 0.15,
+    "bands": [
+     {
+      "abstained": 2683,
+      "band": "q1-poorest",
+      "coverage": 0.7541179994010183,
+      "decidable": 26712,
+      "deployed": 26712,
+      "resolved": 20144,
+      "unsafe": 3885,
+      "unsafe_rate": 0.14544025157232704
+     },
+     {
+      "abstained": 5165,
+      "band": "q2",
+      "coverage": 0.7503303673685138,
+      "decidable": 22702,
+      "deployed": 22702,
+      "resolved": 17034,
+      "unsafe": 503,
+      "unsafe_rate": 0.022156638181658004
+     },
+     {
+      "abstained": 5317,
+      "band": "q3",
+      "coverage": 0.678052592865024,
+      "decidable": 21752,
+      "deployed": 21752,
+      "resolved": 14749,
+      "unsafe": 1686,
+      "unsafe_rate": 0.0775101140125046
+     },
+     {
+      "abstained": 0,
+      "band": "q4-richest",
+      "coverage": 0.9644872796735261,
+      "decidable": 23034,
+      "deployed": 23034,
+      "resolved": 22216,
+      "unsafe": 818,
+      "unsafe_rate": 0.03551272032647391
+     }
+    ],
+    "concentration": {
+     "q1-poorest": 1.9878803972886254,
+     "q2": 0.3028373936030447,
+     "q3": 1.0594098578029503,
+     "q4-richest": 0.48538860341756274
+    },
+    "cuts": [
+     15000,
+     30000,
+     45000
+    ],
+    "hides_a_subgroup": false,
+    "mean_coverage": 0.7870806794055203,
+    "pooled_unsafe_rate": 0.07316348195329087,
+    "shares": {
+     "q1-poorest": 0.28422619047619047,
+     "q2": 0.24107142857142858,
+     "q3": 0.23065476190476192,
+     "q4-richest": 0.24404761904761904
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.0,
+    "worst_band": "q1-poorest"
+   },
+   "published": {
+    "alpha": 0.15,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "well-below",
+      "coverage": 0.7172403494362727,
+      "decidable": 13393,
+      "deployed": 13393,
+      "resolved": 9606,
+      "unsafe": 3787,
+      "unsafe_rate": 0.2827596505637273
+     },
+     {
+      "abstained": 5613,
+      "band": "near-threshold",
+      "coverage": 0.7781628470281349,
+      "decidable": 26835,
+      "deployed": 26835,
+      "resolved": 20882,
+      "unsafe": 340,
+      "unsafe_rate": 0.01267002049562139
+     },
+     {
+      "abstained": 5210,
+      "band": "above",
+      "coverage": 0.6580523513753327,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 11866,
+      "unsafe": 956,
+      "unsafe_rate": 0.053016858917480036
+     },
+     {
+      "abstained": 2342,
+      "band": "well-above",
+      "coverage": 0.8845019476905954,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31789,
+      "unsafe": 1809,
+      "unsafe_rate": 0.050333889816360604
+     }
+    ],
+    "concentration": {
+     "above": 0.7246355354072286,
+     "near-threshold": 0.17317410485889942,
+     "well-above": 0.6879646576757353,
+     "well-below": 3.864764811825756
+    },
+    "cuts": [
+     6000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7870806794055203,
+    "pooled_unsafe_rate": 0.07316348195329087,
+    "shares": {
+     "above": 0.19047619047619047,
+     "near-threshold": 0.2857142857142857,
+     "well-above": 0.38095238095238093,
+     "well-below": 0.14285714285714285
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.0,
+    "worst_band": "well-below"
+   },
+   "two-bands-at-median": {
+    "alpha": 0.15,
+    "bands": [
+     {
+      "abstained": 7848,
+      "band": "below-median",
+      "coverage": 0.752377868620229,
+      "decidable": 49414,
+      "deployed": 49414,
+      "resolved": 37178,
+      "unsafe": 4388,
+      "unsafe_rate": 0.08880074472821467
+     },
+     {
+      "abstained": 5317,
+      "band": "above-median",
+      "coverage": 0.8253695351225829,
+      "decidable": 44786,
+      "deployed": 44786,
+      "resolved": 36965,
+      "unsafe": 2504,
+      "unsafe_rate": 0.05591032912070736
+     }
+    ],
+    "concentration": {
+     "above-median": 0.7641835466004983,
+     "below-median": 1.2137304343293418
+    },
+    "cuts": [
+     30000
+    ],
+    "hides_a_subgroup": false,
+    "mean_coverage": 0.7870806794055203,
+    "pooled_unsafe_rate": 0.07316348195329087,
+    "shares": {
+     "above-median": 0.47470238095238093,
+     "below-median": 0.5252976190476191
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.0,
+    "worst_band": "below-median"
+   }
+  },
+  "0.20": {
+   "bottom-at-12k": {
+    "alpha": 0.2,
+    "bands": [
+     {
+      "abstained": 1002,
+      "band": "bottom<=12k",
+      "coverage": 0.6143143003397087,
+      "decidable": 21489,
+      "deployed": 21489,
+      "resolved": 13201,
+      "unsafe": 7286,
+      "unsafe_rate": 0.3390571920517474
+     },
+     {
+      "abstained": 4162,
+      "band": "near-threshold",
+      "coverage": 0.7632210897059608,
+      "decidable": 18739,
+      "deployed": 18739,
+      "resolved": 14302,
+      "unsafe": 275,
+      "unsafe_rate": 0.014675276162015048
+     },
+     {
+      "abstained": 4702,
+      "band": "above",
+      "coverage": 0.6861690328305236,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 12373,
+      "unsafe": 957,
+      "unsafe_rate": 0.053072315882874886
+     },
+     {
+      "abstained": 2258,
+      "band": "well-above",
+      "coverage": 0.8829437952142459,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31733,
+      "unsafe": 1949,
+      "unsafe_rate": 0.05422927100723428
+     }
+    ],
+    "concentration": {
+     "above": 0.47763563162002626,
+     "bottom<=12k": 3.051417549562874,
+     "near-threshold": 0.13207327930274362,
+     "well-above": 0.4880478961384799
+    },
+    "cuts": [
+     12000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.760180467091295,
+    "pooled_unsafe_rate": 0.11111464968152866,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=12k": 0.22916666666666666,
+     "near-threshold": 0.19940476190476192,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "bottom<=12k"
+   },
+   "bottom-at-15k": {
+    "alpha": 0.2,
+    "bands": [
+     {
+      "abstained": 2421,
+      "band": "bottom<=15k",
+      "coverage": 0.6361560347409404,
+      "decidable": 26712,
+      "deployed": 26712,
+      "resolved": 16993,
+      "unsafe": 7298,
+      "unsafe_rate": 0.2732105420784666
+     },
+     {
+      "abstained": 2743,
+      "band": "near-threshold",
+      "coverage": 0.7775969221663214,
+      "decidable": 13516,
+      "deployed": 13516,
+      "resolved": 10510,
+      "unsafe": 263,
+      "unsafe_rate": 0.019458419650784254
+     },
+     {
+      "abstained": 4702,
+      "band": "above",
+      "coverage": 0.6861690328305236,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 12373,
+      "unsafe": 957,
+      "unsafe_rate": 0.053072315882874886
+     },
+     {
+      "abstained": 2258,
+      "band": "well-above",
+      "coverage": 0.8829437952142459,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31733,
+      "unsafe": 1949,
+      "unsafe_rate": 0.05422927100723428
+     }
+    ],
+    "concentration": {
+     "above": 0.47763563162002626,
+     "bottom<=15k": 2.4588165724459303,
+     "near-threshold": 0.17512019978063217,
+     "well-above": 0.4880478961384799
+    },
+    "cuts": [
+     15000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.760180467091295,
+    "pooled_unsafe_rate": 0.11111464968152866,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=15k": 0.28422619047619047,
+     "near-threshold": 0.14434523809523808,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "bottom<=15k"
+   },
+   "bottom-at-3k": {
+    "alpha": 0.2,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "bottom<=3k",
+      "coverage": 0.4630801687763713,
+      "decidable": 8532,
+      "deployed": 8532,
+      "resolved": 3951,
+      "unsafe": 4581,
+      "unsafe_rate": 0.5369198312236287
+     },
+     {
+      "abstained": 5164,
+      "band": "near-threshold",
+      "coverage": 0.7430590610802625,
+      "decidable": 31696,
+      "deployed": 31696,
+      "resolved": 23552,
+      "unsafe": 2980,
+      "unsafe_rate": 0.09401817264008076
+     },
+     {
+      "abstained": 4702,
+      "band": "above",
+      "coverage": 0.6861690328305236,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 12373,
+      "unsafe": 957,
+      "unsafe_rate": 0.053072315882874886
+     },
+     {
+      "abstained": 2258,
+      "band": "well-above",
+      "coverage": 0.8829437952142459,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31733,
+      "unsafe": 1949,
+      "unsafe_rate": 0.05422927100723428
+     }
+    ],
+    "concentration": {
+     "above": 0.47763563162002626,
+     "bottom<=3k": 4.832124591694451,
+     "near-threshold": 0.8461366067350347,
+     "well-above": 0.4880478961384799
+    },
+    "cuts": [
+     3000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.760180467091295,
+    "pooled_unsafe_rate": 0.11111464968152866,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=3k": 0.09077380952380952,
+     "near-threshold": 0.33779761904761907,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "bottom<=3k"
+   },
+   "bottom-at-6k": {
+    "alpha": 0.2,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "bottom<=6k",
+      "coverage": 0.5408048980810871,
+      "decidable": 13393,
+      "deployed": 13393,
+      "resolved": 7243,
+      "unsafe": 6150,
+      "unsafe_rate": 0.4591951019189129
+     },
+     {
+      "abstained": 5164,
+      "band": "near-threshold",
+      "coverage": 0.7549841624743805,
+      "decidable": 26835,
+      "deployed": 26835,
+      "resolved": 20260,
+      "unsafe": 1411,
+      "unsafe_rate": 0.05258058505682877
+     },
+     {
+      "abstained": 4702,
+      "band": "above",
+      "coverage": 0.6861690328305236,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 12373,
+      "unsafe": 957,
+      "unsafe_rate": 0.053072315882874886
+     },
+     {
+      "abstained": 2258,
+      "band": "well-above",
+      "coverage": 0.8829437952142459,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31733,
+      "unsafe": 1949,
+      "unsafe_rate": 0.05422927100723428
+     }
+    ],
+    "concentration": {
+     "above": 0.47763563162002626,
+     "bottom<=6k": 4.132624305031202,
+     "near-threshold": 0.4732101951230792,
+     "well-above": 0.4880478961384799
+    },
+    "cuts": [
+     6000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.760180467091295,
+    "pooled_unsafe_rate": 0.11111464968152866,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=6k": 0.14285714285714285,
+     "near-threshold": 0.2857142857142857,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "bottom<=6k"
+   },
+   "bottom-at-9k": {
+    "alpha": 0.2,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "bottom<=9k",
+      "coverage": 0.5824622185054656,
+      "decidable": 16741,
+      "deployed": 16741,
+      "resolved": 9751,
+      "unsafe": 6990,
+      "unsafe_rate": 0.41753778149453435
+     },
+     {
+      "abstained": 5164,
+      "band": "near-threshold",
+      "coverage": 0.7558223698216034,
+      "decidable": 23487,
+      "deployed": 23487,
+      "resolved": 17752,
+      "unsafe": 571,
+      "unsafe_rate": 0.02431132115638438
+     },
+     {
+      "abstained": 4702,
+      "band": "above",
+      "coverage": 0.6861690328305236,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 12373,
+      "unsafe": 957,
+      "unsafe_rate": 0.053072315882874886
+     },
+     {
+      "abstained": 2258,
+      "band": "well-above",
+      "coverage": 0.8829437952142459,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31733,
+      "unsafe": 1949,
+      "unsafe_rate": 0.05422927100723428
+     }
+    ],
+    "concentration": {
+     "above": 0.47763563162002626,
+     "bottom<=9k": 3.7577203608278533,
+     "near-threshold": 0.2187949224162997,
+     "well-above": 0.4880478961384799
+    },
+    "cuts": [
+     9000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.760180467091295,
+    "pooled_unsafe_rate": 0.11111464968152866,
+    "shares": {
+     "above": 0.19047619047619047,
+     "bottom<=9k": 0.17857142857142858,
+     "near-threshold": 0.25,
+     "well-above": 0.38095238095238093
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "bottom<=9k"
+   },
+   "eight-bands": {
+    "alpha": 0.2,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "b0",
+      "coverage": 0.5408048980810871,
+      "decidable": 13393,
+      "deployed": 13393,
+      "resolved": 7243,
+      "unsafe": 6150,
+      "unsafe_rate": 0.4591951019189129
+     },
+     {
+      "abstained": 1002,
+      "band": "b1",
+      "coverage": 0.7359189723320159,
+      "decidable": 8096,
+      "deployed": 8096,
+      "resolved": 5958,
+      "unsafe": 1136,
+      "unsafe_rate": 0.14031620553359683
+     },
+     {
+      "abstained": 2809,
+      "band": "b2",
+      "coverage": 0.7089051697451243,
+      "decidable": 9691,
+      "deployed": 9691,
+      "resolved": 6870,
+      "unsafe": 12,
+      "unsafe_rate": 0.0012382623052316583
+     },
+     {
+      "abstained": 1353,
+      "band": "b3",
+      "coverage": 0.8213969938107869,
+      "decidable": 9048,
+      "deployed": 9048,
+      "resolved": 7432,
+      "unsafe": 263,
+      "unsafe_rate": 0.029067197170645445
+     },
+     {
+      "abstained": 2093,
+      "band": "b4",
+      "coverage": 0.7437404746353146,
+      "decidable": 9186,
+      "deployed": 9186,
+      "resolved": 6832,
+      "unsafe": 261,
+      "unsafe_rate": 0.028412802090137166
+     },
+     {
+      "abstained": 2609,
+      "band": "b5",
+      "coverage": 0.6263848066922904,
+      "decidable": 8846,
+      "deployed": 8846,
+      "resolved": 5541,
+      "unsafe": 696,
+      "unsafe_rate": 0.0786796292109428
+     },
+     {
+      "abstained": 2258,
+      "band": "b6",
+      "coverage": 0.7960882928192232,
+      "decidable": 17895,
+      "deployed": 17895,
+      "resolved": 14246,
+      "unsafe": 1391,
+      "unsafe_rate": 0.07773120983514949
+     },
+     {
+      "abstained": 0,
+      "band": "b7",
+      "coverage": 0.969077306733167,
+      "decidable": 18045,
+      "deployed": 18045,
+      "resolved": 17487,
+      "unsafe": 558,
+      "unsafe_rate": 0.030922693266832918
+     }
+    ],
+    "concentration": {
+     "b0": 4.132624305031202,
+     "b1": 1.262805633062465,
+     "b2": 0.011144005842440262,
+     "b3": 0.2615964434388842,
+     "b4": 0.2557070752738054,
+     "b5": 0.708094112130583,
+     "b6": 0.6995586095797345,
+     "b7": 0.2782953764914169
+    },
+    "cuts": [
+     6000,
+     12000,
+     18000,
+     24000,
+     30000,
+     36000,
+     48000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.760180467091295,
+    "pooled_unsafe_rate": 0.11111464968152866,
+    "shares": {
+     "b0": 0.14285714285714285,
+     "b1": 0.08630952380952381,
+     "b2": 0.10267857142857142,
+     "b3": 0.09672619047619048,
+     "b4": 0.09672619047619048,
+     "b5": 0.09375,
+     "b6": 0.18898809523809523,
+     "b7": 0.19196428571428573
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "b0"
+   },
+   "equal-count-quartiles": {
+    "alpha": 0.2,
+    "bands": [
+     {
+      "abstained": 2421,
+      "band": "q1-poorest",
+      "coverage": 0.6361560347409404,
+      "decidable": 26712,
+      "deployed": 26712,
+      "resolved": 16993,
+      "unsafe": 7298,
+      "unsafe_rate": 0.2732105420784666
+     },
+     {
+      "abstained": 4836,
+      "band": "q2",
+      "coverage": 0.7638974539688134,
+      "decidable": 22702,
+      "deployed": 22702,
+      "resolved": 17342,
+      "unsafe": 524,
+      "unsafe_rate": 0.023081666813496608
+     },
+     {
+      "abstained": 4867,
+      "band": "q3",
+      "coverage": 0.6936373666789261,
+      "decidable": 21752,
+      "deployed": 21752,
+      "resolved": 15088,
+      "unsafe": 1797,
+      "unsafe_rate": 0.08261309304891504
+     },
+     {
+      "abstained": 0,
+      "band": "q4-richest",
+      "coverage": 0.9631848571676652,
+      "decidable": 23034,
+      "deployed": 23034,
+      "resolved": 22186,
+      "unsafe": 848,
+      "unsafe_rate": 0.03681514283233481
+     }
+    ],
+    "concentration": {
+     "q1-poorest": 2.4588165724459303,
+     "q2": 0.20772838576778258,
+     "q3": 0.7434941592822966,
+     "q4-richest": 0.33132573371605417
+    },
+    "cuts": [
+     15000,
+     30000,
+     45000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.760180467091295,
+    "pooled_unsafe_rate": 0.11111464968152866,
+    "shares": {
+     "q1-poorest": 0.28422619047619047,
+     "q2": 0.24107142857142858,
+     "q3": 0.23065476190476192,
+     "q4-richest": 0.24404761904761904
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "q1-poorest"
+   },
+   "published": {
+    "alpha": 0.2,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "well-below",
+      "coverage": 0.5408048980810871,
+      "decidable": 13393,
+      "deployed": 13393,
+      "resolved": 7243,
+      "unsafe": 6150,
+      "unsafe_rate": 0.4591951019189129
+     },
+     {
+      "abstained": 5164,
+      "band": "near-threshold",
+      "coverage": 0.7549841624743805,
+      "decidable": 26835,
+      "deployed": 26835,
+      "resolved": 20260,
+      "unsafe": 1411,
+      "unsafe_rate": 0.05258058505682877
+     },
+     {
+      "abstained": 4702,
+      "band": "above",
+      "coverage": 0.6861690328305236,
+      "decidable": 18032,
+      "deployed": 18032,
+      "resolved": 12373,
+      "unsafe": 957,
+      "unsafe_rate": 0.053072315882874886
+     },
+     {
+      "abstained": 2258,
+      "band": "well-above",
+      "coverage": 0.8829437952142459,
+      "decidable": 35940,
+      "deployed": 35940,
+      "resolved": 31733,
+      "unsafe": 1949,
+      "unsafe_rate": 0.05422927100723428
+     }
+    ],
+    "concentration": {
+     "above": 0.47763563162002626,
+     "near-threshold": 0.4732101951230792,
+     "well-above": 0.4880478961384799,
+     "well-below": 4.132624305031202
+    },
+    "cuts": [
+     6000,
+     24000,
+     36000
+    ],
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.760180467091295,
+    "pooled_unsafe_rate": 0.11111464968152866,
+    "shares": {
+     "above": 0.19047619047619047,
+     "near-threshold": 0.2857142857142857,
+     "well-above": 0.38095238095238093,
+     "well-below": 0.14285714285714285
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "well-below"
+   },
+   "two-bands-at-median": {
+    "alpha": 0.2,
+    "bands": [
+     {
+      "abstained": 7257,
+      "band": "below-median",
+      "coverage": 0.6948435666005586,
+      "decidable": 49414,
+      "deployed": 49414,
+      "resolved": 34335,
+      "unsafe": 7822,
+      "unsafe_rate": 0.15829521997814386
+     },
+     {
+      "abstained": 4867,
+      "band": "above-median",
+      "coverage": 0.8322690126378779,
+      "decidable": 44786,
+      "deployed": 44786,
+      "resolved": 37274,
+      "unsafe": 2645,
+      "unsafe_rate": 0.05905863439467691
+     }
+    ],
+    "concentration": {
+     "above-median": 0.5315107824571095,
+     "below-median": 1.4246116100067976
+    },
+    "cuts": [
+     30000
+    ],
+    "hides_a_subgroup": false,
+    "mean_coverage": 0.760180467091295,
+    "pooled_unsafe_rate": 0.11111464968152866,
+    "shares": {
+     "above-median": 0.47470238095238093,
+     "below-median": 0.5252976190476191
+    },
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "below-median"
+   }
+  }
+ },
+ "calibration_share": 0.3,
+ "elapsed_seconds": 132.4,
+ "partitions": {
+  "bottom-at-12k": [
+   12000,
+   24000,
+   36000
+  ],
+  "bottom-at-15k": [
+   15000,
+   24000,
+   36000
+  ],
+  "bottom-at-3k": [
+   3000,
+   24000,
+   36000
+  ],
+  "bottom-at-6k": [
+   6000,
+   24000,
+   36000
+  ],
+  "bottom-at-9k": [
+   9000,
+   24000,
+   36000
+  ],
+  "eight-bands": [
+   6000,
+   12000,
+   18000,
+   24000,
+   30000,
+   36000,
+   48000
+  ],
+  "equal-count-quartiles": [
+   15000,
+   30000,
+   45000
+  ],
+  "published": [
+   6000,
+   24000,
+   36000
+  ],
+  "two-bands-at-median": [
+   30000
+  ]
+ },
+ "predictions": {
+  "Q1": {
+   "claim": "a band still exceeds alpha under equal-count quartiles",
+   "held": true,
+   "hides": true
+  },
+  "Q2": {
+   "claim": "the worst quartile is the poorest",
+   "held": true,
+   "worst": "q1-poorest"
+  },
+  "Q3": {
+   "claim": "its concentration is above 2.0",
+   "held": true,
+   "value": 2.4588165724459303
+  },
+  "Q4": {
+   "claim": "concentration falls monotonically as the bottom cutoff rises",
+   "held": true,
+   "series": [
+    [
+     3000,
+     4.832124591694451
+    ],
+    [
+     6000,
+     4.132624305031202
+    ],
+    [
+     9000,
+     3.7577203608278533
+    ],
+    [
+     12000,
+     3.051417549562874
+    ],
+    [
+     15000,
+     2.4588165724459303
+    ]
+   ]
+  },
+  "Q5": {
+   "at_3k": 4.832124591694451,
+   "claim": "a 3k cutoff concentrates more than the published 6k",
+   "held": true,
+   "published": 4.132624305031202
+  },
+  "Q6": {
+   "claim": "two bands at the median show concentration below 2.0",
+   "held": true,
+   "hides": false,
+   "value": 1.4246116100067976
+  },
+  "Q7": {
+   "claim": "eight bands localise further than four",
+   "held": false,
+   "published": 4.132624305031202,
+   "value": 4.132624305031202
+  }
+ },
+ "seed": 53,
+ "set": "fine_dev",
+ "trials": 200
+}

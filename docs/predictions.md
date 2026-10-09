@@ -1,6 +1,6 @@
 # Every prediction, and what happened
 
-Sixty-one predictions across eight pre-registrations, each written before the
+Sixty-eight predictions across nine pre-registrations, each written before the
 code that tested it. This table is the whole record: no prediction is omitted,
 and the outcome column is the one that was true at the time, not the one that
 would read best.
@@ -77,6 +77,13 @@ there were ten — so the number is derived from here rather than written twice.
 | **N2** | reordering drops concentration below 2.5 | **4.07 — identical again** | **missed** |
 | **N3** | `well-above` rises by at most 3 points | **0.00** points | held *(vacuously)* |
 | **N4** | coverage stays above 68% | 76.0% | held *(vacuously)* |
+| **Q1** | a band still exceeds α under a **neutral** equal-count partition | 27.3% against 20% | held |
+| **Q2** | and it is the poorest quartile | `q1-poorest` | held |
+| **Q3** | its concentration is above 2.0 | 2.46 | held |
+| **Q4** | concentration falls monotonically as the bottom cutoff rises | 4.83 → 4.13 → 3.76 → 3.05 → 2.46 | held |
+| **Q5** | a 3k cutoff concentrates **more** than the published 6k | **4.83 against 4.13** | held |
+| **Q6** | two bands at the median show concentration below 2.0 | 1.42, **and hides nothing** | held |
+| **Q7** | eight bands localise further than four | **4.13, identical** | **missed** |
 
 ---
 
@@ -121,6 +128,42 @@ rule commits on the **high-scoring** ones, and there it is **72%**. I walked
 into the same selection effect that `calibrate_on_trajectories` exists to
 handle. The corrected mechanism is in the README and the original reasoning is
 kept, annotated, in `scripts/diagnose_mechanism.py`.
+
+**Round Q tested the partition the headline finding is phrased in, and the
+finding survived.** Six of seven held. The one that matters is Q1: under
+equal-count quartiles of income — cutoffs taken from the data's own
+distribution with no reference to any result, 191/162/155/164 against the
+hand-drawn 96/192/128/256 — the poorest quartile still runs at **27.3%
+against a 20% budget** while the pooled rate is inside it. The subgroup
+result is not an artefact of three constants in `scripts/split.py`.
+
+Two things the round found that were **not** predicted, and both belong in the
+record:
+
+**A coarse partition hides it completely.** Two bands at the median report a
+worst group of 15.8%, concentration 1.42, and `hides_a_subgroup` **False** at
+both tolerances. An operator who checks for subgroup failure with two groups
+concludes there is none. That is a stronger statement than Q6 asked for — Q6
+predicted a low concentration, not that the finding would disappear — and it
+is the most directly actionable thing in this round.
+
+**Under the neutral partition the detection is tolerance-sensitive.** At
+α = 0.20 the poorest quartile is 27.3% against 20% and the subgroup is
+flagged. At α = 0.15 it is **14.54% against 15%** — inside the budget by 0.46
+points, so `hides_a_subgroup` is False. The published partition flags it at
+both. Reporting this as "the finding fails at 0.15" would overstate it as much
+as omitting it would understate it: the quartile is twice as wide as
+`well-below` and dilutes accordingly, and 0.46 points is not a margin anyone
+should rely on in either direction.
+
+**Q7 missed because of the partition I chose to test it with, not the claim.**
+It predicted that eight bands would localise the effect further than four. The
+eight-band split's lowest band is `income <= 6_000` — *identical to*
+`well-below` — so it returned 4.1326 against 4.1326, the same number to every
+digit. The claim itself is supported elsewhere in the same run: a 3,000 cutoff
+gives 4.83. I should have noticed before running that the partition could not
+possibly answer the question, and the run cost nothing extra, but a prediction
+that cannot fail for the reason it was written is not a test.
 
 **Rounds M and N are the worst two rounds in this ledger, and they produced
 the sharpest single result in it.** Nine predictions, five missed, and the four
