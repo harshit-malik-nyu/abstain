@@ -841,3 +841,111 @@ arms are paired against the figures already published — α = 0.20, 0.15, 0.10,
 written to `evidence/no_distance_groups.json`. Neither holdout is touched.
 Nothing below α = 0.10 is attempted and no prediction is adjusted after a
 result.
+
+---
+
+# Addendum nine — is the subgroup finding a property of the partition?
+
+Written before `scripts/run_partition_sweep.py` exists and before
+`collector` accepts a partition. The git history shows it.
+
+## Why this round exists
+
+The headline finding is stated **per band**: `well-below` absorbs 4.12× its
+share of the error budget. `well-below` is `income <= 6_000`, which on this
+benchmark's grid is three income values out of twenty-one — 96 of 672 cases —
+and the three cutoffs (6,000 / 24,000 / 36,000) were written in
+`scripts/split.py` by hand, before any of this was measured.
+
+Round five already swept the *other* hand-chosen constant, materiality, across
+two orders of magnitude and found the concentration unmoved. **The partition
+has never been swept at all**, and it is the more dangerous of the two,
+because the finding is phrased in its terms. A concentration that appears only
+at these cutoffs is a fact about where a line was drawn.
+
+The cutoffs were not chosen to produce the result — `split.py` is the first
+commit in the repository and predates every measurement, which is checkable.
+That rules out tuning. It does **not** rule out luck, and luck is what this
+round is for.
+
+## What is added
+
+No new method. `collector` gains an optional `partition` argument defaulting
+to `hardness`, so a breakdown can be computed over any grouping of the same
+trajectories. The sweep covers:
+
+**A neutral partition.** Equal-count quartiles of income, cutoffs 15,000 /
+30,000 / 45,000, giving 191 / 162 / 155 / 164 cases. Chosen by the data's own
+distribution with no reference to any result, and materially different from
+the hand-drawn 96 / 192 / 128 / 256.
+
+**The bottom cutoff, swept.** `well-below` redefined at 3,000, 6,000, 9,000,
+12,000 and 15,000 with the upper cutoffs fixed, so the question "how far up
+does the effect reach?" gets an answer rather than an assumption.
+
+**Coarseness.** A two-band split at the median, and an eight-band split on the
+grid's own 6,000-wide steps.
+
+One run, `fine_dev`, 200 trials, seed 53, α = 0.20 and 0.15.
+
+## Predictions
+
+**Q1.** Under equal-count quartiles some band will still exceed α at
+α = 0.20 — `hides_a_subgroup` stays **True**. This is the round's point: if it
+fails, the finding is a property of the hand-drawn cutoffs.
+
+**Q2.** The worst band under equal-count quartiles will be the **lowest-income
+quartile**.
+
+**Q3.** Its concentration will be **above 2.0**, though below 4.12, because
+the quartile is twice as wide and dilutes with safer cases.
+
+**Q4.** Across the swept bottom cutoff the concentration will fall
+**monotonically** as the cutoff rises, for the same dilution reason.
+
+**Q5.** At a 3,000 cutoff the concentration will be **above 4.12** — higher
+than at 6,000. This only holds if the effect is concentrated at the very
+bottom of the income range rather than spread over `well-below`'s three
+values, so it is a real test of the mechanism and not a restatement of Q4.
+
+**Q6.** The two-band split at the median will show a concentration **below
+2.0** and may well report no hidden subgroup. Coarse partitions hide this
+finding, which is the argument for reporting a fine one, and E7 already saw a
+two-group *calibration* scheme land between the extremes.
+
+**Q7.** The eight-band split will show a **higher** maximum concentration than
+four bands — finer partitions localise the effect further.
+
+## What would falsify what
+
+**Q1 fails.** No band exceeds α under a neutral equal-count partition. Then
+the subgroup result as stated is an artefact of three hand-written constants,
+and that goes at the top of the README above everything else, with the
+per-band tables relabelled as a property of this specific grouping.
+
+**Q2 fails while Q1 holds.** Some band is unsafe but not the poorest one.
+Then the *mechanism* — a score feature that reads distance-from-boundary as
+safety, maximal far below the limit — does not explain which group is harmed,
+and the mechanism section becomes a correlation.
+
+**Q5 fails while Q4 holds.** Dilution explains the shape and "the effect lives
+at the bottom of the range" does not. Weaker but worth knowing.
+
+**Q3, Q6 or Q7 missing** is uninformative; all three are magnitude or
+direction predictions about partitions nobody would deploy.
+
+## What this cannot show
+
+Every partition here is a partition **of income**. The impossibility result
+stands: no finite set of groupings covers every subgroup, and a group that
+cuts across income is no better protected than before. This round asks whether
+the finding survives reasonable choices of *income* grouping, which is a
+narrower question than whether it survives any grouping, and the narrower one
+is the one that was left open.
+
+## Analysis plan
+
+One run on `fine_dev`, 200 trials, seed 53, α = 0.20 and 0.15, written to
+`evidence/partition_sweep.json`. Neither holdout is touched. The partitions
+listed above are fixed here and none is added or dropped after seeing a
+result.
