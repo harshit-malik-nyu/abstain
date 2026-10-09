@@ -50,6 +50,32 @@ wrong.
 
 ---
 
+## Contents
+
+Thirteen sections and a license. The three worth reading if you read
+nothing else are **the finding that matters most**, **the case
+against**, and the [prediction ledger](docs/predictions.md) — in that
+order, because the first is the result, the second is why it might not
+hold, and the third is every time I was wrong about it.
+
+- [The finding that matters most](#the-finding-that-matters-most)
+- [Why not just pick a threshold?](#why-not-just-pick-a-threshold)
+- [Does the bound survive a bad score?](#does-the-bound-survive-a-bad-score)
+- [What breaking the assumption costs, and the certificate that never notices](#what-breaking-the-assumption-costs-and-the-certificate-that-never-notices)
+- [Four bugs, all in the method's favour](#four-bugs-all-in-the-methods-favour)
+- [The original result, and its replication](#the-original-result-and-its-replication)
+- [What is guaranteed, and on what basis](#what-is-guaranteed-and-on-what-basis)
+- [How much data does any of this need?](#how-much-data-does-any-of-this-need)
+- [If you are building one of these](#if-you-are-building-one-of-these)
+- [The case against](#the-case-against)
+- [The holdout is locked before the method exists](#the-holdout-is-locked-before-the-method-exists)
+- [Reproducing any of it](#reproducing-any-of-it)
+- [Status](#status)
+- [License](#license)
+
+---
+
+
 ## The finding that matters most
 
 The guarantee is **marginal**. It bounds the error rate over the population and

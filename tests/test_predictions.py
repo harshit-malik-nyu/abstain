@@ -485,3 +485,82 @@ def test_the_opening_states_all_three_levels_of_the_attack():
     nums = [ln for ln in lines[:end] if re.match(r"^\d+\. ", ln)]
     assert len(nums) == 3, nums
     assert "J1" in opening and "round O" in opening
+
+
+def _slug(heading: str) -> str:
+    """GitHub's anchor rule: lowercase, drop punctuation, spaces to hyphens."""
+    s = re.sub(r"[^\w\s-]", "", heading.lower())
+    return re.sub(r"\s+", "-", s.strip())
+
+
+def test_the_contents_block_matches_the_actual_sections():
+    """
+    A hand-maintained table of contents beside a growing README is the same
+    defect as a hand-typed count: it is right once.
+
+    So it is checked. Every `##` section except Contents itself must appear
+    as a link, in document order, with the anchor GitHub will actually
+    generate — a wrong anchor is worse than no link, because it silently
+    scrolls nowhere.
+    """
+    lines = (ROOT / "README.md").read_text().splitlines()
+    heads = [ln[3:].strip() for ln in lines if ln.startswith("## ")]
+    assert "Contents" in heads, "the contents block is missing"
+    sections = [h for h in heads if h != "Contents"]
+    assert len(sections) > 10, sections
+
+    start = next(i for i, ln in enumerate(lines) if ln.strip() == "## Contents")
+    end = next(i for i in range(start + 1, len(lines))
+               if lines[i].startswith("## "))
+    block = lines[start:end]
+
+    entries = [m.groups() for ln in block
+               if (m := re.match(r"^- \[(.+)\]\(#(.+)\)$", ln.strip()))]
+    assert [t for t, _ in entries] == sections, (
+        "the contents list and the sections disagree",
+        [t for t, _ in entries], sections)
+    for title, anchor in entries:
+        assert anchor == _slug(title), (title, anchor, _slug(title))
+
+
+def test_the_contents_block_counts_the_sections_it_lists():
+    """
+    The sentence above the list says how many sections there are, which is
+    one more hand-typed count unless it is derived. Fifth in this README.
+    """
+    lines = (ROOT / "README.md").read_text().splitlines()
+    heads = [ln[3:].strip() for ln in lines if ln.startswith("## ")]
+    # License is listed but is not one of the sections the sentence counts.
+    n = len([h for h in heads if h not in ("Contents", "License")])
+
+    start = next(i for i, ln in enumerate(lines) if ln.strip() == "## Contents")
+    end = next(i for i in range(start + 1, len(lines))
+               if lines[i].startswith("## "))
+    block = " ".join(" ".join(lines[start:end]).split()).lower()
+
+    assert f"{spell(n)} sections and a license" in block, n
+    for other in range(1, 20):
+        if other == n:
+            continue
+        bad = re.compile(rf"(?<![\w-]){spell(other)} sections and a license")
+        assert not bad.search(block), (other, n)
+
+
+def test_every_in_document_link_points_at_a_real_heading():
+    """
+    A wrong anchor is worse than no link: it scrolls nowhere and the reader
+    concludes the section does not exist.
+
+    The README cross-references itself eighteen times and gained most of
+    those while sections were being renamed, so the links are checked
+    against the headings rather than trusted. Covers the whole file, not
+    just the contents block.
+    """
+    for name in ("README.md", "docs/theory.md", "docs/against.md",
+                 "docs/predictions.md", "docs/results-secondary.md"):
+        text = (ROOT / name).read_text()
+        anchors = {_slug(ln.lstrip("#").strip())
+                   for ln in text.splitlines() if ln.startswith("#")}
+        links = re.findall(r"\]\(#([^)]+)\)", text)
+        broken = sorted({x for x in links if x not in anchors})
+        assert not broken, (name, broken)
