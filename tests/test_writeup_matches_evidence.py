@@ -1713,3 +1713,144 @@ def test_every_partition_is_tallied_from_one_run(sweep):
         assert len(pooled) == 1, (alpha, sorted(pooled))
         assert len(cov) == 1, (alpha, sorted(cov))
         assert len(trials) == 1, (alpha, sorted(trials))
+
+
+# ---------------------------------------------------------------------------
+# Round O: attacking the result that refuted the central claim
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def ndg():
+    p = ROOT / "evidence" / "no_distance_groups.json"
+    if not p.exists():
+        pytest.skip("round O has not been run in this checkout")
+    return json.loads(p.read_text())
+
+
+def nd_arm(payload: dict, alpha: float) -> dict:
+    return next(r for r in payload["fitted-no-distance"]
+                if r["alpha"] == alpha)
+
+
+def nd_scheme(payload: dict, scorer: str, alpha: float, scheme: str) -> dict:
+    return next(s for s in payload["schemes"]
+                if s["scorer"] == scorer and s["alpha"] == alpha
+                and s["scheme"] == scheme)
+
+
+def test_round_o_reproduces_round_j_where_they_overlap(ndg, fitted_cond):
+    """
+    The pairing that makes round O an extension rather than a new experiment.
+
+    Same seed, same share, same refit protocol, so the two tolerances round J
+    measured must come back identical. If they do not, the alpha = 0.10 arm
+    is not comparable to the published figures and the whole round is a
+    separate run that happens to use the same scorer.
+    """
+    assert ndg["seed"] == fitted_cond["seed"], (ndg["seed"],
+                                                fitted_cond["seed"])
+    for alpha in (0.20, 0.15):
+        o = nd_arm(ndg, alpha)
+        j = arm(fitted_cond, "fitted-no-distance", alpha)
+        assert o["pooled_unsafe_rate"] == pytest.approx(
+            j["pooled_unsafe_rate"], abs=1e-12), alpha
+        assert o["mean_coverage"] == pytest.approx(
+            j["mean_coverage"], abs=1e-12), alpha
+        assert o["auc"] == pytest.approx(j["auc"], abs=1e-12), alpha
+
+
+def test_o1_missed_and_the_readme_says_the_rate_collapsed(readme, ndg):
+    """
+    O1 predicted the no-distance scorer would break a 10% budget. It does
+    not — the worst band falls to 3.79% and coverage rises.
+    """
+    ten = nd_arm(ndg, 0.10)
+    w = ten["worst_band"]
+    rate = next(b["unsafe_rate"] for b in ten["bands"] if b["band"] == w)
+
+    assert ten["hides_a_subgroup"] is False
+    assert rate < 0.10, rate
+    assert any(f in readme for f in pct_forms(rate, 2)), rate
+    assert any(f in readme for f in pct_forms(ten["mean_coverage"], 2)), \
+        ten["mean_coverage"]
+
+
+def test_the_two_estimators_are_both_reported(readme, ndg):
+    """
+    The correction round O produced, and the one most worth a guard.
+
+    The README said removing the feature "brings every band inside the
+    budget". That is the across-trial estimator. On the per-trial one, a
+    quarter of deployments put a band over budget at the two tighter
+    tolerances. Both numbers have to be in the write-up or the sentence
+    reads as a clean result again.
+    """
+    for alpha in (0.20, 0.15, 0.10):
+        pooled = nd_scheme(ndg, "fitted-no-distance", alpha, "pooled")
+        gv = pooled["group_violation_rate_when_feasible"]
+        assert any(f in readme for f in pct_forms(gv, 1)), (alpha, gv)
+
+    tight = nd_scheme(ndg, "fitted-no-distance", 0.15, "pooled")
+    assert tight["group_violation_rate_when_feasible"] > 0.20, \
+        "this guard exists because the per-trial rate is large at 0.15"
+
+    text = " ".join((ROOT / "README.md").read_text().split())
+    assert "on this estimator" in text, \
+        "the qualified version of the refuted sentence has to be the one " \
+        "in the write-up"
+
+
+def test_no_remedy_is_available_at_the_tightest_tolerance(readme, ndg):
+    """
+    O3's miss, which is the finding with a consequence for practice.
+
+    Group conditioning is infeasible in every trial at alpha = 0.10, for
+    both scorers. A reader who takes "condition per group" as the answer
+    needs to know the answer is unavailable there.
+    """
+    nd = nd_scheme(ndg, "fitted-no-distance", 0.10, "by-band")
+    hand = nd_scheme(ndg, "handcrafted", 0.10, "by-band")
+    assert nd["feasible_trials"] == 0, nd["feasible_trials"]
+    assert hand["feasible_trials"] < 10, hand["feasible_trials"]
+
+    assert has_count(readme, nd["feasible_trials"]) or "0/200" in readme
+    assert has_count(readme, hand["feasible_trials"]), \
+        hand["feasible_trials"]
+    assert "no remedy" in readme.lower(), \
+        "the unavailability has to be stated, not left in a table"
+
+
+def test_the_cost_of_tightening_is_questions_not_coverage(readme, ndg):
+    """
+    The secondary finding: with this scorer, coverage RISES as the tolerance
+    tightens and the cost shows up in questions per case.
+
+    Worth a guard because the whole write-up frames the trade as safety
+    against coverage, and here that framing is wrong.
+    """
+    rows = [nd_arm(ndg, a) for a in (0.20, 0.15, 0.10)]
+    qs = [r["mean_questions"] for r in rows]
+    covs = [r["mean_coverage"] for r in rows]
+    assert qs == sorted(qs), qs
+    assert covs == sorted(covs), covs
+
+    for q in (qs[0], qs[-1]):
+        assert f"{q:.2f}" in readme, q
+
+
+def test_conditioning_and_feature_removal_are_complements(ndg):
+    """
+    The claim that replaced "removing it beat every alternative".
+
+    Where both are feasible, the combination must be safer on the per-trial
+    measure than either alone. If it is not, "complements rather than
+    substitutes" is wrong and the recommendation has to change back.
+    """
+    for alpha in (0.20, 0.15):
+        both = nd_scheme(ndg, "fitted-no-distance", alpha, "by-band")
+        feature_only = nd_scheme(ndg, "fitted-no-distance", alpha, "pooled")
+        cond_only = nd_scheme(ndg, "handcrafted", alpha, "by-band")
+        assert both["feasible_trials"] > 0, alpha
+        gv = both["group_violation_rate_when_feasible"]
+        assert gv <= feature_only["group_violation_rate_when_feasible"], alpha
+        assert gv <= cond_only["group_violation_rate_when_feasible"], alpha

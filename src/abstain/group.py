@@ -30,24 +30,41 @@ at level δ, so a group that cannot be certified makes the arm infeasible
 rather than quietly unsafe.
 
 **Removing a feature that is directionally wrong for one group** — measured in
-round J, and on every axis the rule optimises it did better than conditioning
-did: 7.25% pooled against 11.11%, 92.75% coverage against 76.02%, worst band
-12.48% against 13.02% under conditioning, and no infeasible trials. I had
-pre-registered that it would not work at all (J1) and it is the best remedy
-here.
+round J. I had pre-registered that it would not work at all (J1) and it is the
+cheapest remedy here.
 
 The two are not interchangeable, and the difference is the whole point of this
-module. Conditioning **guarantees** a per-group rate at level δ. A pooled rule
-over a better-behaved score **happens to come in** under budget per group —
-that is a measurement on one benchmark at the tolerances tested, with nothing
-in the construction promising it elsewhere or at a tighter α. Round O
-(`docs/preregistration-5.md`, addendum eight) tests exactly that, because the
-no-distance scorer's worst band moves only 12.48% → 11.65% as the budget falls
-from 20% to 15%, which is what a fixed failure rate with a sliding budget looks
-like.
+module. Conditioning **guarantees** a per-group rate at level δ: a group that
+cannot be certified makes the arm infeasible instead of quietly unsafe. A
+pooled rule over a better-behaved score **happens to come in** under budget
+per group, which is a measurement rather than a statement.
 
-So: audit the features first, because it is cheap and it worked best here, and
-condition anyway if you need the statement rather than the outcome.
+Round O measured how much that distinction is worth, and it is worth more than
+the first version of this docstring implied. Trials in which some band exceeded
+α, out of 200 on `fine_dev`:
+
+    alpha   handcrafted+cond   no-distance pooled   both
+    0.20    2.6%  (196 feas)   2.5%   (200 feas)    1.1%  (187)
+    0.15    8.3%  (120 feas)   24.5%  (200 feas)    4.0%  ( 99)
+    0.10    0.0%  (  3 feas)   26.0%  (200 feas)    --   (  0)
+
+Removing the feature matches conditioning at α = 0.20 and is three times worse
+at α = 0.15. Together they beat either alone wherever both are feasible. And at
+α = 0.10 on 672 cases nothing is available: conditioning is infeasible in every
+trial for both scorers, so there is no per-group certificate to buy at any
+price.
+
+Note that the pooled across-trial rate tells a gentler story than the per-trial
+one — 12.48% worst band at α = 0.20 against 2.5% of trials failing, but 11.65%
+against **24.5%** at α = 0.15. Both are honest; one averages over trials and
+the other counts failures. Quoting only the first is how "removing the feature
+brings every band inside the budget" got written, and it was false of a quarter
+of deployments.
+
+So: audit the features first, because it is cheap and it is the only remedy
+available at tight tolerances — then condition as well, because they are
+complements and because only one of them gives you a statement rather than an
+outcome.
 
 Prior work, named
 -----------------

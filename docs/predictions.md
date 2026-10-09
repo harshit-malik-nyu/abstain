@@ -1,6 +1,6 @@
 # Every prediction, and what happened
 
-Sixty-eight predictions across nine pre-registrations, each written before the
+Seventy-three predictions across nine pre-registrations, each written before the
 code that tested it. This table is the whole record: no prediction is omitted,
 and the outcome column is the one that was true at the time, not the one that
 would read best.
@@ -84,6 +84,11 @@ there were ten — so the number is derived from here rather than written twice.
 | **Q5** | a 3k cutoff concentrates **more** than the published 6k | **4.83 against 4.13** | held |
 | **Q6** | two bands at the median show concentration below 2.0 | 1.42, **and hides nothing** | held |
 | **Q7** | eight bands localise further than four | **4.13, identical** | **missed** |
+| **O1** | the no-distance scorer breaks a 10% budget for some band | **3.79%, nothing hidden** | **missed** |
+| **O2** | its worst-band rate at α = 0.10 is within 2 points of its rate at 0.20 | 3.79% against 12.48% | **missed** |
+| **O3** | conditioning still fixes what is left at α = 0.10 | **feasible in 0 of 200 trials** | **missed** |
+| **O4** | conditioning costs feasibility at α = 0.10 | 0 of 200 | held |
+| **O5** | `well-below` stays worst at every tolerance | all three | held |
 
 ---
 
@@ -128,6 +133,54 @@ rule commits on the **high-scoring** ones, and there it is **72%**. I walked
 into the same selection effect that `calibrate_on_trajectories` exists to
 handle. The corrected mechanism is in the README and the original reasoning is
 kept, annotated, in `scripts/diagnose_mechanism.py`.
+
+**Round O attacked the result that had refuted this repository's central
+claim, lost three of five predictions, and found an error in the claim it was
+defending.**
+
+J1 refuted the strong form of the central claim: removing the distance feature
+cut the concentration 4.13 → 1.72 and put every band inside the budget. That
+had been reported prominently for two rounds without being attacked. Round O
+attacked it, predicting the result was luck — the worst band moved only 12.48%
+→ 11.65% as the budget fell by a quarter, which looks like a fixed failure
+rate with the budget sliding past it.
+
+**It is not.** At α = 0.10 the worst band falls to **3.79%**, coverage rises
+to 97.79%, and nothing is hidden. The two-point extrapolation was the error,
+not the hypothesis: at that tolerance the threshold is high enough that the
+rule asks nearly everything, full information always resolves, and the rate
+collapses. Two points either side of a regime change is not a trend — the C3
+lesson again in a different shape.
+
+**And the concern behind O1 was right on an estimator I had not thought to
+name.** The same arm, at the same tolerance:
+
+| | α = 0.20 | α = 0.15 | α = 0.10 |
+|---|---:|---:|---:|
+| worst band, pooled across 200 trials | 12.48% | 11.65% | **3.79%** |
+| trials where **some** band exceeded α | 2.5% | **24.5%** | **26.0%** |
+
+Both are honest numbers and they say different things, because one averages
+over trials and the other counts failures. A quarter of deployments put a band
+over budget while the across-trial rate sits comfortably inside it. **The
+README said removing the feature "brings every band inside the budget", which
+is true of the first row and false of a quarter of deployments** — the same
+unit-of-aggregation error as the third bug and as the naive-versus-cluster
+interval, found for the third time in this repository and the first time in a
+claim that was mine rather than a metric's.
+
+**O3 is the one with a consequence for practice.** At α = 0.10, group
+conditioning on this scorer is feasible in **0 of 200 trials**, and 3 of 200
+for the handcrafted one. So at that tolerance on 672 cases there is no remedy
+available at all — not conditioning, and not a per-group certificate at any
+price. Only a better-behaved score, whose per-group behaviour is then measured
+rather than guaranteed.
+
+The cost of tightening, with this scorer, is **questions**: 2.00 → 2.08 →
+2.72 per case while coverage *rises* 92.75% → 97.79%. The repository frames
+the trade as safety against coverage throughout; here it is safety against
+interrogation, and that is the more useful framing when the question budget is
+not the binding constraint.
 
 **Round Q tested the partition the headline finding is phrased in, and the
 finding survived.** Six of seven held. The one that matters is Q1: under

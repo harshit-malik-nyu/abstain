@@ -16,3 +16,42 @@
     near-threshold   4.81%  95.19%    0.71
              above   7.78%  92.22%    1.15
         well-above   5.87%  94.13%    0.87
+
+  fitted-no-distance, alpha = 0.10   pooled 2.21%   coverage 97.79%   worst band well-below at 3.79%   hides a subgroup: False
+              band   unsafe      cov    conc
+        well-below   3.79%  96.21%    1.71
+    near-threshold   1.60%  98.40%    0.72
+             above   2.54%  97.46%    1.15
+        well-above   1.91%  98.09%    0.86
+
+  O3/O4 — group conditioning on the no-distance scorer
+               scorer  alpha     scheme   feas  grp-viol    worst     cov
+          handcrafted   0.20     pooled    200     99.0%  45.80% 76.02%
+          handcrafted   0.20    by-band    196      2.6%  13.02% 80.32%
+          handcrafted   0.15     pooled    200     90.0%  28.12% 78.71%
+          handcrafted   0.15    by-band    120      8.3%   9.14% 79.63%
+          handcrafted   0.10     pooled    200     70.5%  13.26% 77.19%
+          handcrafted   0.10    by-band      3      0.0%   7.87% 83.01%
+
+   fitted-no-distance   0.20     pooled    200      2.5%  12.89% 92.75%
+   fitted-no-distance   0.20    by-band    187      1.1%   8.15% 95.72%
+   fitted-no-distance   0.15     pooled    200     24.5%  12.03% 93.24%
+   fitted-no-distance   0.15    by-band     99      4.0%   6.35% 97.38%
+   fitted-no-distance   0.10     pooled    200     26.0%   3.89% 97.79%
+   fitted-no-distance   0.10    by-band      0       n/a   0.00%  0.00%
+
+
+  O1-O5, scored against addendum eight
+  O1  MISSED   no-distance worst band above 10% at alpha 0.10, hides_a_subgroup True
+  O2  MISSED   its rate at 0.10 within 2 points of its rate at 0.20
+  O3  MISSED   conditioning brings the worst band under alpha at 0.10 in feasible trials
+  O4    held   fewer than 190 of 200 feasible at alpha 0.10
+  O5    held   well-below stays the worst band at every tolerance
+
+  the no-distance scorer against its own budget
+   alpha       worst band  its rate  budget  inside   pooled     cov
+    0.20       well-below   12.48%    20%     yes   7.25% 92.75%
+    0.15       well-below   11.65%    15%     yes   6.76% 93.24%
+    0.10       well-below    3.79%    10%     yes   2.21% 97.79%
+
+  wrote evidence/no_distance_groups.json (4528.5s)

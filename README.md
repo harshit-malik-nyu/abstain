@@ -16,7 +16,7 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; twenty-three pre-registered predictions that missed; and one result that
+it was; twenty-six pre-registered predictions that missed; and one result that
 changes what the method is for.** The guarantee it delivers is not the
 guarantee its own README advertised for four rounds, and the gap is not small
 — and the strongest form of the claim that replaced it was refuted by its own
@@ -24,7 +24,7 @@ pre-registered test, two rounds later.
 
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
-fix, and **[all sixty-eight predictions are listed with their
+fix, and **[all seventy-three predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
 wrong.
@@ -289,9 +289,12 @@ disjoint from calibration and deployment.
 | **fitted, no distance feature** | **0.8888** | **7.3%** | **92.7%** | `well-below` | **12.5%** | **1.72** | **no** |
 
 **The strong claim is refuted.** Dropping the one feature the mechanism blames
-cuts the concentration from 4.13 to **1.72** and brings every band inside the
-budget. Had I not written the prediction down, "a single threshold concentrates
-harm" is exactly the kind of claim that survives on two confirming arms.
+cuts the concentration from 4.13 to **1.72** and puts every band inside the
+budget *on this estimator* — a qualification added two rounds later, after
+[round O](#i-attacked-that-result-too-and-it-corrected-a-claim-of-mine) found
+that the sentence was false of one deployment in four. Had I not written the
+prediction down, "a single threshold concentrates harm" is exactly the kind of
+claim that survives on two confirming arms.
 
 What survives is narrower and still worth having:
 
@@ -304,8 +307,10 @@ What survives is narrower and still worth having:
 
 So a single threshold contributes, and here it is not the dominant term. The
 practical reading is more useful than the claim it replaces: **a feature that
-is directionally wrong for a group is the thing to look for first**, and
-removing it beat every alternative.
+is directionally wrong for a group is the thing to look for first.** What it
+does *not* support — and I wrote that it did — is that removing the feature
+beat every alternative. On the per-trial measure it matches conditioning at
+α = 0.20 and is far worse at α = 0.15, which is the next section.
 
 **J1, J3 and J4 all missed, in the same direction: I badly underestimated the
 crippled scorer.** J3 predicted its coverage would fall below 60% — it is
@@ -314,6 +319,65 @@ crippled scorer.** J3 predicted its coverage would fall below 60% — it is
 other direction: I predicted the fitted scorer's pooled rate would be at or
 below the handcrafted one's, and it is higher at both tolerances, because it
 commits far more often while resolving twelve points more.
+
+### I attacked that result too, and it corrected a claim of mine
+
+The refutation above had been the most prominent thing in this section for two
+rounds and had never been attacked the way the claim it refuted was. It has a
+visible weakness: the no-distance scorer's worst band moves only 12.48% →
+11.65% as the budget falls from 20% to 15%, which is what a fixed failure rate
+with a sliding budget looks like rather than a rule tracking its budget. So
+[addendum eight](docs/preregistration-5.md) predicted it would break at
+α = 0.10.
+
+**It does not.** At α = 0.10 the worst band falls to **3.79%** and coverage
+rises to **97.79%**. The two-point extrapolation was the error, not the
+hypothesis: at that threshold the rule asks nearly everything, full
+information always resolves, and the rate collapses. Three of five predictions
+missed.
+
+**And the concern behind them was right, on an estimator I had not thought to
+name.** Same arm, same tolerances, two ways of counting:
+
+| | α = 0.20 | α = 0.15 | α = 0.10 |
+|---|---:|---:|---:|
+| worst band, pooled across 200 trials | 12.48% | 11.65% | **3.79%** |
+| trials where **some** band exceeded α | 2.5% | **24.5%** | **26.0%** |
+| questions per case | 2.00 | 2.08 | **2.72** |
+| coverage | 92.75% | 93.24% | **97.79%** |
+
+Both rows are honest and they say different things, because one averages over
+trials and the other counts failures. **A quarter of deployments put a band
+over budget while the across-trial rate sits comfortably inside it**, so
+"removing the feature brings every band inside the budget" is true of the first
+row and false of the second. That is the same unit-of-aggregation error as
+[the third bug](#the-guarantee-was-conditional-on-feasibility-and-the-metric-was-not)
+and as the naive-versus-cluster interval — the third time in this repository,
+and the first time in a claim of mine rather than in a metric's behaviour.
+
+Against conditioning on the per-trial measure, which is the comparison the
+earlier section should have made:
+
+| α | handcrafted + conditioning | no-distance, one threshold | no-distance + conditioning |
+|---:|---|---|---|
+| 0.20 | 2.6%, 196/200 feasible | **2.5%, 200/200** | **1.1%, 187/200** |
+| 0.15 | **8.3%, 120/200** | 24.5%, 200/200 | **4.0%, 99/200** |
+| 0.10 | 0.0%, **3/200** | 26.0%, 200/200 | — **0/200** |
+
+**Removing the feature matches conditioning at α = 0.20 and is three times
+worse at α = 0.15.** The two together beat either alone wherever both are
+feasible. And at α = 0.10 on 672 cases there is **no remedy to buy**:
+conditioning is infeasible in every trial for both scorers, so the per-group
+certificate is not available at any price and all that is left is a
+better-behaved score whose per-group behaviour is measured rather than
+guaranteed.
+
+One more thing that table changes. The cost of tightening here is **questions,
+not coverage** — 2.00 to 2.72 per case while coverage *rises* five points.
+This README frames the trade as safety against coverage throughout, and for a
+scorer that is right about its own question the trade is safety against
+interrogation, which is the more useful framing whenever the question budget
+is not the binding constraint.
 
 ### The fix works on the learned scorer too
 

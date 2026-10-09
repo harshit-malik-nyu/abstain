@@ -166,11 +166,14 @@ property of where that threshold was set.
 > scorer. A better-ranking scorer does not fix it.~~
 
 **Refuted by its own pre-registered test (J1).** A scorer refit without the
-distance feature cuts the concentration from **4.13 to 1.72** and brings every
-band inside the budget. The strong form of the claim does not survive, and
-this document carried it after the README had already recorded the
-refutation — a stale claim in the theory file is worse than one in a
-write-up, because this is the document a reader checks the write-up against.
+distance feature cuts the concentration from **4.13 to 1.72** and puts every
+band inside the budget **on the across-trial estimator** — a qualification
+round O added, and it matters: on the per-trial measure the same arm breaks
+the budget for some band in **24.5%** of trials at α = 0.15. The strong form
+of the claim does not survive either way, and this document carried it after
+the README had already recorded the refutation — a stale claim in the theory
+file is worse than one in a write-up, because this is the document a reader
+checks the write-up against.
 
 What survives, and it is narrower:
 
@@ -213,14 +216,39 @@ immediately asks the one question that switches them off.
 > reaches under the rule. AUC moved by 0.0179 in both directions while
 > behaviour did not move in any digit.
 
-**Status: measured, and narrowed twice.** The subgroup failure is real. Of the
-three remedies measured, **removing** the offending feature was the best on
-every axis the rule optimises — 7.3% pooled, 92.7% coverage, worst band 12.5%,
-nothing hidden — while scoring the *worst* AUC of any arm, 0.8888. Conditional
-calibration works without touching the scorer. **Adding** the missing feature
-does nothing at all. So the practical ordering is the reverse of the intuitive
-one: look for a feature that is directionally wrong for a group before
-reaching for a better one.
+#### Which remedy, measured on the estimator that counts failures
+
+Three remedies, and the comparison depends on which estimator is used — which
+is itself the finding. Trials in which **some** band exceeded α, out of 200:
+
+| α | handcrafted + conditioning | no-distance, one threshold | both |
+|---:|---|---|---|
+| 0.20 | 2.6%, 196 feasible | **2.5%, 200** | **1.1%, 187** |
+| 0.15 | **8.3%, 120** | 24.5%, 200 | **4.0%, 99** |
+| 0.10 | 0.0%, **3** | 26.0%, 200 | — **0** |
+
+**Removing** the offending feature is the cheapest remedy and the best on
+every *pooled* axis — 7.3% pooled unsafe, 92.7% coverage, worst band 12.5% —
+while scoring the **worst** AUC of any arm, 0.8888. On the per-trial measure
+it matches conditioning at α = 0.20 and is three times worse at α = 0.15.
+
+**Conditioning** works without touching the scorer and is the only one of the
+three that yields a *certificate* rather than an outcome. Its cost is sample
+size and the cost is steep: 3 feasible trials in 200 at α = 0.10.
+
+**Both together** beat either alone wherever both are feasible.
+
+**Adding** the missing feature does nothing at all — see below.
+
+At α = 0.10 on 672 cases **there is no remedy to buy.** Conditioning is
+infeasible in every trial for both scorers, so a per-group guarantee is not
+available at any price, and what remains is a better-behaved score whose
+per-group behaviour is measured rather than guaranteed.
+
+**Status: measured, and narrowed three times.** The subgroup failure is real,
+the practical ordering is the reverse of the intuitive one — look for a
+feature that is directionally wrong for a group before reaching for a better
+one — and the two remedies are complements rather than substitutes.
 
 ### The fix, its status, and its cost
 
