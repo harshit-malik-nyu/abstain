@@ -1861,3 +1861,80 @@ def test_conditioning_and_feature_removal_are_complements(ndg):
         gv = both["group_violation_rate_when_feasible"]
         assert gv <= feature_only["group_violation_rate_when_feasible"], alpha
         assert gv <= cond_only["group_violation_rate_when_feasible"], alpha
+
+
+def test_the_per_trial_intervals_in_the_readme_are_the_computed_ones(readme,
+                                                                    ndg):
+    """
+    Six cells, each an exact interval derived from the run's own k and n.
+
+    Two of them mislead without an interval and that is why this exists: 2.6%
+    on 196 trials beside 2.5% on 200 reads as conditioning narrowly losing
+    when the intervals are indistinguishable, and 0.0% on 3 trials reads as
+    a perfect result when its upper bound is 70.8%.
+
+    Computed from the library function rather than retyped, so a change to
+    the interval, the rates, or the feasible counts fails here.
+    """
+    from abstain.group import trial_rate_interval
+
+    cells = [("handcrafted", "by-band"), ("fitted-no-distance", "pooled"),
+             ("fitted-no-distance", "by-band")]
+    checked = 0
+    for alpha in (0.20, 0.15, 0.10):
+        for scorer, scheme in cells:
+            s = nd_scheme(ndg, scorer, alpha, scheme)
+            n = s["feasible_trials"]
+            gv = s["group_violation_rate_when_feasible"]
+            if n == 0 or gv is None:
+                continue
+            lo, hi = trial_rate_interval(round(gv * n), n)
+            assert f"[{lo * 100:.1f}, {hi * 100:.1f}]" in readme, \
+                (scorer, alpha, scheme, lo, hi)
+            checked += 1
+    assert checked >= 6, checked
+
+
+def test_the_three_trial_cell_carries_its_upper_bound(readme, ndg):
+    """
+    The single most misleading number in the round, pinned on its own.
+
+    Zero failures in three trials is not evidence of safety, so the bound
+    has to be *explained in prose* and not only sit in a table cell where a
+    reader skims past it. The companion test above checks the cell; this one
+    checks the sentence.
+
+    The first version of this assertion did not do that. It looked for the
+    figure anywhere in the README and for either of two phrases, and the
+    figure appears in the table cell while one phrase appears elsewhere — so
+    deleting the whole explanatory sentence left it passing, and its
+    docstring claimed otherwise. A test whose docstring overstates what it
+    checks is the same defect as prose overstating its evidence, so it is
+    now scoped to the sentence itself and verified against its removal.
+    """
+    from abstain.group import trial_rate_interval
+
+    s = nd_scheme(ndg, "handcrafted", 0.10, "by-band")
+    n = s["feasible_trials"]
+    assert n < 10, ("this test assumes the cell stayed underpowered", n)
+
+    _, hi = trial_rate_interval(0, n)
+    assert hi > 0.5, hi
+
+    words = "zero one two three four five six seven eight nine".split()
+    text = " ".join((ROOT / "README.md").read_text().split())
+    sentence = (f"zero failures in **{words[n]}** feasible trials, upper "
+                f"bound **{hi * 100:.1f}%**")
+    assert sentence in text, sentence
+    assert "supports almost nothing" in text, \
+        "the bound has to be interpreted, not just printed"
+
+
+def test_the_readme_says_what_the_trial_intervals_do_not_cover(readme):
+    """
+    They are conditional on the 672-case pool, and narrower than what an
+    operator faces. Stating only the interval would be the same overclaim
+    as the naive binomial interval this repository already rejected once.
+    """
+    assert "narrower than" in readme
+    assert "Monte Carlo" in readme

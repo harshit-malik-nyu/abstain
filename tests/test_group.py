@@ -532,3 +532,66 @@ def test_refitting_changes_the_outcome(dev):
                              refit=fit)
     assert fitted.as_dict()["mean_coverage"] != \
         plain.as_dict()["mean_coverage"]
+
+
+# ---------------------------------------------------------------------------
+# trial_rate_interval
+# ---------------------------------------------------------------------------
+
+class TestTheTrialRateInterval:
+    """
+    The interval that should have been on the per-trial rates from the
+    start, and the two cells it changes the reading of.
+    """
+
+    def test_it_brackets_the_point_estimate(self):
+        from abstain.group import trial_rate_interval
+        for k, n in ((0, 3), (2, 187), (5, 196), (5, 200), (10, 120),
+                     (49, 200), (52, 200), (198, 200)):
+            lo, hi = trial_rate_interval(k, n)
+            assert 0.0 <= lo <= k / n <= hi <= 1.0, (k, n, lo, hi)
+
+    def test_three_trials_support_almost_nothing(self):
+        """
+        Zero failures in three trials is not evidence of safety. The whole
+        reason the function exists.
+        """
+        from abstain.group import trial_rate_interval
+        lo, hi = trial_rate_interval(0, 3)
+        assert lo == 0.0
+        assert hi > 0.5, hi
+
+    def test_conditioning_and_feature_removal_overlap_at_the_loose_alpha(self):
+        """
+        2.6% on 196 and 2.5% on 200 are the same number to this design's
+        resolution, and the README used to present them as a ranking.
+        """
+        from abstain.group import trial_rate_interval
+        cond = trial_rate_interval(5, 196)
+        feat = trial_rate_interval(5, 200)
+        assert cond[0] < feat[1] and feat[0] < cond[1], (cond, feat)
+
+    def test_the_tighter_alpha_difference_is_not_noise(self):
+        """
+        8.3% on 120 against 24.5% on 200 must NOT overlap, otherwise "three
+        times worse" is a story about Monte Carlo error.
+        """
+        from abstain.group import trial_rate_interval
+        cond = trial_rate_interval(10, 120)
+        feat = trial_rate_interval(49, 200)
+        assert cond[1] < feat[0], (cond, feat)
+
+    def test_it_degrades_rather_than_raising_on_no_trials(self):
+        """
+        Zero feasible trials happens — at α = 0.10 it is every trial — so
+        the function returns the uninformative interval instead of dividing
+        by zero, because a caller formatting a table should get [0, 1] and
+        not a traceback.
+        """
+        from abstain.group import trial_rate_interval
+        assert trial_rate_interval(0, 0) == (0.0, 1.0)
+
+    def test_it_widens_as_trials_shrink(self):
+        from abstain.group import trial_rate_interval
+        widths = [trial_rate_interval(0, n)[1] for n in (3, 20, 100, 200)]
+        assert widths == sorted(widths, reverse=True), widths

@@ -367,21 +367,42 @@ and as the naive-versus-cluster interval — the third time in this repository,
 and the first time in a claim of mine rather than in a metric's behaviour.
 
 Against conditioning on the per-trial measure, which is the comparison the
-earlier section should have made:
+earlier section should have made. Exact 95% intervals, because two of these
+six cells mislead badly without one:
 
 | α | handcrafted + conditioning | no-distance, one threshold | no-distance + conditioning |
 |---:|---|---|---|
-| 0.20 | 2.6%, 196/200 feasible | **2.5%, 200/200** | **1.1%, 187/200** |
-| 0.15 | **8.3%, 120/200** | 24.5%, 200/200 | **4.0%, 99/200** |
-| 0.10 | 0.0%, **3/200** | 26.0%, 200/200 | — **0/200** |
+| 0.20 | 2.6% [0.8, 5.9], 196/200 | **2.5% [0.8, 5.7]**, 200/200 | **1.1% [0.1, 3.8]**, 187/200 |
+| 0.15 | **8.3% [4.1, 14.8]**, 120/200 | 24.5% [18.7, 31.1], 200/200 | **4.0% [1.1, 10.0]**, 99/200 |
+| 0.10 | 0.0% **[0.0, 70.8]**, 3/200 | 26.0% [20.1, 32.7], 200/200 | — 0/200 |
 
-**Removing the feature matches conditioning at α = 0.20 and is three times
-worse at α = 0.15.** The two together beat either alone wherever both are
-feasible. And at α = 0.10 on 672 cases there is **no remedy to buy**:
-conditioning is infeasible in every trial for both scorers, so the per-group
-certificate is not available at any price and all that is left is a
-better-behaved score whose per-group behaviour is measured rather than
-guaranteed.
+**At α = 0.20, removing the feature and conditioning are
+indistinguishable** — 2.5% [0.8, 5.7] against 2.6% [0.8, 5.9]. Without the
+intervals that row reads as conditioning narrowly losing, and it does not.
+**At α = 0.15 removing the feature is three times worse**, and those two
+intervals do not overlap, so that difference is real rather than Monte Carlo
+noise. The two together beat either alone wherever both are feasible.
+
+**And the 0.0% at α = 0.10 is the row that most needs its interval.** It is
+zero failures in **three** feasible trials, upper bound **70.8%** — a figure
+that supports almost nothing, and exactly the shape of the C3 miss, where an
+underpowered experiment reported no hidden subgroup and there was one. Read as
+"conditioning is perfect there", it is the opposite of the truth: at α = 0.10
+on 672 cases there is **no remedy to buy**. Conditioning is infeasible in
+every trial for the better scorer and nearly every trial for the other, so the
+per-group certificate is unavailable at any price and all that is left is a
+score whose per-group behaviour is measured rather than guaranteed.
+
+One limit on all six intervals, since it is the third time the unit of
+aggregation has mattered here. Each trial is an independent split of a
+**fixed** pool, so conditional on these 672 cases the trials are i.i.d. and
+the interval is exact — it quantifies Monte Carlo error, which is why
+re-running at another seed would be a redundant check rather than an extra
+one. It does **not** cover the pool. For the across-trial band rates that gap
+is addressed by resampling cases
+([above](#with-honest-error-bars), ±9.5 points rather than ±0.6); for these
+per-trial rates nothing equivalent is computed, so **they are narrower than
+the uncertainty an operator actually faces.**
 
 One more thing that table changes. The cost of tightening here is **questions,
 not coverage** — 2.00 to 2.72 per case while coverage *rises* five points.

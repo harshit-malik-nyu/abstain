@@ -43,10 +43,15 @@ Round O measured how much that distinction is worth, and it is worth more than
 the first version of this docstring implied. Trials in which some band exceeded
 α, out of 200 on `fine_dev`:
 
-    alpha   handcrafted+cond   no-distance pooled   both
-    0.20    2.6%  (196 feas)   2.5%   (200 feas)    1.1%  (187)
-    0.15    8.3%  (120 feas)   24.5%  (200 feas)    4.0%  ( 99)
-    0.10    0.0%  (  3 feas)   26.0%  (200 feas)    --   (  0)
+    alpha   handcrafted+cond      no-distance pooled    both
+    0.20    2.6% [0.8, 5.9]/196  2.5% [0.8,  5.7]/200  1.1%/187
+    0.15    8.3% [4.1, 14.8]/120 24.5% [18.7,31.1]/200 4.0%/ 99
+    0.10    0.0% [0.0, 70.8]/  3 26.0% [20.1,32.7]/200   -- /  0
+
+Exact 95% intervals from `trial_rate_interval`, and two cells need them: at
+alpha 0.20 the first two columns are indistinguishable rather than ranked, and
+the 0.0% at alpha 0.10 is zero failures in THREE trials with an upper bound of
+70.8%.
 
 Removing the feature matches conditioning at α = 0.20 and is three times worse
 at α = 0.15. Together they beat either alone wherever both are feasible. And at
@@ -662,6 +667,46 @@ def reachable_alpha(n_per_group: int, delta: float = 0.05) -> float:
     if n_per_group <= 0:
         return 1.0
     return clopper_pearson_upper(0, n_per_group, delta)
+
+
+def trial_rate_interval(failures: int, trials: int,
+                        level: float = 0.95) -> tuple[float, float]:
+    """
+    An exact interval for a rate measured over trials, and what it covers.
+
+    `group_violation_rate_when_feasible` is `failures / trials`, and it was
+    quoted bare in three documents until round O made it load-bearing. Two
+    of those quotes needed an interval badly:
+
+    - **2.6% on 196 trials against 2.5% on 200** read as conditioning
+      narrowly losing to feature removal. The intervals are [0.8%, 5.9%] and
+      [0.8%, 5.7%] — indistinguishable, which is the honest comparison.
+    - **0.0% on 3 trials** read as a perfect result. Its upper bound is
+      **70.8%**. Three feasible trials support almost no conclusion, and
+      that is exactly the shape of the C3 miss, where an underpowered
+      experiment reported no hidden subgroup and there was one.
+
+    What this interval covers, precisely
+    ------------------------------------
+    Each trial is an independent draw of a calibration/deployment split from
+    a **fixed** case pool, so conditional on that pool the trials are i.i.d.
+    and a Clopper-Pearson interval is exact for the rate over splits. It
+    quantifies Monte Carlo error, which is why re-running at another seed
+    would be a redundant check rather than an additional one.
+
+    What it does **not** cover is the pool. The 672 cases are themselves one
+    sample, and the uncertainty from that is the uncertainty
+    `conditional.bootstrap_band_rate` addresses for the across-trial band
+    rates by resampling cases. No equivalent is computed for the per-trial
+    rates here, and the gap is stated rather than papered over: these
+    intervals are narrower than the uncertainty an operator actually faces.
+    """
+    if trials <= 0:
+        return (0.0, 1.0)
+    tail = (1.0 - level) / 2.0
+    lo = 1.0 - clopper_pearson_upper(trials - failures, trials, tail)
+    hi = clopper_pearson_upper(failures, trials, tail)
+    return (lo, hi)
 
 
 assert BANDS, "grouping schemes depend on conditional.BANDS being populated"

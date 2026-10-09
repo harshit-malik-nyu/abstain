@@ -223,9 +223,18 @@ is itself the finding. Trials in which **some** band exceeded α, out of 200:
 
 | α | handcrafted + conditioning | no-distance, one threshold | both |
 |---:|---|---|---|
-| 0.20 | 2.6%, 196 feasible | **2.5%, 200** | **1.1%, 187** |
-| 0.15 | **8.3%, 120** | 24.5%, 200 | **4.0%, 99** |
-| 0.10 | 0.0%, **3** | 26.0%, 200 | — **0** |
+| 0.20 | 2.6% [0.8, 5.9], 196 feasible | **2.5% [0.8, 5.7]**, 200 | **1.1% [0.1, 3.8]**, 187 |
+| 0.15 | **8.3% [4.1, 14.8]**, 120 | 24.5% [18.7, 31.1], 200 | **4.0% [1.1, 10.0]**, 99 |
+| 0.10 | 0.0% **[0.0, 70.8]**, 3 | 26.0% [20.1, 32.7], 200 | — 0 |
+
+Exact 95% intervals, and two cells need them. At α = 0.20 the first two
+columns are **indistinguishable**, not a ranking. At α = 0.10 the leading cell
+is zero failures in **three** trials with an upper bound of **70.8%** — it
+supports almost nothing, and read as "conditioning is perfect there" it is the
+opposite of the truth. The intervals are exact conditional on the 672-case
+pool and do not cover the pool itself, so they are narrower than the
+uncertainty an operator faces; `group.trial_rate_interval` says so in more
+detail.
 
 **Removing** the offending feature is the cheapest remedy and the best on
 every *pooled* axis — 7.3% pooled unsafe, 92.7% coverage, worst band 12.5% —
