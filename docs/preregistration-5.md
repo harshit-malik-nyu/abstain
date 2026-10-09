@@ -616,3 +616,90 @@ One run on `fine_dev`, 200 trials, seed 83, α = 0.20 and 0.15, written to
 `evidence/award_aware.json`. Neither holdout is touched. `k = 0.8` is fixed
 in this document and is not adjusted afterwards; if the first run disappoints,
 that is the result.
+
+---
+
+# Addendum seven — the fix that can actually change anything
+
+Written before `signed_scorer` exists. M1 failed first; this is why, and what
+follows from it.
+
+## M1 failed, and the reason was already measured in this repository
+
+`award_aware_scorer` multiplied the score down wherever the award was at risk.
+It produced results **identical to the handcrafted scorer in every digit** —
+pooled 11.5%, coverage 75.8%, concentration 4.07, band by band.
+
+Because it is a monotone transform. Measured: **zero order flips in 106,365
+state pairs.** The term was `base × (1 − 0.8·d)` where `base ∝ d`, so it was
+a function of `d` alone — and `d` already ordered those states.
+
+> A threshold rule reads only the **order**. Make the score smaller where it
+> is wrong and calibration simply picks a smaller threshold. Nothing moves.
+
+That is not a new result here. The `sharpen` corruption established exactly it
+two rounds earlier — a strictly monotone transform leaves behaviour unchanged
+— and I designed a fix that violated my own finding. **M1 is recorded as
+failed and the scorer is kept**, because a repair that cannot work for a
+reason the repository already proved is worth more visible than deleted.
+
+## What the failure points at
+
+The scorer uses **|distance|** from the eligibility boundary. On this
+benchmark that makes two very different situations identical:
+
+| | income | log_distance | eligibility | award |
+|---|---:|---:|---|---|
+| far **below** | $3,000 | 0.861 | settled: eligible | **swings with household size** |
+| far **above** | $48,000 | 0.817 | settled: ineligible | zero regardless of size |
+
+Both score ≈ 0.84 and rank together. One is award-undetermined and the other
+is fully determined. **The missing feature is the sign**, and unlike a
+rescale, adding it changes the order.
+
+It is agent-computable: the agent knows the income it was told and can compare
+it to a rough limit, which `features` already does to get the distance.
+
+## What is added
+
+`signed_scorer`: the handcrafted score, with the award penalty applied **only
+below** the boundary.
+
+    below      = income < rough limit (or its lower edge when deps unknown)
+    award_risk = distance  if below and dependents unknown  else 0
+    score      = handcrafted × (1 − award_risk × 0.8)
+
+Same weight, 0.8, carried over unchanged from addendum six. The only
+difference is where it applies.
+
+## Predictions
+
+**N1.** The ordering will **genuinely change**: more than 1% of state pairs
+will flip relative to the handcrafted scorer. If this fails the term is
+another monotone transform and nothing downstream can differ.
+
+**N2.** The concentration on `well-below` will fall **below 2.5**, from 4.07.
+
+**N3.** `well-above`'s unsafe rate will **not rise** by more than 3 points.
+The penalty is now withheld from that side, and withholding it must not make
+it worse.
+
+**N4.** Coverage will stay **above 68%**. Below that the fix is buying safety
+by abstaining, which the per-band figures will also show.
+
+## What would falsify the mechanism
+
+**N1 holds and N2 fails.** The order changes, in the direction the diagnosis
+says, and the concentration does not move. Then the diagnosis identifies a
+real property of the scorer that is not what drives the subgroup failure, and
+the README's mechanism section is rewritten as a correlation.
+
+## What would not falsify it
+
+**N3 or N4 missing.** Both are cost predictions.
+
+## Analysis plan
+
+One run on `fine_dev`, 200 trials, seed 89, α = 0.20 and 0.15, written to
+`evidence/signed_scorer.json`. Neither holdout is touched. The weight stays at
+0.8; if the sign is not the missing piece, that is the result.

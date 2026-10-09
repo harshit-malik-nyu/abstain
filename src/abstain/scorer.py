@@ -259,3 +259,61 @@ def auc(samples: list[tuple[float, bool]]) -> float:
             elif p == q:
                 ties += 1
     return (wins + 0.5 * ties) / (len(pos) * len(neg))
+
+
+# ---------------------------------------------------------------------------
+# The scorer the mechanism diagnosis implies
+# ---------------------------------------------------------------------------
+
+AWARD_RISK_WEIGHT = 0.8
+"""
+Fixed in `docs/preregistration-5.md` before the first run, and not adjusted.
+
+Chosen so the penalty is nearly total at maximal distance from the boundary,
+which is where the measurement says the scorer is most wrong. One value, no
+sweep: a constant tuned after seeing the result it produces is not a fix, it
+is a fit.
+"""
+
+
+def award_aware_scorer(case: dict, known: frozenset[str]) -> float:
+    """
+    `handcrafted_scorer` plus the term the failure analysis asks for.
+
+    What it is repairing
+    --------------------
+    The handcrafted scorer estimates whether **eligibility** is settled.
+    Determinability on this benchmark requires the **award** to be settled
+    too — sweeping the unknown fields must not move it by more than the
+    materiality threshold. Far below the income limit eligibility is obvious
+    and the award swings hardest with household size, so the scorer is
+    confident, correct about its own question, and wrong about the one it is
+    scored on. Measured: **72%** of its commitments in `well-below` are
+    award-only against 0% in `above`.
+
+    Why the existing discount is not already this
+    ---------------------------------------------
+    `handcrafted_scorer` multiplies by 0.45 when `dependents` is unknown,
+    uniformly. Right direction, wrong shape. Near the income boundary an
+    unknown household size threatens **eligibility**, and `log_distance`
+    already collapses the score there. Far below it threatens the **award**,
+    and nothing in the score notices — so the one place the flat discount
+    leaves the score high is the one place it should not.
+
+    So the award term scales **with** distance, which is the inverse of how
+    the rest of the score behaves:
+
+        award_risk = distance   if dependents unknown else 0
+        score      = handcrafted × (1 − award_risk × AWARD_RISK_WEIGHT)
+
+    Nothing here consults the oracle. The agent knows the household size it
+    has been told and the one it has not, which is all the term needs — it
+    does not estimate the award, only whether the award is pinned down.
+    """
+    base = handcrafted_scorer(case, known)
+    if base <= 0.0 or "dependents" in known:
+        return base
+
+    f = features(case, known)
+    award_risk = f["log_distance"] if f["income_known"] else 1.0
+    return max(0.0, base * (1.0 - award_risk * AWARD_RISK_WEIGHT))
