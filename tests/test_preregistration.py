@@ -620,3 +620,45 @@ class TestTheCaseAgainstAnswersObjectionsToItself:
             in t
         assert "partition of income" in t.lower() or \
             "partition **of income**" in t
+
+
+class TestTheOpeningDoesNotBorrowCredibility:
+    """
+    The one number in the opening that this repository did not measure.
+    """
+
+    def test_the_external_number_is_qualified_where_it_is_first_stated(self):
+        """
+        "A companion benchmark measured a frontier model doing exactly that
+        on 62.5% of undecidable cases" opened this README for several rounds
+        with no indication that the figure comes from a different project,
+        is not comparable to anything here, and is not reproducible from
+        this repository. The qualification existed — eleven hundred lines
+        further down.
+
+        An impressive number a reader meets before any caveat is credibility
+        borrowed against work that is not in the repository, so the caveat
+        has to travel with it.
+        """
+        lines = (ROOT / "README.md").read_text().splitlines()
+        end = next(i for i, ln in enumerate(lines) if ln.strip() == "---")
+        opening = " ".join(" ".join(lines[:end]).split())
+
+        assert "62.5%" in opening, \
+            "this test assumes the figure is still in the opening"
+        assert "separate benchmark" in opening or "companion" in opening
+        assert "not comparable" in opening
+        assert "No language model was run here" in opening, \
+            "the governing limitation belongs beside the borrowed number"
+
+    def test_the_opening_does_not_imply_the_number_is_a_baseline(self):
+        """
+        62.5% against this method's single-digit violation rates would be a
+        tempting comparison and a false one. The repository says elsewhere
+        that putting them in one table would be the most misleading thing it
+        could do; the opening now says so too.
+        """
+        lines = (ROOT / "README.md").read_text().splitlines()
+        end = next(i for i, ln in enumerate(lines) if ln.strip() == "---")
+        opening = " ".join(" ".join(lines[:end]).split())
+        assert "motivation, not a baseline" in opening

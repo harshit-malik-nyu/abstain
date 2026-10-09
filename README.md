@@ -2,9 +2,17 @@
 
 An agent conducting a benefits intake can ask for a field or commit to a
 verdict. Committing while the case is still undecidable is the failure that
-matters, because downstream it becomes a filed claim built on a guess. A
-companion benchmark measured a frontier model doing exactly that on **62.5%**
-of undecidable cases.
+matters, because downstream it becomes a filed claim built on a guess.
+
+That the failure is real rather than hypothetical comes from a **separate
+benchmark** (`underdetermined`, same account), which measured a frontier model
+answering **62.5%** of undecidable cases. **That number is motivation, not a
+baseline**, and it is not comparable to anything below: different cases,
+different n, free text rather than four known fields, and nothing in this
+repository reproduces it. **No language model was run here at all** — the
+limitation is [the one objection this project cannot
+answer](docs/against.md#1-there-is-no-model-in-it), and it belongs in the
+first paragraph rather than a thousand lines down.
 
 This is a rule where the operator names a tolerance and gets it:
 
