@@ -2283,3 +2283,173 @@ def test_the_precorrection_files_show_the_defect_they_are_kept_for(unit_cmp):
     assert vacuous, "the kept file should still show the vacuous zero"
     assert all("violation_rate_when_feasible" not in r for r in old), \
         "the pre-correction file must stay pre-correction"
+
+
+# ---------------------------------------------------------------------------
+# Three live evidence files that no test read, found by the manifest guard
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def writeups():
+    """
+    The documents a reader would look in for a figure.
+
+    Rounds two and five are written up in `results-secondary.md` rather than
+    the README, so a test that only checked the README would report a
+    published figure as missing — which is a false alarm in the direction
+    that gets a guard relaxed.
+    """
+    parts = [squash("README.md"), squash("docs/results-secondary.md"),
+             squash("docs/predictions.md"), squash("docs/theory.md")]
+    return _Haystack(" ".join(parts))
+
+
+@pytest.fixture(scope="module")
+def holdout_run():
+    p = ROOT / "evidence" / "holdout_result.json"
+    if not p.exists():
+        pytest.skip("holdout_result.json not present")
+    return json.loads(p.read_text())
+
+
+@pytest.fixture(scope="module")
+def secondary():
+    p = ROOT / "evidence" / "secondary_dev.json"
+    if not p.exists():
+        pytest.skip("secondary_dev.json not present")
+    return json.loads(p.read_text())
+
+
+@pytest.fixture(scope="module")
+def materiality():
+    p = ROOT / "evidence" / "materiality.json"
+    if not p.exists():
+        pytest.skip("materiality.json not present")
+    return json.loads(p.read_text())
+
+
+def test_the_holdout_table_is_the_holdout_run(readme, holdout_run):
+    """
+    The pre-registered primary result, and nothing read its evidence file
+    until the manifest guard said so.
+
+    Every published cell, against the run. The table was *correct* when
+    checked by hand, which is exactly why this needed a test: a figure that
+    is right and unchecked is one edit from being wrong and unchecked.
+    """
+    assert holdout_run["cases"] == 81, holdout_run["cases"]
+    assert holdout_run["trials"] == 150, holdout_run["trials"]
+
+    for key in ("0.2", "0.15", "0.1"):
+        r = holdout_run["results"][key]
+        assert r["infeasible_rate"] == 0.0, (key, r["infeasible_rate"])
+        assert any(f in readme for f in pct_forms(r["violation_rate"], 1)), \
+            (key, r["violation_rate"])
+        assert any(f in readme for f in pct_forms(r["mean_coverage"], 1)), \
+            (key, r["mean_coverage"])
+        assert f"{r['mean_questions']:.2f}" in readme, r["mean_questions"]
+
+
+def test_the_infeasible_holdout_row_is_not_printed_as_a_pass(readme,
+                                                             holdout_run):
+    """
+    α = 0.05 on 81 cases is 100% infeasible, and its `violation_rate` in the
+    file is 0.0 — the vacuous zero this repository retracted twice.
+
+    The README prints "—" and "100%", which is the right convention. This
+    requires it to stay that way, because the raw file still offers the
+    tempting number.
+    """
+    r = holdout_run["results"]["0.05"]
+    assert r["infeasible_rate"] == 1.0, r
+    assert r["violation_rate"] == 0.0, r
+
+    text = " ".join((ROOT / "README.md").read_text().split())
+    assert "| 0.05 | — | **100%** | — | — |" in text, \
+        "the 100%-infeasible row must show a dash, not a 0.0%"
+
+
+def test_the_plugin_baseline_table_is_the_measured_one(writeups,
+                                                       secondary):
+    """
+    A1-A4's evidence, previously unread. The plug-in arm violates its budget
+    where the conformal arm does not, and the comparison is paired at each
+    calibration size.
+    """
+    sweep = secondary["A_plugin_baseline"]["calibration_size_sweep"]
+    by = {}
+    for r in sweep:
+        by.setdefault(r["bound"], []).append(r)
+    assert set(by) == {"clopper-pearson", "plugin"}, sorted(by)
+
+    # The plug-in arm is always feasible -- a point estimate at alpha always
+    # finds a threshold -- which is the point: it certifies and violates
+    # where the exact bound declines. Both halves are asserted.
+    assert all(r["infeasible_rate"] == 0.0 for r in by["plugin"]), by["plugin"]
+    assert all(r["violation_rate"] > 0.10 for r in by["plugin"]), by["plugin"]
+
+    exact = by["clopper-pearson"]
+    assert any(r["infeasible_rate"] > 0.0 for r in exact), exact
+    certified = [r for r in exact if r["infeasible_rate"] < 1.0]
+    assert all(r["violation_rate"] <= 0.10 for r in certified), certified
+
+    lo = min(r["violation_rate"] for r in by["plugin"])
+    hi = max(r["violation_rate"] for r in by["plugin"])
+    for v in (lo, hi):
+        assert any(f in writeups for f in pct_forms(v, 1)), v
+
+
+def test_the_corruption_ordering_figures_are_the_measured_ones(readme,
+                                                               secondary):
+    """
+    B1-B4's evidence. The two figures the write-up leans on are the
+    monotone corruption's identical AUC and the inverted score's tau.
+    """
+    ordering = {r["name"]: r for r in secondary["B_score_corruption"]["ordering"]}
+    ident = ordering["identity"]
+    sharp = next(v for k, v in ordering.items() if k.startswith("sharpen"))
+
+    assert sharp["auc"] == pytest.approx(ident["auc"], abs=1e-12)
+    assert sharp["kendall_tau"] == pytest.approx(1.0)
+    assert f"{ident['kendall_tau']:.3f}" in readme
+
+    inv = next((v for k, v in ordering.items() if "invert" in k), None)
+    if inv is not None:
+        assert inv["kendall_tau"] < -0.9, inv
+        assert "−1.00" in readme or "-1.00" in readme
+
+
+def test_the_materiality_sweep_is_the_measured_one(writeups,
+                                                   materiality):
+    """
+    L1-L4's evidence, previously unread.
+
+    The claim is that the concentration is flat across materiality
+    thresholds and collapses only when the award criterion is removed, so
+    the extremes of the sweep are what the write-up has to carry.
+    """
+    rows = materiality["rows"]
+    assert len(rows) >= 5, len(rows)
+
+    def conc(r):
+        w = r["worst_band"]
+        return r["concentration"].get(w, 0.0) if w else 0.0
+
+    money = [r for r in rows if not r["flip_only"]]
+    assert money, "no dollar-threshold rows in the sweep"
+
+    spread = (max(r["worst_concentration"] for r in money)
+              - min(r["worst_concentration"] for r in money))
+    assert spread < 0.5, ("the sweep should be flat in money", spread)
+
+    # And it must collapse when the award criterion is removed entirely --
+    # the flip-only arm. That contrast is what L1-L3 turned on.
+    flip = next(r for r in rows if r["flip_only"])
+    assert flip["worst_concentration"] < 2.0, flip
+    assert flip["worst_band"] != money[0]["worst_band"], \
+        "the worst band should change at flip-only; L2 turned on that"
+
+    for value in (min(r["worst_concentration"] for r in money),
+                  max(r["worst_concentration"] for r in money),
+                  flip["worst_concentration"]):
+        assert f"{value:.2f}" in writeups, value

@@ -133,11 +133,19 @@ the evidence is.**
 A union bound over the grid — testing each candidate at δ/101 — restores a
 valid simultaneous statement. Measured on dev it is unaffordable here:
 
-| α | Violations | Infeasible | Coverage |
+| α | Violations, **of the trials it certified** | Infeasible | Coverage |
 |---:|---:|---:|---:|
-| 0.20 | 0.0% | **55%** | 66.5% |
-| 0.15 | 0.0% | **100%** | — |
-| 0.10 | 0.0% | **100%** | — |
+| 0.20 | 0.0% of the 45% it certified | **55%** | 66.5% |
+| 0.15 | **— never certified** | **100%** | — |
+| 0.10 | **— never certified** | **100%** | — |
+
+Those two dashes used to read **0.0%**, which is the same vacuous zero
+retracted in §2 above: zero violations over zero certified trials, printed in
+a Violations column. The README's own tables have always used "—" and "no
+feasible trial" for this, so the convention existed and this document was the
+place that broke it. The uncorrected arm — same grid, no union bound — sits at
+1.0% violations with **nothing** infeasible at all three tolerances, which is
+the comparison the table is for.
 
 Because the requirement roughly triples:
 
