@@ -1228,3 +1228,80 @@ def test_the_bootstrap_point_matches_the_published_run(uncertainty, round4,
                        if b["band"] == band)
             now = cell(uncertainty, which, 0.20, band)["point"]
             assert was == pytest.approx(now, abs=1e-9), (which, band)
+
+
+# ---------------------------------------------------------------------------
+# Does the method's own justification survive at scale?
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def plugin_scale():
+    p = ROOT / "evidence" / "plugin_scale.json"
+    if not p.exists():
+        pytest.skip("the plug-in scale sweep has not been run")
+    return json.loads(p.read_text())
+
+
+def at_size(payload: dict, alpha: float, n_cal: int, bound: str) -> dict:
+    return next(r for r in payload["rows"] if r["alpha"] == alpha
+                and r["calibration_size"] == n_cal and r["bound"] == bound)
+
+
+def test_the_correction_matters_at_every_size_tested(readme, plugin_scale):
+    """
+    K2's refutation, which is what the README's baseline section now rests
+    on. If a future run shows the plug-in holding delta at the largest fold,
+    the section's claim is wrong and must be narrowed to "below some n".
+    """
+    delta = plugin_scale["delta"]
+    for alpha in (0.20, 0.10):
+        for n_cal in plugin_scale["sizes"]:
+            plug = at_size(plugin_scale, alpha, n_cal, "plugin")
+            rate = plug["violation_rate_when_feasible"]
+            assert rate is not None and rate > delta, (alpha, n_cal, rate)
+
+
+def test_the_conformal_rule_holds_delta_at_every_size(plugin_scale):
+    """K4. Where it cannot, it must decline rather than offer a threshold."""
+    for alpha in (0.20, 0.10):
+        for n_cal in plugin_scale["sizes"]:
+            c = at_size(plugin_scale, alpha, n_cal, "clopper-pearson")
+            if c["feasible_trials"] == 0:
+                assert c["infeasible_rate"] == 1.0, (alpha, n_cal)
+                continue
+            assert c["holds"] is True, (alpha, n_cal)
+
+
+def test_only_one_arm_ever_declines(plugin_scale):
+    """
+    The asymmetry the section turns on: the plug-in always has a threshold
+    to offer, and the threshold is not safe.
+    """
+    for alpha in (0.20, 0.10):
+        for n_cal in plugin_scale["sizes"]:
+            assert at_size(plugin_scale, alpha, n_cal,
+                           "plugin")["infeasible_rate"] == 0.0
+
+
+def test_k1_is_recorded_as_a_miss(readme, plugin_scale):
+    """
+    I predicted the plug-in's violation rate would fall monotonically with
+    calibration size. At alpha = 0.20 it rises again at the largest fold.
+    """
+    rates = [at_size(plugin_scale, 0.20, n, "plugin")
+             ["violation_rate_when_feasible"]
+             for n in plugin_scale["sizes"]]
+    assert rates != sorted(rates, reverse=True), \
+        "K1 now holds; the write-up must stop calling it a miss"
+    assert "K1 and K2 both missed" in (ROOT / "README.md").read_text()
+
+
+def test_the_quoted_scale_table_is_the_measured_one(readme, plugin_scale):
+    for alpha in (0.20, 0.10):
+        for n_cal in plugin_scale["sizes"]:
+            for bound in ("clopper-pearson", "plugin"):
+                r = at_size(plugin_scale, alpha, n_cal, bound)
+                v = r["violation_rate_when_feasible"]
+                if v is None:
+                    continue
+                assert pct(v) in readme, (alpha, n_cal, bound, v)

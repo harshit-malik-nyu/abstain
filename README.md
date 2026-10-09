@@ -16,7 +16,7 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; eleven pre-registered predictions that missed; and one result that
+it was; thirteen pre-registered predictions that missed; and one result that
 changes what the method is for.** The guarantee it delivers is not the
 guarantee its own README advertised for four rounds, and the gap is not small
 — and the strongest form of the claim that replaced it was refuted by its own
@@ -24,7 +24,7 @@ pre-registered test, two rounds later.
 
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
-fix, and **[all forty-four predictions are listed with their
+fix, and **[all forty-eight predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
 wrong.
@@ -344,15 +344,40 @@ whose *observed* calibration rate is within α — is what a competent engineer
 writes, and it is correct **in expectation**, which is exactly why it fails. An
 operator who asks for 5% and gets 5% on average is over budget half the time.
 
-Same pipeline, same grid, α = 0.10, 150 trials:
+Same pipeline, same grid, 300 trials on the 672-case benchmark, swept across
+calibration size — because the correction it justifies is a *finite-sample*
+correction, and the obvious objection is that it stops mattering once you have
+data:
 
-| Calibration cases | Conformal | Plug-in |
-|---:|---:|---:|
-| 40 | **3.3%** violations | **16.7%** |
-| 50 | **0.7%** violations | **20.7%** |
+| Calibration cases | α = 0.20 conformal | α = 0.20 plug-in | α = 0.10 conformal | α = 0.10 plug-in |
+|---:|---:|---:|---:|---:|
+| 25 | **2.1%** | **36.3%** | *declines* | **46.7%** |
+| 50 | **1.3%** | **35.0%** | **0.3%** | **39.0%** |
+| 100 | **0.3%** | 19.7% | **0.7%** | 29.7% |
+| 200 | **2.3%** | 8.7% | **0.3%** | 17.3% |
+| 400 | **1.0%** | **16.0%** | **1.0%** | 6.3% |
 
-The plug-in never reports infeasible. It always has a threshold to offer, and
-the threshold is not safe.
+**It does not stop mattering.** The plug-in never holds δ = 0.05 at any
+calibration size tested — up to 400 cases, five times what the original
+comparison had and most of the available pool — and at α = 0.20 its violation
+rate is not even monotone, rising again from 8.7% to 16.0%.
+
+**K1 and K2 both missed, and being wrong improved the explanation.** I had
+described this as a finite-sample correction that should dissolve with data,
+and pre-registered that the plug-in would hold δ at 400 cases. It does not,
+because the failure was never about sample size:
+
+> The plug-in chooses the smallest threshold whose **point estimate** sits at
+> α. A point estimate at α is above α about half the time, so the deployed
+> rate crosses the budget by construction. More calibration data makes that
+> targeting *more precise* — it lands *closer* to α — which does not reduce
+> the crossings. The 46.7% at the smallest fold is that mechanism with the
+> noise stripped away.
+
+The conformal rule holds δ at every size, and where it cannot it **declines**:
+at 25 cases and a 10% tolerance it reports infeasible in 100% of trials rather
+than offering a threshold. The plug-in never reports infeasible. It always has
+a threshold to offer, and the threshold is not safe.
 
 ---
 
@@ -853,6 +878,7 @@ python scripts/run_recalibration.py     # does recalibrating alone fix it?
 python scripts/run_allocation.py        # questions per band, per scheme
 python scripts/check_confounds.py       # is it the stopping or asking rule?
 python scripts/diagnose_mechanism.py    # why the levels are shifted
+python scripts/run_plugin_scale.py      # does the baseline fail at scale?
 python scripts/run_uncertainty.py       # cluster bootstrap over cases
 python scripts/make_figure.py           # regenerate docs/shift.svg
 

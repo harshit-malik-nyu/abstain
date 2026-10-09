@@ -1,6 +1,6 @@
 # Every prediction, and what happened
 
-Thirty-four predictions across six pre-registrations, each written before the
+Forty-eight predictions across six pre-registrations, each written before the
 code that tested it. This table is the whole record: no prediction is omitted,
 and the outcome column is the one that was true at the time, not the one that
 would read best.
@@ -56,6 +56,10 @@ there were ten — so the number is derived from here rather than written twice.
 | **J2** | the same band is still worst | `well-below` | held |
 | **J3** | no-distance coverage below 60% | **92.7%** | **missed** |
 | **J4** | no-distance AUC below 0.80 | 0.8888 | **missed** |
+| **K1** | plug-in violations fall monotonically with calibration size | rises again, 8.7% → 16.0% | **missed** |
+| **K2** | plug-in holds δ at 400 calibration cases | 16.0% and 6.3% | **missed** |
+| **K3** | plug-in violates >15% at the smallest fold | 36.3% | held |
+| **K4** | conformal holds δ at every size | 0.3–2.3%, declining where it cannot | held |
 
 ---
 
@@ -86,3 +90,13 @@ tolerance. Reporting them as failed would have been reporting noise.
 
 **J1 is the one that cost the most.** It was the test of the strongest form of
 the central claim, and the claim lost. The README states the narrowed version.
+
+**K1 and K2 missed in the method's favour, which is its own hazard.** I had
+described the Clopper–Pearson correction as a finite-sample fix that should
+dissolve once you have data, and predicted the plug-in would hold δ at 400
+calibration cases. It does not, at any size tested — because the plug-in
+targets a *point estimate* at α, and a point estimate at α is above α about
+half the time. The failure was never about sample size. Being wrong produced
+a better account of why the method works than being right would have, and a
+prediction that misses in your favour is exactly the one it is tempting not
+to score.
