@@ -85,6 +85,13 @@ bound is 1 − δ<sup>1/n</sup>, so the smallest tolerance reachable at all is
 | 20 | 13.9% |
 | 29 | **9.9%** |
 
+*Corrected after the fact, and the table left as written because a
+pre-registration is not edited: the last cell is `reachable_alpha(29)`, which
+is **9.81%** and rounds to **9.8%**. The round's argument uses 29 as the
+smallest group size that can certify a 10% tolerance, which is right —
+`minimum_calibration_size(0.10)` returns 29 — and the misprint is in the floor
+beside it.*
+
 Dev holds 79 cases; a 60% calibration fold is 47, which is about 11 per band.
 So the prediction is not subtle.
 

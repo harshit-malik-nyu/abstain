@@ -93,7 +93,11 @@ a Clopper–Pearson bound with zero observed failures in n trials is still
     7 cases per group  ->  34.8%
    10 cases per group  ->  25.9%
    20 cases per group  ->  13.9%
-   29 cases per group  ->   9.9%
+   29 cases per group  ->   9.8%
+
+Every cell is `reachable_alpha(n)` and a test now requires it to be, because
+the last row read 9.9% for a value of 9.81% — a hand-typed figure sitting
+beside the code that computes it.
 
 Dev's 60% calibration fold is 47 cases, about 11 per band. Group conditioning
 at a 10% tolerance is arithmetically out of reach there, and no amount of
