@@ -1,0 +1,78 @@
+{
+ "cases": 672,
+ "elapsed_seconds": 3.0,
+ "first_question": {
+  "award-aware": {
+   "all_cases": {
+    "age": 0,
+    "dependents": 672,
+    "employment_income": 0,
+    "state_name": 0
+   },
+   "asking_cases": {
+    "age": 0,
+    "dependents": 672,
+    "employment_income": 0,
+    "state_name": 0
+   },
+   "n_asking": 672
+  },
+  "handcrafted": {
+   "all_cases": {
+    "age": 0,
+    "dependents": 672,
+    "employment_income": 0,
+    "state_name": 0
+   },
+   "asking_cases": {
+    "age": 0,
+    "dependents": 447,
+    "employment_income": 0,
+    "state_name": 0
+   },
+   "n_asking": 447
+  },
+  "signed": {
+   "all_cases": {
+    "age": 0,
+    "dependents": 672,
+    "employment_income": 0,
+    "state_name": 0
+   },
+   "asking_cases": {
+    "age": 0,
+    "dependents": 543,
+    "employment_income": 0,
+    "state_name": 0
+   },
+   "n_asking": 543
+  }
+ },
+ "immediate_commits": {
+  "award-aware": 0,
+  "handcrafted": 225,
+  "signed": 129
+ },
+ "order_flips": {
+  "award-aware": {
+   "comparable": 95938,
+   "flip_rate": 0.047687047885092454,
+   "flips": 4575,
+   "pairs_sampled": 100000,
+   "reachable_states": 5376,
+   "seed": 89,
+   "ties": 4062
+  },
+  "signed": {
+   "comparable": 95938,
+   "flip_rate": 0.03041547666201088,
+   "flips": 2918,
+   "pairs_sampled": 100000,
+   "reachable_states": 5376,
+   "seed": 89,
+   "ties": 4062
+  }
+ },
+ "set": "fine_dev",
+ "tau": 0.3
+}

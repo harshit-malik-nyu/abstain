@@ -1,9 +1,13 @@
 # Every prediction, and what happened
 
-Fifty-two predictions across six pre-registrations, each written before the
+Sixty-one predictions across eight pre-registrations, each written before the
 code that tested it. This table is the whole record: no prediction is omitted,
 and the outcome column is the one that was true at the time, not the one that
 would read best.
+
+**Scoring rule, fixed and applied even where it hurts: a prediction is scored
+against the number written down**, not against the nearest figure that would
+let it pass. M3 is the case that tests this — see below.
 
 `tests/test_predictions.py` parses this file, counts the outcomes, and
 requires the counts quoted anywhere else to match. A hand-counted number in
@@ -64,6 +68,15 @@ there were ten — so the number is derived from here rather than written twice.
 | **L2** | `well-below` worst at every setting | worst becomes `above` at flip-only | **missed** |
 | **L3** | flip-only concentration at least as large as $50 | **1.55 against 4.07** | **missed** |
 | **L4** | materiality $0 degenerates the benchmark | 57.3% open, 75.7% coverage — not degenerate | **missed** |
+| **M1** | the award term drops concentration below 2.0 | **4.07 — identical to its control** | **missed** |
+| **M2** | without the coverage collapse blinding caused | 75.8% | held *(vacuously — see below)* |
+| **M3** | pooled rate at or below the handcrafted 11.1% | 11.5%, equal to its control to every digit | **missed** |
+| **M4** | `well-below` stops being the worst band | still worst | **missed** |
+| **M5** | conditioning helps **less** than before | helps by exactly as much, 46.5% → 13.7% | **missed** |
+| **N1** | the signed term genuinely reorders states | 3.04% of reachable pairs | held *(and the wrong guard)* |
+| **N2** | reordering drops concentration below 2.5 | **4.07 — identical again** | **missed** |
+| **N3** | `well-above` rises by at most 3 points | **0.00** points | held *(vacuously)* |
+| **N4** | coverage stays above 68% | 76.0% | held *(vacuously)* |
 
 ---
 
@@ -108,6 +121,50 @@ rule commits on the **high-scoring** ones, and there it is **72%**. I walked
 into the same selection effect that `calibrate_on_trajectories` exists to
 handle. The corrected mechanism is in the README and the original reasoning is
 kept, annotated, in `scripts/diagnose_mechanism.py`.
+
+**Rounds M and N are the worst two rounds in this ledger, and they produced
+the sharpest single result in it.** Nine predictions, five missed, and the four
+that held did so **vacuously** — they held because the thing being tested
+changed nothing at all, so every cost prediction was satisfied by a no-op.
+A round where the cost predictions pass for that reason is not a partial
+success and the ledger should not let it read as one.
+
+What happened: both rounds added a term to the scorer that fires only while
+`dependents` is unknown, and the greedy question-selector asks for
+`dependents` **first in every case that asks anything** — 447 of 447. So the
+term acts on the opening state and nowhere else. An agent that does not commit
+immediately asks the one question that switches the term off.
+
+The result is that three scorers with **AUC 0.9425, 0.9555 and 0.9604**, which
+reorder **3.0% and 4.8%** of the state pairs the rule can reach, produce
+deployed behaviour identical **in every float**: same pooled rate, same four
+band rates, same coverage, same questions per case, same group-conditional
+figures, at both tolerances and under both schemes. Not identical to the
+printed precision — identical under `==`, which
+`tests/test_predictions.py` now checks.
+
+> **A confidence function for a sequential agent cannot be evaluated on the
+> state space. It has to be evaluated on the states the agent reaches under
+> the rule.** AUC gave three different numbers for what is, in deployment,
+> one policy — and it moved in *both directions* while nothing moved.
+
+That is the fifth independent result in this repository about AUC failing to
+see a threshold-local decision, and the strongest, because the other four
+involved behaviour changing while AUC did not.
+
+**M3 is where the scoring rule costs something.** It predicted the pooled rate
+would come in "at or below the handcrafted scorer's 11.1%". It came in at
+11.5% — and so did its own control, to every digit, because 11.1% was measured
+in an earlier run at a different seed. Scored against its own control it holds;
+scored against the number written down it misses, and that is how it is scored.
+Either way its stated reason — "should improve the pooled figure, not merely
+redistribute it" — is refuted, because it did neither.
+
+**N1 held and was the wrong guard.** It was written to catch the failure mode
+of round M by checking that the new term actually reorders states. It does, and
+reordering was never what was broken. A pre-registered guard can be answered
+correctly and still be aimed at the wrong thing; that is worth more than a
+clean pass would have been.
 
 **K1 and K2 missed in the method's favour, which is its own hazard.** I had
 described the Clopper–Pearson correction as a finite-sample fix that should

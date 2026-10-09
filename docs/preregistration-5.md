@@ -701,10 +701,20 @@ difference is where it applies.
 **N1.** The ordering will **genuinely change**: more than 1% of state pairs
 will flip relative to the handcrafted scorer.
 
-*Scored after the retraction above: N1 **held** — 2.78% of reachable pairs
-flip — and it was the wrong guard. The ordering was never the problem. The
-problem is that the term switches off at the agent's first question, which
-N1 cannot detect.*
+*Scored after the retraction above: N1 **held** — and it was the wrong guard.
+The ordering was never the problem. The problem is that the term switches off
+at the agent's first question, which N1 cannot detect.*
+
+*Scored twice, and the two figures differ. The figure first published here was
+**2.78%**, measured ad hoc and never written to `evidence/` — which is the
+same defect as the retracted claim above in a milder form, since a number no
+script computes is a number no test can check. The recorded measurement,
+uniform over pairs of reachable states at a fixed seed, is **3.04%**
+(`scripts/measure_opening_state.py`, `evidence/opening_state.json`). The
+earlier figure is left visible rather than overwritten; it is superseded, not
+corrected, because its estimator is no longer recoverable. N1 holds under
+both, and the 1% guard is far enough away that the difference changes
+nothing — which is luck, not a defence of the practice.*
 
 **N2.** The concentration on `well-below` will fall **below 2.5**, from 4.07.
 

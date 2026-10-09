@@ -1,0 +1,1105 @@
+{
+ "arms": {
+  "award-aware": [
+   {
+    "alpha": 0.2,
+    "auc": 0.9425381920150347,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "well-below",
+      "coverage": 0.5407335763708058,
+      "decidable": 13441,
+      "deployed": 13441,
+      "resolved": 7268,
+      "unsafe": 6173,
+      "unsafe_rate": 0.45926642362919423
+     },
+     {
+      "abstained": 5137,
+      "band": "near-threshold",
+      "coverage": 0.7525314342939802,
+      "decidable": 26961,
+      "deployed": 26961,
+      "resolved": 20289,
+      "unsafe": 1535,
+      "unsafe_rate": 0.0569340899818256
+     },
+     {
+      "abstained": 4637,
+      "band": "above",
+      "coverage": 0.6879672185613821,
+      "decidable": 18059,
+      "deployed": 18059,
+      "resolved": 12424,
+      "unsafe": 998,
+      "unsafe_rate": 0.055263303615925574
+     },
+     {
+      "abstained": 2169,
+      "band": "well-above",
+      "coverage": 0.8854192898514228,
+      "decidable": 35739,
+      "deployed": 35739,
+      "resolved": 31644,
+      "unsafe": 1926,
+      "unsafe_rate": 0.05389070763031982
+     }
+    ],
+    "concentration": {
+     "above": 0.4896353649943745,
+     "near-threshold": 0.5044386076267844,
+     "well-above": 0.4774741025936914,
+     "well-below": 4.069121247730446
+    },
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7603503184713376,
+    "mean_questions": 2.0524734607218686,
+    "pooled_unsafe_rate": 0.11286624203821656,
+    "scorer": "award-aware",
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "well-below"
+   },
+   {
+    "alpha": 0.15,
+    "auc": 0.9425381920150347,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "well-below",
+      "coverage": 0.7010639089353471,
+      "decidable": 13441,
+      "deployed": 13441,
+      "resolved": 9423,
+      "unsafe": 4018,
+      "unsafe_rate": 0.2989360910646529
+     },
+     {
+      "abstained": 5571,
+      "band": "near-threshold",
+      "coverage": 0.7776417788657691,
+      "decidable": 26961,
+      "deployed": 26961,
+      "resolved": 20966,
+      "unsafe": 424,
+      "unsafe_rate": 0.01572641964318831
+     },
+     {
+      "abstained": 5140,
+      "band": "above",
+      "coverage": 0.6601140705465419,
+      "decidable": 18059,
+      "deployed": 18059,
+      "resolved": 11921,
+      "unsafe": 998,
+      "unsafe_rate": 0.055263303615925574
+     },
+     {
+      "abstained": 2243,
+      "band": "well-above",
+      "coverage": 0.8862587089733904,
+      "decidable": 35739,
+      "deployed": 35739,
+      "resolved": 31674,
+      "unsafe": 1822,
+      "unsafe_rate": 0.05098072134083215
+     }
+    ],
+    "concentration": {
+     "above": 0.7168553016552175,
+     "near-threshold": 0.20399734651450546,
+     "well-above": 0.6613032154098578,
+     "well-below": 3.8776893112490094
+    },
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7853927813163482,
+    "mean_questions": 2.1493736730360937,
+    "pooled_unsafe_rate": 0.07709129511677282,
+    "scorer": "award-aware",
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "well-below"
+   }
+  ],
+  "handcrafted": [
+   {
+    "alpha": 0.2,
+    "auc": 0.9555349084493348,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "well-below",
+      "coverage": 0.5407335763708058,
+      "decidable": 13441,
+      "deployed": 13441,
+      "resolved": 7268,
+      "unsafe": 6173,
+      "unsafe_rate": 0.45926642362919423
+     },
+     {
+      "abstained": 5137,
+      "band": "near-threshold",
+      "coverage": 0.7525314342939802,
+      "decidable": 26961,
+      "deployed": 26961,
+      "resolved": 20289,
+      "unsafe": 1535,
+      "unsafe_rate": 0.0569340899818256
+     },
+     {
+      "abstained": 4637,
+      "band": "above",
+      "coverage": 0.6879672185613821,
+      "decidable": 18059,
+      "deployed": 18059,
+      "resolved": 12424,
+      "unsafe": 998,
+      "unsafe_rate": 0.055263303615925574
+     },
+     {
+      "abstained": 2169,
+      "band": "well-above",
+      "coverage": 0.8854192898514228,
+      "decidable": 35739,
+      "deployed": 35739,
+      "resolved": 31644,
+      "unsafe": 1926,
+      "unsafe_rate": 0.05389070763031982
+     }
+    ],
+    "concentration": {
+     "above": 0.4896353649943745,
+     "near-threshold": 0.5044386076267844,
+     "well-above": 0.4774741025936914,
+     "well-below": 4.069121247730446
+    },
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7603503184713376,
+    "mean_questions": 2.0524734607218686,
+    "pooled_unsafe_rate": 0.11286624203821656,
+    "scorer": "handcrafted",
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "well-below"
+   },
+   {
+    "alpha": 0.15,
+    "auc": 0.9555349084493348,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "well-below",
+      "coverage": 0.7010639089353471,
+      "decidable": 13441,
+      "deployed": 13441,
+      "resolved": 9423,
+      "unsafe": 4018,
+      "unsafe_rate": 0.2989360910646529
+     },
+     {
+      "abstained": 5571,
+      "band": "near-threshold",
+      "coverage": 0.7776417788657691,
+      "decidable": 26961,
+      "deployed": 26961,
+      "resolved": 20966,
+      "unsafe": 424,
+      "unsafe_rate": 0.01572641964318831
+     },
+     {
+      "abstained": 5140,
+      "band": "above",
+      "coverage": 0.6601140705465419,
+      "decidable": 18059,
+      "deployed": 18059,
+      "resolved": 11921,
+      "unsafe": 998,
+      "unsafe_rate": 0.055263303615925574
+     },
+     {
+      "abstained": 2243,
+      "band": "well-above",
+      "coverage": 0.8862587089733904,
+      "decidable": 35739,
+      "deployed": 35739,
+      "resolved": 31674,
+      "unsafe": 1822,
+      "unsafe_rate": 0.05098072134083215
+     }
+    ],
+    "concentration": {
+     "above": 0.7168553016552175,
+     "near-threshold": 0.20399734651450546,
+     "well-above": 0.6613032154098578,
+     "well-below": 3.8776893112490094
+    },
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7853927813163482,
+    "mean_questions": 2.1493736730360937,
+    "pooled_unsafe_rate": 0.07709129511677282,
+    "scorer": "handcrafted",
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "well-below"
+   }
+  ],
+  "signed": [
+   {
+    "alpha": 0.2,
+    "auc": 0.9604059948808876,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "well-below",
+      "coverage": 0.5407335763708058,
+      "decidable": 13441,
+      "deployed": 13441,
+      "resolved": 7268,
+      "unsafe": 6173,
+      "unsafe_rate": 0.45926642362919423
+     },
+     {
+      "abstained": 5137,
+      "band": "near-threshold",
+      "coverage": 0.7525314342939802,
+      "decidable": 26961,
+      "deployed": 26961,
+      "resolved": 20289,
+      "unsafe": 1535,
+      "unsafe_rate": 0.0569340899818256
+     },
+     {
+      "abstained": 4637,
+      "band": "above",
+      "coverage": 0.6879672185613821,
+      "decidable": 18059,
+      "deployed": 18059,
+      "resolved": 12424,
+      "unsafe": 998,
+      "unsafe_rate": 0.055263303615925574
+     },
+     {
+      "abstained": 2169,
+      "band": "well-above",
+      "coverage": 0.8854192898514228,
+      "decidable": 35739,
+      "deployed": 35739,
+      "resolved": 31644,
+      "unsafe": 1926,
+      "unsafe_rate": 0.05389070763031982
+     }
+    ],
+    "concentration": {
+     "above": 0.4896353649943745,
+     "near-threshold": 0.5044386076267844,
+     "well-above": 0.4774741025936914,
+     "well-below": 4.069121247730446
+    },
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7603503184713376,
+    "mean_questions": 2.0524734607218686,
+    "pooled_unsafe_rate": 0.11286624203821656,
+    "scorer": "signed",
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "well-below"
+   },
+   {
+    "alpha": 0.15,
+    "auc": 0.9604059948808876,
+    "bands": [
+     {
+      "abstained": 0,
+      "band": "well-below",
+      "coverage": 0.7010639089353471,
+      "decidable": 13441,
+      "deployed": 13441,
+      "resolved": 9423,
+      "unsafe": 4018,
+      "unsafe_rate": 0.2989360910646529
+     },
+     {
+      "abstained": 5571,
+      "band": "near-threshold",
+      "coverage": 0.7776417788657691,
+      "decidable": 26961,
+      "deployed": 26961,
+      "resolved": 20966,
+      "unsafe": 424,
+      "unsafe_rate": 0.01572641964318831
+     },
+     {
+      "abstained": 5140,
+      "band": "above",
+      "coverage": 0.6601140705465419,
+      "decidable": 18059,
+      "deployed": 18059,
+      "resolved": 11921,
+      "unsafe": 998,
+      "unsafe_rate": 0.055263303615925574
+     },
+     {
+      "abstained": 2243,
+      "band": "well-above",
+      "coverage": 0.8862587089733904,
+      "decidable": 35739,
+      "deployed": 35739,
+      "resolved": 31674,
+      "unsafe": 1822,
+      "unsafe_rate": 0.05098072134083215
+     }
+    ],
+    "concentration": {
+     "above": 0.7168553016552175,
+     "near-threshold": 0.20399734651450546,
+     "well-above": 0.6613032154098578,
+     "well-below": 3.8776893112490094
+    },
+    "hides_a_subgroup": true,
+    "mean_coverage": 0.7853927813163482,
+    "mean_questions": 2.1493736730360937,
+    "pooled_unsafe_rate": 0.07709129511677282,
+    "scorer": "signed",
+    "trials": 200,
+    "violation_rate_when_feasible": 0.01,
+    "worst_band": "well-below"
+   }
+  ]
+ },
+ "award_risk_weight": 0.8,
+ "calibration_share": 0.3,
+ "elapsed_seconds": 1478.5,
+ "order_flips": {
+  "award_aware_vs_handcrafted": {
+   "comparable": 95938,
+   "flip_rate": 0.047687047885092454,
+   "flips": 4575,
+   "pairs_sampled": 100000,
+   "population": "reachable states, uniform over pairs",
+   "seed": 89,
+   "ties": 4062
+  },
+  "signed_vs_handcrafted": {
+   "comparable": 95938,
+   "flip_rate": 0.03041547666201088,
+   "flips": 2918,
+   "pairs_sampled": 100000,
+   "population": "reachable states, uniform over pairs",
+   "seed": 89,
+   "ties": 4062
+  }
+ },
+ "predictions": {
+  "N1": {
+   "claim": ">1% of reachable state pairs flip vs handcrafted",
+   "held": true,
+   "value": 0.03041547666201088
+  },
+  "N2": {
+   "claim": "well-below concentration below 2.5, from 4.07",
+   "held": false,
+   "value": 4.069121247730446,
+   "worst_band": "well-below"
+  },
+  "N3": {
+   "claim": "well-above unsafe rate rises by at most 3 points",
+   "held": true,
+   "value": 0.0
+  },
+  "N4": {
+   "claim": "coverage stays above 68%",
+   "held": true,
+   "value": 0.7603503184713376
+  }
+ },
+ "schemes": [
+  {
+   "alpha": 0.2,
+   "bands": [
+    {
+     "abstention_rate": 0.25676947782269227,
+     "band": "above",
+     "coverage": 0.6879672185613821,
+     "deployed": 18059,
+     "questions_per_case": 2.4114292042748766,
+     "unsafe": 998,
+     "unsafe_rate": 0.055263303615925574
+    },
+    {
+     "abstention_rate": 0.1905344757241942,
+     "band": "near-threshold",
+     "coverage": 0.7525314342939802,
+     "deployed": 26961,
+     "questions_per_case": 2.2680909461815215,
+     "unsafe": 1535,
+     "unsafe_rate": 0.0569340899818256
+    },
+    {
+     "abstention_rate": 0.06069000251825737,
+     "band": "well-above",
+     "coverage": 0.8854192898514228,
+     "deployed": 35739,
+     "questions_per_case": 1.853213576205266,
+     "unsafe": 1926,
+     "unsafe_rate": 0.05389070763031982
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.5407335763708058,
+     "deployed": 13441,
+     "questions_per_case": 1.6675098578974779,
+     "unsafe": 6173,
+     "unsafe_rate": 0.45926642362919423
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 200,
+   "group_violation_rate_when_feasible": 0.985,
+   "infeasible_rate": 0.0,
+   "mean_coverage": 0.7603503184713379,
+   "mean_max_concentration": 4.1060813507627545,
+   "mean_questions": 2.052473460721869,
+   "mean_worst_group_rate": 0.4566981315786839,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.5407335763708058,
+   "post_hoc": false,
+   "scheme": "pooled",
+   "scorer": "handcrafted",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.01,
+   "worst_band": "well-below"
+  },
+  {
+   "alpha": 0.2,
+   "bands": [
+    {
+     "abstention_rate": 0.24142364560808838,
+     "band": "above",
+     "coverage": 0.6965110163053007,
+     "deployed": 17111,
+     "questions_per_case": 2.276781018058559,
+     "unsafe": 1062,
+     "unsafe_rate": 0.06206533808661095
+    },
+    {
+     "abstention_rate": 0.19654149426184714,
+     "band": "near-threshold",
+     "coverage": 0.7579045983292997,
+     "deployed": 25618,
+     "questions_per_case": 2.2823015067530643,
+     "unsafe": 1167,
+     "unsafe_rate": 0.04555390740885315
+    },
+    {
+     "abstention_rate": 0.03377364596510841,
+     "band": "well-above",
+     "coverage": 0.8574622694242594,
+     "deployed": 33991,
+     "questions_per_case": 1.3124356447294871,
+     "unsafe": 3697,
+     "unsafe_rate": 0.10876408461063222
+    },
+    {
+     "abstention_rate": 0.02216131558339859,
+     "band": "well-below",
+     "coverage": 0.9184808144087706,
+     "deployed": 12770,
+     "questions_per_case": 2.151840250587314,
+     "unsafe": 758,
+     "unsafe_rate": 0.059357870007830854
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 190,
+   "group_violation_rate_when_feasible": 0.05263157894736842,
+   "infeasible_rate": 0.05,
+   "mean_coverage": 0.8068946250977767,
+   "mean_max_concentration": 1.7618967446620175,
+   "mean_questions": 1.894245167057773,
+   "mean_worst_group_rate": 0.12940378141374176,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.6965110163053007,
+   "post_hoc": false,
+   "scheme": "by-band",
+   "scorer": "handcrafted",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-above"
+  },
+  {
+   "alpha": 0.15,
+   "bands": [
+    {
+     "abstention_rate": 0.2846226258375325,
+     "band": "above",
+     "coverage": 0.6601140705465419,
+     "deployed": 18059,
+     "questions_per_case": 2.4702364472008416,
+     "unsafe": 998,
+     "unsafe_rate": 0.055263303615925574
+    },
+    {
+     "abstention_rate": 0.20663180149104263,
+     "band": "near-threshold",
+     "coverage": 0.7776417788657691,
+     "deployed": 26961,
+     "questions_per_case": 2.3303660843440523,
+     "unsafe": 424,
+     "unsafe_rate": 0.01572641964318831
+    },
+    {
+     "abstention_rate": 0.06276056968577744,
+     "band": "well-above",
+     "coverage": 0.8862587089733904,
+     "deployed": 35739,
+     "questions_per_case": 1.9716276336774952,
+     "unsafe": 1822,
+     "unsafe_rate": 0.05098072134083215
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.7010639089353471,
+     "deployed": 13441,
+     "questions_per_case": 1.8278401904620192,
+     "unsafe": 4018,
+     "unsafe_rate": 0.2989360910646529
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 200,
+   "group_violation_rate_when_feasible": 0.92,
+   "infeasible_rate": 0.0,
+   "mean_coverage": 0.7853927813163483,
+   "mean_max_concentration": 3.786288909952894,
+   "mean_questions": 2.149373673036093,
+   "mean_worst_group_rate": 0.29709408038875645,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.6601140705465419,
+   "post_hoc": false,
+   "scheme": "pooled",
+   "scorer": "handcrafted",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.01,
+   "worst_band": "well-below"
+  },
+  {
+   "alpha": 0.15,
+   "bands": [
+    {
+     "abstention_rate": 0.3137108792846498,
+     "band": "above",
+     "coverage": 0.639344262295082,
+     "deployed": 12078,
+     "questions_per_case": 2.429706905116741,
+     "unsafe": 567,
+     "unsafe_rate": 0.04694485842026826
+    },
+    {
+     "abstention_rate": 0.20249170338936945,
+     "band": "near-threshold",
+     "coverage": 0.767803710353082,
+     "deployed": 18381,
+     "questions_per_case": 2.3042815951254014,
+     "unsafe": 546,
+     "unsafe_rate": 0.029704586257548557
+    },
+    {
+     "abstention_rate": 0.05748964612293435,
+     "band": "well-above",
+     "coverage": 0.8691105917086973,
+     "deployed": 24387,
+     "questions_per_case": 1.5467257145200313,
+     "unsafe": 1790,
+     "unsafe_rate": 0.0733997621683684
+    },
+    {
+     "abstention_rate": 0.048859934853420196,
+     "band": "well-below",
+     "coverage": 0.9186753528773073,
+     "deployed": 9210,
+     "questions_per_case": 2.196199782844734,
+     "unsafe": 299,
+     "unsafe_rate": 0.03246471226927253
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 136,
+   "group_violation_rate_when_feasible": 0.11029411764705882,
+   "infeasible_rate": 0.32,
+   "mean_coverage": 0.8038435119270638,
+   "mean_max_concentration": 1.8215780085184177,
+   "mean_questions": 2.0239790183589372,
+   "mean_worst_group_rate": 0.0917390982040425,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.639344262295082,
+   "post_hoc": false,
+   "scheme": "by-band",
+   "scorer": "handcrafted",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-above"
+  },
+  {
+   "alpha": 0.2,
+   "bands": [
+    {
+     "abstention_rate": 0.25676947782269227,
+     "band": "above",
+     "coverage": 0.6879672185613821,
+     "deployed": 18059,
+     "questions_per_case": 2.4114292042748766,
+     "unsafe": 998,
+     "unsafe_rate": 0.055263303615925574
+    },
+    {
+     "abstention_rate": 0.1905344757241942,
+     "band": "near-threshold",
+     "coverage": 0.7525314342939802,
+     "deployed": 26961,
+     "questions_per_case": 2.2680909461815215,
+     "unsafe": 1535,
+     "unsafe_rate": 0.0569340899818256
+    },
+    {
+     "abstention_rate": 0.06069000251825737,
+     "band": "well-above",
+     "coverage": 0.8854192898514228,
+     "deployed": 35739,
+     "questions_per_case": 1.853213576205266,
+     "unsafe": 1926,
+     "unsafe_rate": 0.05389070763031982
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.5407335763708058,
+     "deployed": 13441,
+     "questions_per_case": 1.6675098578974779,
+     "unsafe": 6173,
+     "unsafe_rate": 0.45926642362919423
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 200,
+   "group_violation_rate_when_feasible": 0.985,
+   "infeasible_rate": 0.0,
+   "mean_coverage": 0.7603503184713379,
+   "mean_max_concentration": 4.1060813507627545,
+   "mean_questions": 2.052473460721869,
+   "mean_worst_group_rate": 0.4566981315786839,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.5407335763708058,
+   "post_hoc": false,
+   "scheme": "pooled",
+   "scorer": "award-aware",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.01,
+   "worst_band": "well-below"
+  },
+  {
+   "alpha": 0.2,
+   "bands": [
+    {
+     "abstention_rate": 0.24142364560808838,
+     "band": "above",
+     "coverage": 0.6965110163053007,
+     "deployed": 17111,
+     "questions_per_case": 2.276781018058559,
+     "unsafe": 1062,
+     "unsafe_rate": 0.06206533808661095
+    },
+    {
+     "abstention_rate": 0.19654149426184714,
+     "band": "near-threshold",
+     "coverage": 0.7579045983292997,
+     "deployed": 25618,
+     "questions_per_case": 2.2823015067530643,
+     "unsafe": 1167,
+     "unsafe_rate": 0.04555390740885315
+    },
+    {
+     "abstention_rate": 0.03377364596510841,
+     "band": "well-above",
+     "coverage": 0.8574622694242594,
+     "deployed": 33991,
+     "questions_per_case": 1.3124356447294871,
+     "unsafe": 3697,
+     "unsafe_rate": 0.10876408461063222
+    },
+    {
+     "abstention_rate": 0.02216131558339859,
+     "band": "well-below",
+     "coverage": 0.9184808144087706,
+     "deployed": 12770,
+     "questions_per_case": 2.151840250587314,
+     "unsafe": 758,
+     "unsafe_rate": 0.059357870007830854
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 190,
+   "group_violation_rate_when_feasible": 0.05263157894736842,
+   "infeasible_rate": 0.05,
+   "mean_coverage": 0.8068946250977767,
+   "mean_max_concentration": 1.7618967446620175,
+   "mean_questions": 1.894245167057773,
+   "mean_worst_group_rate": 0.12940378141374176,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.6965110163053007,
+   "post_hoc": false,
+   "scheme": "by-band",
+   "scorer": "award-aware",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-above"
+  },
+  {
+   "alpha": 0.15,
+   "bands": [
+    {
+     "abstention_rate": 0.2846226258375325,
+     "band": "above",
+     "coverage": 0.6601140705465419,
+     "deployed": 18059,
+     "questions_per_case": 2.4702364472008416,
+     "unsafe": 998,
+     "unsafe_rate": 0.055263303615925574
+    },
+    {
+     "abstention_rate": 0.20663180149104263,
+     "band": "near-threshold",
+     "coverage": 0.7776417788657691,
+     "deployed": 26961,
+     "questions_per_case": 2.3303660843440523,
+     "unsafe": 424,
+     "unsafe_rate": 0.01572641964318831
+    },
+    {
+     "abstention_rate": 0.06276056968577744,
+     "band": "well-above",
+     "coverage": 0.8862587089733904,
+     "deployed": 35739,
+     "questions_per_case": 1.9716276336774952,
+     "unsafe": 1822,
+     "unsafe_rate": 0.05098072134083215
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.7010639089353471,
+     "deployed": 13441,
+     "questions_per_case": 1.8278401904620192,
+     "unsafe": 4018,
+     "unsafe_rate": 0.2989360910646529
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 200,
+   "group_violation_rate_when_feasible": 0.92,
+   "infeasible_rate": 0.0,
+   "mean_coverage": 0.7853927813163483,
+   "mean_max_concentration": 3.786288909952894,
+   "mean_questions": 2.149373673036093,
+   "mean_worst_group_rate": 0.29709408038875645,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.6601140705465419,
+   "post_hoc": false,
+   "scheme": "pooled",
+   "scorer": "award-aware",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.01,
+   "worst_band": "well-below"
+  },
+  {
+   "alpha": 0.15,
+   "bands": [
+    {
+     "abstention_rate": 0.3137108792846498,
+     "band": "above",
+     "coverage": 0.639344262295082,
+     "deployed": 12078,
+     "questions_per_case": 2.429706905116741,
+     "unsafe": 567,
+     "unsafe_rate": 0.04694485842026826
+    },
+    {
+     "abstention_rate": 0.20249170338936945,
+     "band": "near-threshold",
+     "coverage": 0.767803710353082,
+     "deployed": 18381,
+     "questions_per_case": 2.3042815951254014,
+     "unsafe": 546,
+     "unsafe_rate": 0.029704586257548557
+    },
+    {
+     "abstention_rate": 0.05748964612293435,
+     "band": "well-above",
+     "coverage": 0.8691105917086973,
+     "deployed": 24387,
+     "questions_per_case": 1.5467257145200313,
+     "unsafe": 1790,
+     "unsafe_rate": 0.0733997621683684
+    },
+    {
+     "abstention_rate": 0.048859934853420196,
+     "band": "well-below",
+     "coverage": 0.9186753528773073,
+     "deployed": 9210,
+     "questions_per_case": 2.196199782844734,
+     "unsafe": 299,
+     "unsafe_rate": 0.03246471226927253
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 136,
+   "group_violation_rate_when_feasible": 0.11029411764705882,
+   "infeasible_rate": 0.32,
+   "mean_coverage": 0.8038435119270638,
+   "mean_max_concentration": 1.8215780085184177,
+   "mean_questions": 2.0239790183589372,
+   "mean_worst_group_rate": 0.0917390982040425,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.639344262295082,
+   "post_hoc": false,
+   "scheme": "by-band",
+   "scorer": "award-aware",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-above"
+  },
+  {
+   "alpha": 0.2,
+   "bands": [
+    {
+     "abstention_rate": 0.25676947782269227,
+     "band": "above",
+     "coverage": 0.6879672185613821,
+     "deployed": 18059,
+     "questions_per_case": 2.4114292042748766,
+     "unsafe": 998,
+     "unsafe_rate": 0.055263303615925574
+    },
+    {
+     "abstention_rate": 0.1905344757241942,
+     "band": "near-threshold",
+     "coverage": 0.7525314342939802,
+     "deployed": 26961,
+     "questions_per_case": 2.2680909461815215,
+     "unsafe": 1535,
+     "unsafe_rate": 0.0569340899818256
+    },
+    {
+     "abstention_rate": 0.06069000251825737,
+     "band": "well-above",
+     "coverage": 0.8854192898514228,
+     "deployed": 35739,
+     "questions_per_case": 1.853213576205266,
+     "unsafe": 1926,
+     "unsafe_rate": 0.05389070763031982
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.5407335763708058,
+     "deployed": 13441,
+     "questions_per_case": 1.6675098578974779,
+     "unsafe": 6173,
+     "unsafe_rate": 0.45926642362919423
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 200,
+   "group_violation_rate_when_feasible": 0.985,
+   "infeasible_rate": 0.0,
+   "mean_coverage": 0.7603503184713379,
+   "mean_max_concentration": 4.1060813507627545,
+   "mean_questions": 2.052473460721869,
+   "mean_worst_group_rate": 0.4566981315786839,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.5407335763708058,
+   "post_hoc": false,
+   "scheme": "pooled",
+   "scorer": "signed",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.01,
+   "worst_band": "well-below"
+  },
+  {
+   "alpha": 0.2,
+   "bands": [
+    {
+     "abstention_rate": 0.24142364560808838,
+     "band": "above",
+     "coverage": 0.6965110163053007,
+     "deployed": 17111,
+     "questions_per_case": 2.276781018058559,
+     "unsafe": 1062,
+     "unsafe_rate": 0.06206533808661095
+    },
+    {
+     "abstention_rate": 0.19654149426184714,
+     "band": "near-threshold",
+     "coverage": 0.7579045983292997,
+     "deployed": 25618,
+     "questions_per_case": 2.2823015067530643,
+     "unsafe": 1167,
+     "unsafe_rate": 0.04555390740885315
+    },
+    {
+     "abstention_rate": 0.03377364596510841,
+     "band": "well-above",
+     "coverage": 0.8574622694242594,
+     "deployed": 33991,
+     "questions_per_case": 1.3124356447294871,
+     "unsafe": 3697,
+     "unsafe_rate": 0.10876408461063222
+    },
+    {
+     "abstention_rate": 0.02216131558339859,
+     "band": "well-below",
+     "coverage": 0.9184808144087706,
+     "deployed": 12770,
+     "questions_per_case": 2.151840250587314,
+     "unsafe": 758,
+     "unsafe_rate": 0.059357870007830854
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 190,
+   "group_violation_rate_when_feasible": 0.05263157894736842,
+   "infeasible_rate": 0.05,
+   "mean_coverage": 0.8068946250977767,
+   "mean_max_concentration": 1.7618967446620175,
+   "mean_questions": 1.894245167057773,
+   "mean_worst_group_rate": 0.12940378141374176,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.6965110163053007,
+   "post_hoc": false,
+   "scheme": "by-band",
+   "scorer": "signed",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-above"
+  },
+  {
+   "alpha": 0.15,
+   "bands": [
+    {
+     "abstention_rate": 0.2846226258375325,
+     "band": "above",
+     "coverage": 0.6601140705465419,
+     "deployed": 18059,
+     "questions_per_case": 2.4702364472008416,
+     "unsafe": 998,
+     "unsafe_rate": 0.055263303615925574
+    },
+    {
+     "abstention_rate": 0.20663180149104263,
+     "band": "near-threshold",
+     "coverage": 0.7776417788657691,
+     "deployed": 26961,
+     "questions_per_case": 2.3303660843440523,
+     "unsafe": 424,
+     "unsafe_rate": 0.01572641964318831
+    },
+    {
+     "abstention_rate": 0.06276056968577744,
+     "band": "well-above",
+     "coverage": 0.8862587089733904,
+     "deployed": 35739,
+     "questions_per_case": 1.9716276336774952,
+     "unsafe": 1822,
+     "unsafe_rate": 0.05098072134083215
+    },
+    {
+     "abstention_rate": 0.0,
+     "band": "well-below",
+     "coverage": 0.7010639089353471,
+     "deployed": 13441,
+     "questions_per_case": 1.8278401904620192,
+     "unsafe": 4018,
+     "unsafe_rate": 0.2989360910646529
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 200,
+   "group_violation_rate_when_feasible": 0.92,
+   "infeasible_rate": 0.0,
+   "mean_coverage": 0.7853927813163483,
+   "mean_max_concentration": 3.786288909952894,
+   "mean_questions": 2.149373673036093,
+   "mean_worst_group_rate": 0.29709408038875645,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.6601140705465419,
+   "post_hoc": false,
+   "scheme": "pooled",
+   "scorer": "signed",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.01,
+   "worst_band": "well-below"
+  },
+  {
+   "alpha": 0.15,
+   "bands": [
+    {
+     "abstention_rate": 0.3137108792846498,
+     "band": "above",
+     "coverage": 0.639344262295082,
+     "deployed": 12078,
+     "questions_per_case": 2.429706905116741,
+     "unsafe": 567,
+     "unsafe_rate": 0.04694485842026826
+    },
+    {
+     "abstention_rate": 0.20249170338936945,
+     "band": "near-threshold",
+     "coverage": 0.767803710353082,
+     "deployed": 18381,
+     "questions_per_case": 2.3042815951254014,
+     "unsafe": 546,
+     "unsafe_rate": 0.029704586257548557
+    },
+    {
+     "abstention_rate": 0.05748964612293435,
+     "band": "well-above",
+     "coverage": 0.8691105917086973,
+     "deployed": 24387,
+     "questions_per_case": 1.5467257145200313,
+     "unsafe": 1790,
+     "unsafe_rate": 0.0733997621683684
+    },
+    {
+     "abstention_rate": 0.048859934853420196,
+     "band": "well-below",
+     "coverage": 0.9186753528773073,
+     "deployed": 9210,
+     "questions_per_case": 2.196199782844734,
+     "unsafe": 299,
+     "unsafe_rate": 0.03246471226927253
+    }
+   ],
+   "delta": 0.05,
+   "feasible_trials": 136,
+   "group_violation_rate_when_feasible": 0.11029411764705882,
+   "infeasible_rate": 0.32,
+   "mean_coverage": 0.8038435119270638,
+   "mean_max_concentration": 1.8215780085184177,
+   "mean_questions": 2.0239790183589372,
+   "mean_worst_group_rate": 0.0917390982040425,
+   "measured_by": "by-band",
+   "min_band_coverage": 0.639344262295082,
+   "post_hoc": false,
+   "scheme": "by-band",
+   "scorer": "signed",
+   "trials": 200,
+   "violation_rate_when_feasible": 0.0,
+   "worst_band": "well-above"
+  }
+ ],
+ "seed": 89,
+ "set": "fine_dev",
+ "trials": 200
+}

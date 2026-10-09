@@ -20,6 +20,7 @@ contradicts.
 
 from __future__ import annotations
 
+import json
 import re
 from pathlib import Path
 
@@ -106,7 +107,7 @@ def test_the_ledger_covers_every_preregistration(ledger):
     labels = {p for p, _, _ in ledger}
     for prefix, count in (("P", 8), ("A", 4), ("B", 4), ("C", 3),
                           ("E", 8), ("F", 5), ("G", 3), ("H", 4), ("J", 4),
-                          ("K", 4), ("L", 4)):
+                          ("K", 4), ("L", 4), ("M", 5), ("N", 4)):
         found = {x for x in labels if x.startswith(prefix)
                  and x[1:].isdigit()}
         assert len(found) == count, (prefix, sorted(found))
@@ -131,6 +132,16 @@ def test_the_readme_quotes_the_number_the_ledger_shows(ledger):
 def test_no_stale_smaller_count_survives_anywhere(ledger):
     """
     The specific way this went wrong: a smaller, older count left behind.
+
+    The guard needs a left boundary that a hyphen does not satisfy. With a
+    plain substring test this failed the moment the count passed twenty,
+    because "twenty-two" contains "two" and the test flagged the correct
+    number as a stale one. `\\b` is not enough either — a hyphen is a
+    non-word character, so `\\btwo` matches inside "twenty-two" as well.
+
+    That is the same shape of defect as the `spell` lookup table that
+    stopped at twelve: a check that is right over the range it was written
+    against and silently wrong past it.
     """
     missed = len([p for p, _, v in ledger if outcome_of(v) == "missed"])
     text = " ".join((ROOT / "README.md").read_text().split())
@@ -139,8 +150,9 @@ def test_no_stale_smaller_count_survives_anywhere(ledger):
         # The full phrase, not a prefix of it: the shift section legitimately
         # says "All five pre-registered predictions held", which is a count
         # of a different thing and must not trip this.
-        assert f"{word} pre-registered predictions that missed" not in text, \
-            word
+        stale = re.compile(rf"(?<![\w-]){re.escape(word)} "
+                           r"pre-registered predictions that missed")
+        assert not stale.search(text), word
 
 
 def test_the_misses_are_each_named_in_a_writeup(ledger):
@@ -173,3 +185,163 @@ def test_the_ledger_is_linked_from_the_readme():
     text = (ROOT / "README.md").read_text()
     assert "docs/predictions.md" in text, \
         "a complete record nobody can find is not a record"
+
+
+# ---------------------------------------------------------------------------
+# Rounds M and N: the claim the ledger makes about them
+# ---------------------------------------------------------------------------
+
+def _arms(path: str) -> dict:
+    p = ROOT / "evidence" / path
+    if not p.exists():
+        pytest.skip(f"{path} not present")
+    return json.loads(p.read_text())
+
+
+def _deployed(row: dict) -> dict:
+    """Everything the run reports except what the scorer is called and AUC."""
+    return {k: v for k, v in row.items() if k not in ("scorer", "auc")}
+
+
+@pytest.mark.parametrize("path", ["award_aware.json", "signed_scorer.json"])
+def test_the_arms_are_identical_in_every_float(path):
+    """
+    The claim rounds M and N rest on, checked rather than eyeballed.
+
+    The ledger says three scorers with different AUCs produce behaviour
+    "identical in every float". A printed table at one decimal place cannot
+    support that — 11.47% and 11.49% both print as 11.5%. So the comparison
+    is `==` over the whole reported structure: pooled rate, every band rate,
+    every band's coverage, every concentration, coverage, questions per
+    case, the violation rate, at every tolerance in the run.
+
+    If a future change to the scorer or the selector makes these diverge,
+    this fails and the ledger entry is wrong — which is the point. The
+    result is surprising enough that it should not be allowed to rot into a
+    claim nobody re-checks.
+    """
+    d = _arms(path)
+    arms = d["arms"]
+    assert "handcrafted" in arms, sorted(arms)
+    others = [k for k in arms if k != "handcrafted"]
+    assert others, "nothing to compare the control against"
+
+    alphas = sorted({r["alpha"] for r in arms["handcrafted"]})
+    for alpha in alphas:
+        base = _deployed(next(r for r in arms["handcrafted"]
+                              if r["alpha"] == alpha))
+        for label in others:
+            got = _deployed(next(r for r in arms[label]
+                                 if r["alpha"] == alpha))
+            assert got == base, (path, label, alpha)
+
+
+@pytest.mark.parametrize("path", ["award_aware.json", "signed_scorer.json"])
+def test_auc_moved_while_nothing_else_did(path):
+    """
+    The other half of the claim: AUC is not constant across these arms.
+
+    Identical behaviour from identical scores would be unremarkable. The
+    result is that the scores differ — measurably, by the metric the field
+    reaches for first — and the deployed rule does not notice.
+    """
+    arms = _arms(path)["arms"]
+    aucs = {k: v[0]["auc"] for k, v in arms.items()}
+    assert len(set(aucs.values())) == len(aucs), aucs
+    spread = max(aucs.values()) - min(aucs.values())
+    assert spread > 0.005, (aucs, spread)
+
+
+def test_the_term_fires_only_on_the_opening_state():
+    """
+    The mechanism behind the identity, which is the part that generalises.
+
+    Both added terms are gated on `dependents` being unknown, and the greedy
+    selector asks for `dependents` first in every case that asks anything.
+    So the terms can only act on the opening state. Asserted against the
+    scorers themselves rather than against prose: on any state that knows
+    `dependents`, all three must agree exactly.
+    """
+    import sys
+    sys.path.insert(0, str(ROOT / "src"))
+    from abstain.scorer import (award_aware_scorer, handcrafted_scorer,
+                                signed_scorer)
+    from abstain.validate import states_of
+
+    cases = json.loads((ROOT / "evidence" / "dev.json").read_text())
+    checked = 0
+    for case, known, _ in states_of(cases):
+        if "dependents" not in known:
+            continue
+        h = handcrafted_scorer(case, known)
+        assert award_aware_scorer(case, known) == h
+        assert signed_scorer(case, known) == h
+        checked += 1
+    assert checked > 100, checked
+
+
+def test_the_rounds_that_held_vacuously_say_so(ledger):
+    """
+    A cost prediction satisfied by a no-op is not a cost prediction that
+    passed, and the ledger must not let it read as one.
+    """
+    text = " ".join(LEDGER.read_text().split())
+    assert "vacuously" in text
+    for label in ("M2", "N3", "N4"):
+        row = next((v for p, _, v in ledger if p == label), None)
+        assert row is not None, label
+        assert "held" in row.lower() and "vacuous" in row.lower(), (label, row)
+
+
+def test_the_opening_state_figures_are_recorded_not_typed():
+    """
+    The four numbers that carried rounds M and N, coupled to their run.
+
+    "447 of 447", "225", "129" and the flip rate appeared in the
+    pre-registration and in `scorer.py` before any of them existed in
+    `evidence/`. A figure no script computes is a figure no test can check,
+    and that is how the retracted 106,365-pair claim survived long enough to
+    be committed.
+
+    Checked against the recorded run rather than against each other, so a
+    change to the selector or either scorer breaks this instead of quietly
+    making the prose wrong.
+    """
+    p = ROOT / "evidence" / "opening_state.json"
+    if not p.exists():
+        pytest.skip("opening_state.json not present")
+    d = json.loads(p.read_text())
+
+    hand = d["first_question"]["handcrafted"]
+    assert hand["asking_cases"]["dependents"] == hand["n_asking"], \
+        "the claim is that EVERY asking case asks for dependents first"
+    assert hand["all_cases"]["dependents"] == d["cases"], \
+        "and that it does so independently of the threshold"
+
+    commits = d["immediate_commits"]
+    assert commits["award-aware"] == 0, commits
+    assert commits["signed"] < commits["handcrafted"], commits
+
+    corpus = " ".join(
+        " ".join((ROOT / f).read_text().split())
+        for f in ("docs/preregistration-5.md", "src/abstain/scorer.py",
+                  "docs/predictions.md"))
+    for n in (hand["n_asking"], commits["handcrafted"], commits["signed"]):
+        assert f"{n:,}" in corpus or str(n) in corpus, n
+
+    rate = d["order_flips"]["signed"]["flip_rate"]
+    assert rate > 0.01, ("N1's guard", rate)
+    assert f"{rate:.2%}" in corpus, \
+        f"the recorded flip rate {rate:.2%} has to be the published one"
+
+
+def test_the_superseded_flip_rate_is_not_silently_replaced():
+    """
+    An ad-hoc figure overwritten with a recorded one, with no note, would be
+    the same move as replacing the retracted claim quietly.
+    """
+    doc = " ".join((ROOT / "docs" / "preregistration-5.md").read_text()
+                   .split())
+    assert "2.78%" in doc, "the superseded figure has to stay visible"
+    assert "superseded" in doc
+    assert "3.04%" in doc

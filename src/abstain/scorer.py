@@ -354,8 +354,18 @@ def signed_scorer(case: dict, known: frozenset[str]) -> float:
         $48,000  distance 0.817   settled ineligible, award zero either way
 
     Only one is award-undetermined. Adding the sign separates them, and it
-    does — 2.78% of reachable pairs reorder, and the opening-state commits
-    split 129 against 225. It is the right feature on the wrong state.
+    does — **3.04%** of reachable pairs reorder, and the opening-state
+    commits split 129 against 225. It is the right feature on the wrong
+    state. (An earlier, ad-hoc measurement of the same quantity said 2.78%;
+    it is superseded by `evidence/opening_state.json` and the discrepancy is
+    recorded in `docs/preregistration-5.md`.)
+
+    And the reordering reaches nothing. On every state where `dependents` is
+    known this function returns `handcrafted_scorer` exactly, the selector
+    asks for `dependents` first in all 447 cases that ask anything, and the
+    deployed figures match the handcrafted scorer's **in every float** at
+    both tolerances. Three scorers, AUC 0.9425 / 0.9555 / 0.9604, one
+    policy.
 
     Kept rather than deleted. A fix that is correct about the world and
     useless against the rule is the most informative thing in this file.

@@ -1,0 +1,17 @@
+  fine_dev: 672 cases, tau = 0.3
+
+  which field does the selector ask for first?
+    handcrafted  dependents in 672 of 672 cases, and in 447 of the 447 that ask anything
+    award-aware  dependents in 672 of 672 cases, and in 672 of the 672 that ask anything
+         signed  dependents in 672 of 672 cases, and in 543 of the 543 that ask anything
+
+  cases committed to with no question asked, at tau = 0.3
+    handcrafted   225 of 672
+    award-aware     0 of 672
+         signed   129 of 672
+
+  order flips against the handcrafted scorer
+    award-aware  4.77% of 95,938 comparable pairs (4,062 tied)
+         signed  3.04% of 95,938 comparable pairs (4,062 tied)
+
+  wrote evidence/opening_state.json (3.0s)
