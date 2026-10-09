@@ -169,9 +169,11 @@ it rules out is a lucky split rather than a wrong design.
   fourth, each in its own commit. Coverage rose from dev to holdout, which is
   what a method that was not tuned against its development set does.
 - **The miss stayed a miss.** 5.3% against a 5% target is 0.19 standard
-  errors and is recorded as a failed prediction. So did the other four: A2's
-  monotonicity, C1 and C2 predicting the wrong band, and E6 predicting that
-  group conditioning would cost coverage when it gains it.
+  errors and is recorded as a failed prediction. So did every other one:
+  [`docs/predictions.md`](predictions.md) lists all of them with outcomes, and
+  a test derives the count from that table rather than letting a number here
+  go stale — which this line did, saying "the other four" while the ledger had
+  grown past twenty.
 - **The subgroup result, narrowed by its own test.** It does not depend on the
   scorer ranking well — the scorer ranks at 0.9976 inside the band it fails on
   — nor on the hand-built functional form, since a learned scorer over the same
@@ -181,11 +183,16 @@ it rules out is a lucky split rather than a wrong design.
   inside budget. A single threshold contributes and, here, is not the dominant
   term. I predicted otherwise and the pre-registration is why that is a
   reported finding rather than a surviving claim.
-- **The three bugs, and that scrutiny rather than validation found them.** The
+- **The four bugs, and that scrutiny rather than validation found them.** The
   refusal threshold that was not a refusal, the subgroup comparison that
-  measured itself, and the feasibility-conditioning the metric did not have.
-  All three flattered the method. None was found by the experiment meant to
-  validate it, and one was held in place by a passing test.
+  measured itself, the feasibility-conditioning the metric did not have, and
+  the pre-registered prediction scored against an arm that never contained the
+  scorer it was about. All four flattered the method. None was found by the
+  experiment meant to validate it, and one was held in place by a passing
+  test. A fifth defect — a corruption seeded from `hash()`, so unreproducible
+  across processes — is listed in the README too, because it did *not* flatter
+  the method and a claim about "every defect" should not be made over a set
+  chosen to support it.
 
 ## The objection I cannot answer
 

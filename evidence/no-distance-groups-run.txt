@@ -1,0 +1,4 @@
+  fine_dev: 672 cases, 200 trials, seed 53
+  alphas (0.2, 0.15, 0.1); the scorer is refit per trial on a disjoint third
+
+  fitted-no-distance: AUC 0.8888 (fit and scored on disjoint folds)

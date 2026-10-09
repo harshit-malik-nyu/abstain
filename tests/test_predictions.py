@@ -345,3 +345,60 @@ def test_the_superseded_flip_rate_is_not_silently_replaced():
     assert "2.78%" in doc, "the superseded figure has to stay visible"
     assert "superseded" in doc
     assert "3.04%" in doc
+
+
+# ---------------------------------------------------------------------------
+# The bug count, which disagreed with itself inside one document
+# ---------------------------------------------------------------------------
+
+_BUG_DOCS = ("README.md", "docs/against.md", "docs/results-secondary.md")
+
+_NUMBER = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+           "seven": 7, "eight": 8, "nine": 9, "ten": 10}
+
+
+def _bug_counts(path: str) -> set[int]:
+    """Every count of bugs any sentence in a document claims."""
+    text = " ".join((ROOT / path).read_text().split())
+    found = set()
+    for word, n in _NUMBER.items():
+        for pat in (rf"(?<![\w-]){word} bugs?", rf"(?<![\w-])The {word} bugs?"):
+            if re.search(pat, text, re.I):
+                found.add(n)
+    return found
+
+
+def test_the_bug_count_agrees_with_itself_everywhere():
+    """
+    The README's opening said "four bugs" while its own section heading said
+    "Three bugs", for several rounds, and the fourth was described only in a
+    docstring. Two documents agreed with the heading and one with the opening.
+
+    A count that contradicts itself inside one document is the cheapest way
+    to lose a reader, and it survived because nothing compared the two. This
+    compares them.
+    """
+    per_doc = {p: _bug_counts(p) for p in _BUG_DOCS}
+    claimed = set().union(*per_doc.values())
+    assert claimed, per_doc
+    assert len(claimed) == 1, per_doc
+
+
+def test_every_claimed_bug_has_its_own_writeup():
+    """
+    A count is not a record. The README must carry one subsection per bug
+    under the bug section, so "four" cannot be asserted over three write-ups.
+    """
+    text = (ROOT / "README.md").read_text()
+    counts = _bug_counts("README.md")
+    n = counts.pop()
+
+    lines = text.splitlines()
+    starts = [i for i, ln in enumerate(lines)
+              if re.match(r"^## .*\bbugs\b", ln, re.I)]
+    assert len(starts) == 1, starts
+    start = starts[0]
+    end = next((i for i in range(start + 1, len(lines))
+                if lines[i].startswith("## ")), len(lines))
+    subs = [ln for ln in lines[start:end] if ln.startswith("### ")]
+    assert len(subs) == n, (n, subs)

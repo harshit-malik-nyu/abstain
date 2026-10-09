@@ -656,11 +656,17 @@ in the evidence rather than left for the reader to work out.
 
 ---
 
-## Three bugs, all in the method's favour
+## Four bugs, all in the method's favour
 
 Worth its own section, because the pattern is the point: **every defect found
 by scrutiny made the method look better than it was**, and none was found by
 the experiment that was supposed to validate it.
+
+This section said "three" for several rounds while the opening said four, and
+the fourth — the one below that scored a pre-registered prediction against a
+measurement of the wrong thing — was described only in a docstring. A count
+that disagrees with itself inside one document is the cheapest possible way to
+lose a reader, and it survived because no test compared the two.
 
 ### The refusal threshold was not a refusal
 
@@ -703,6 +709,32 @@ measures obedience to the flag, not the bound. Invisible while every condition
 was feasible; load-bearing once corruptions made the procedure decline in 100%
 of trials, where the honest statement is that there is no guarantee to test —
 not that it held, and not that it failed. Reported as `None`, never `0.0`.
+
+### A pre-registered prediction was scored against the wrong measurement
+
+The worst of the four, and the last to be written up here. `validate_groups`
+had no way to refit a scorer per trial. Addendum two asked whether group
+conditioning fixes the subgroup failure **for a learned scorer** — H4 — and
+with no refit available, that arm passed `handcrafted_scorer` to every row.
+
+The table it printed looked like an answer to H4. It was a **duplicate of an
+earlier round's scheme comparison**, and the learned scorer never appeared in
+it. H4 was scored *held* on it. Nothing failed, nothing warned, and the arm
+that was supposed to carry the prediction was not in the experiment.
+
+**A missing capability that quietly changes which question is answered is
+worse than one that raises an error.** `refit` exists now and
+[`group.py`](src/abstain/group.py) carries the account beside it; H4 was
+re-scored on the arm that actually varies the scorer, and holds — 86.5% → 7.0%
+— which is the result the first table claimed without measuring.
+
+One further defect does not belong in this list because it did not flatter the
+method, only hide it: `robustness.noisy` seeded its generator from `hash()`,
+which Python salts per process, so the corruption study was not reproducible
+across runs. Three subprocesses gave three different answers. It now seeds from
+SHA-256 of the state. Reported here because "every defect flattered the method"
+is a claim about these four, and leaving out a fifth defect of a different kind
+would make that claim look tidier than the record is.
 
 Each fix kept its pre-fix run in `evidence/` rather than overwriting it. Fixing
 a bug and re-running is not tuning, and the difference is only credible if both

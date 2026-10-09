@@ -17,8 +17,37 @@ across four vertically shifted distributions, so it cuts each one at a
 different quantile — tight where the distribution sits low, loose where it
 sits high.
 
-A better scorer does not fix that. A better-*ranking* scorer certainly does
-not. What fixes it is calibrating inside each group.
+A better-*ranking* scorer does not fix that, and the measurement is sharper
+than the argument: across three scorers on `fine_dev`, AUC descends 0.9555 →
+0.9252 → 0.8888 while the concentration descends with it, 4.13 → 3.31 → 1.72.
+On this benchmark the **worst**-ranking scorer spent its budget most evenly.
+
+Two things do fix it, and this docstring claimed only one for two rounds.
+
+**Calibrating inside each group** — what this module does. It converts the
+per-group rate into a *certificate*: each group is tested against the §1 bound
+at level δ, so a group that cannot be certified makes the arm infeasible
+rather than quietly unsafe.
+
+**Removing a feature that is directionally wrong for one group** — measured in
+round J, and on every axis the rule optimises it did better than conditioning
+did: 7.25% pooled against 11.11%, 92.75% coverage against 76.02%, worst band
+12.48% against 13.02% under conditioning, and no infeasible trials. I had
+pre-registered that it would not work at all (J1) and it is the best remedy
+here.
+
+The two are not interchangeable, and the difference is the whole point of this
+module. Conditioning **guarantees** a per-group rate at level δ. A pooled rule
+over a better-behaved score **happens to come in** under budget per group —
+that is a measurement on one benchmark at the tolerances tested, with nothing
+in the construction promising it elsewhere or at a tighter α. Round O
+(`docs/preregistration-5.md`, addendum eight) tests exactly that, because the
+no-distance scorer's worst band moves only 12.48% → 11.65% as the budget falls
+from 20% to 15%, which is what a fixed failure rate with a sliding budget looks
+like.
+
+So: audit the features first, because it is cheap and it worked best here, and
+condition anyway if you need the statement rather than the outcome.
 
 Prior work, named
 -----------------

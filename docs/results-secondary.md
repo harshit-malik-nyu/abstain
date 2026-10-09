@@ -505,9 +505,9 @@ row rather than left to the reader.
 
 ---
 
-## The pattern across all four rounds
+## The pattern across the rounds
 
-Three bugs were found by scrutiny, and **every one made the method look better
+Four bugs were found by scrutiny, and **every one made the method look better
 than it was**:
 
 | bug | what it hid | how it survived |
@@ -515,15 +515,22 @@ than it was**:
 | refusal threshold of `1.0` | the rule committing blind after declining to certify itself | the one scorer ever used tops out at 0.9718; a passing test asserted the wrong value |
 | one parameter for calibration and measurement partitions | the pooled rule's real worst-band rate, 45.7% reported as 11.1% | the pooled scheme has one group, so the breakdown was trivially flat |
 | violation rate pooled over declined trials | the difference between "held", "failed" and "never certified" | every condition was feasible until corruptions made them not |
+| no way to refit a scorer in `validate_groups` | that **H4's arm never contained the learned scorer** — the table was a duplicate of an earlier round's | the duplicate was a plausible-looking answer, and a missing capability raises nothing |
 
-None was found by the experiment meant to validate the method. All three were
+None was found by the experiment meant to validate the method. All four were
 found by experiments built to attack it, and two were found only because the
 corruption study ran scorers the primary experiment never would have.
 
-Five predictions missed across the four rounds: **A2** (monotonicity in
-calibration size), **C1** and **C2** (the wrong band, twice), **C3** (which
-was right and unmeasurable at 79 cases), and **E6** (coverage cost, which was
-a coverage gain). Each is recorded as a miss with a test pinning it.
+A fifth defect is recorded in the README and deliberately **not** counted
+here: `robustness.noisy` seeded from `hash()`, which Python salts per process,
+so the corruption study was not reproducible run to run. It did not flatter the
+method, and "every one flattered the method" is a claim worth keeping honest
+about which set it is made over.
+
+Every prediction that missed is listed with its outcome in
+[`docs/predictions.md`](predictions.md), and a test derives the count from that
+table. This paragraph used to name five of them by hand and was stale by
+seventeen within two rounds.
 
 ---
 
