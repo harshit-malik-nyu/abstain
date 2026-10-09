@@ -119,32 +119,58 @@ the second — households obviously eligible on income whose *award* still
 swings with household size — and that a scorer measuring distance from the
 *eligibility* boundary is blind to that by construction.
 
-I rejected that, and the rejection was wrong — in a way worth reading, because
-it is the same mistake this project is built around.
+I rejected that, then over-corrected, and the full account took three passes.
+All three are kept, because the sequence is the honest record — and the middle
+one is where I was most confident and least right.
 
-Across **all undetermined states**, the amount-only share is `well-below`
-31%, `near-threshold` 42%, `above` 15%, `well-above` 14%. Not a majority for
-the failing band, so the hypothesis looked dead.
+**Pass one — rejected.** Across *all* undetermined states the award-only share
+is `well-below` 31%, `near-threshold` 42%, `above` 15%, `well-above` 14%. Not
+a majority for the failing band, so the hypothesis looked dead.
 
-But the rule does not meet undetermined states uniformly. **It commits on the
-high-scoring ones**, and for `well-below` those are exactly the states where
-eligibility is settled — far below the limit — and only the award moves.
-Measured on the states the rule actually commits on while undetermined:
+**Pass two — over-corrected.** The rule does not meet undetermined states
+uniformly; it commits on the **high-scoring** ones. Measured there:
 
-| band | unsafe commitments | flip | **amount-only** |
+| band | unsafe commitments | **award-only** | share |
 |---|---:|---:|---:|
-| **well-below** | 1,165 | 331 | **834 — 72%** |
-| near-threshold | 232 | 143 | 38% |
-| above | 208 | 208 | 0% |
-| well-above | 385 | 308 | 20% |
+| **well-below** | 1,165 | **834** | **72%** |
+| near-threshold | 232 | 89 | 38% |
+| above | 208 | 0 | 0% |
+| well-above | 385 | 77 | 20% |
 
-**72%, not 31%.** The population that matters is the one the rule selects,
-which is the entire point of
-[`calibrate_on_trajectories`](src/abstain/rule.py) — and I walked into the
-same selection effect while diagnosing the rule that the rule itself had to
-be fixed for.
+**72%, not 31%** — a real measurement, and the selection effect behind it is
+the one [`calibrate_on_trajectories`](src/abstain/rule.py) exists to handle.
+I then promoted it to *the cause*, which it is not. It answers **why those
+states are undetermined**. It does not answer **why the scorer is confident
+about them** — a different question I had merged into it.
 
-What is actually happening, over undetermined states where income is known:
+**Pass three — the two questions, kept apart.** Take the two bands with
+near-identical base rates of safe states whose concentrations differ eightfold:
+
+| band | safe partial states | open states | median score | **share above 0.3** | concentration |
+|---|---:|---:|---:|---:|---:|
+| **well-below** | 12.5% | 588 | 0.3767 | **100%** | **4.07** |
+| near-threshold | 13.8% | 1,159 | 0.2884 | **45%** | 0.50 |
+
+Same base rate. **Every one of `well-below`'s unsafe states sits above 0.3;
+fewer than half of `near-threshold`'s do.** What differs is not how many states
+are unsafe — it is *where the unsafe ones sit on the scale*.
+
+So the account has three parts and only the third is the mechanism:
+
+1. **Why are those states undetermined?** The award moves — 72% of the rule's
+   failures there are award-only.
+2. **Why is the scorer confident about them?** Its one real feature is distance
+   from the eligibility boundary, maximal far *below* the limit, where
+   eligibility is settled and the award is not.
+3. **Why does that concentrate harm?** One threshold cuts a band whose unsafe
+   states are 100% above it at a completely different effective quantile than
+   one where 45% are.
+
+**A base-rate explanation was tested and rejected too**: bands at 12.5% and
+13.8% safe produce concentrations of 4.07 and 0.50, so base rate does not
+predict harm here.
+
+Part 2, measured over undetermined states where income is known:
 
 | band | undetermined states | share scoring **0** | median score | mean distance-from-boundary |
 |---|---:|---:|---:|---:|
@@ -153,13 +179,14 @@ What is actually happening, over undetermined states where income is known:
 | above | 663 | 77% | 0.0000 | 0.1849 |
 | well-above | 667 | 19% | 0.3073 | 0.6382 |
 
-**Not one undetermined `well-below` state scores zero**, and their median score
-is the highest of any band. The scorer's one real feature is distance from the
-eligibility boundary, which is *maximal* for households far **below** the
-income limit.
+**Not one undetermined `well-below` state scores zero** — every other band has
+undetermined states the scorer rates at exactly zero, which is the scorer
+saying *it cannot tell* — and `well-below`'s median is the highest of any band.
+The last column is why: the score tracks distance from the income limit, and
+that distance is largest precisely where the limit is furthest away.
 
-Put the two measurements together and the mechanism is sharper than "a feature
-that is wrong":
+Parts 1 and 2 together make the mechanism sharper than "a feature that is
+wrong":
 
 > **The scorer answers a different question than the one it is scored on.** It
 > estimates whether *eligibility* is settled, and for households far below the

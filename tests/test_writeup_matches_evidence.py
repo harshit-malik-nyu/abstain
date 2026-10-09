@@ -672,8 +672,14 @@ def test_the_correction_is_stated_not_silently_applied(readme, mechanism):
         pytest.skip("this run predates the commit-population measurement")
 
     text = " ".join((ROOT / "README.md").read_text().split())
-    assert "the rejection was wrong" in text
+    # The claim, not one phrasing of it. This assertion was written against
+    # the first correction ("the rejection was wrong") and had to change when
+    # that correction was itself corrected — which is the argument for
+    # pinning the figures and the admission, not the sentence.
     assert "72%, not 31%" in text
+    assert "over-corrected" in text, \
+        "the second revision has to be visible, not silently applied"
+    assert "three passes" in text
 
     wb = commits["well-below"]
     assert has_count(text, wb["flip"] + wb["amount_only"])
