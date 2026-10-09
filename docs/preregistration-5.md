@@ -741,3 +741,103 @@ the README's mechanism section is rewritten as a correlation.
 One run on `fine_dev`, 200 trials, seed 89, α = 0.20 and 0.15, written to
 `evidence/signed_scorer.json`. Neither holdout is touched. The weight stays at
 0.8; if the sign is not the missing piece, that is the result.
+
+---
+
+# Addendum eight — attacking the result that refuted the central claim
+
+Written before `scripts/run_no_distance_groups.py` exists. The git history
+shows it.
+
+## Why this round exists
+
+J1 refuted the strongest form of this repository's central claim. I had
+predicted that removing the distance feature would *not* fix the subgroup
+concentration, because the concentration was a property of using one threshold
+rather than a property of the scorer. It did fix it: 4.13 → **1.72**, and
+`hides_a_subgroup` went False — every band inside the budget.
+
+That refutation has been reported prominently for two rounds and has never
+been attacked the way the claim it refuted was. It should be, because it has
+a visible weakness:
+
+| α | no-distance worst band | budget | inside? |
+|---:|---:|---:|:--:|
+| 0.20 | 12.48% | 20% | yes |
+| 0.15 | 11.65% | 15% | yes |
+| 0.10 | — | 10% | **not measured** |
+
+**The worst band barely moves with the tolerance** — 12.48% to 11.65% while
+the budget falls by a quarter. That is not a rule tracking its budget; that is
+a roughly fixed failure rate with the budget sliding past it. If the pattern
+continues, the band sits above 10% at α = 0.10 and the "every band inside the
+budget" result is a property of the two tolerances that happened to be
+measured.
+
+Group conditioning was never run on this scorer either — `schemes` in
+`evidence/fitted_conditional.json` carries `handcrafted` and `fitted` only. So
+the question "does conditioning still add anything once the feature is gone?"
+has been open since the round that made it interesting, and the README has
+been comparing a *pooled* no-distance rule against a *group-conditioned*
+handcrafted one without saying so.
+
+## What is added
+
+No new method. `run_no_distance_groups.py` runs the arm that was skipped:
+`fitted_no_distance_scorer` at α = 0.20, 0.15 **and 0.10**, pooled and
+by-band, 200 trials, `fine_dev`, refit every trial on a fold disjoint from
+calibration and deployment — the same protocol as round J.
+
+## Predictions
+
+**O1.** At α = 0.10 the no-distance scorer's worst band will be **above 10%**
+and `hides_a_subgroup` will be **True**. The apparent conditional validity at
+0.20 and 0.15 is the budget moving past a near-constant failure rate.
+
+**O2.** Its worst-band rate at α = 0.10 will be **within 2 points of its rate
+at α = 0.20** (12.48%), on the same reasoning — the rate is close to
+insensitive to the tolerance.
+
+**O3.** Group conditioning on this scorer will bring the worst band **under
+the tolerance** at α = 0.10 in the feasible trials. Conditioning still adds
+something after the feature is removed.
+
+**O4.** It will cost feasibility, and more at α = 0.10 than at α = 0.20:
+fewer than 190 feasible trials out of 200 at α = 0.10.
+
+**O5.** `well-below` will remain the worst band at every tolerance under the
+pooled rule. Removing the feature shrinks the disparity without changing which
+group bears it — this is J2 continuing to hold.
+
+## What would falsify what
+
+**O1 fails** — the no-distance scorer holds every band inside a 10% budget.
+Then removing the feature delivers *conditional* validity on this benchmark
+without any conditioning, which is a stronger result than anything currently
+in the README, and the recommendation should lead with the feature audit
+rather than with conditioning. This would be good news reported as good news.
+
+**O3 fails while O1 holds** — the feature is gone, the subgroup failure is
+back at a tighter tolerance, and conditioning cannot fix it either. Then the
+remedy section is wrong about what conditioning is for, and the honest
+conclusion is that at α = 0.10 on 672 cases there is no remedy, only a
+sample-size requirement.
+
+**O2 or O4 missing** is uninformative. Both are shape predictions.
+
+## What this cannot show
+
+α = 0.10 is close to the arithmetic floor for group conditioning on this
+benchmark — [`power.py`](../src/abstain/power.py) puts the by-band arm at
+roughly 50 cases per group and `fine_dev`'s 30% fold gives about 50 total per
+band. So a low feasible count at α = 0.10 is **expected** and is not evidence
+against conditioning; it is the cost the method already reports. O4 exists to
+record the size of that cost, not to argue from it.
+
+## Analysis plan
+
+One run on `fine_dev`, 200 trials, seed 53 — the seed round J used, so the
+arms are paired against the figures already published — α = 0.20, 0.15, 0.10,
+written to `evidence/no_distance_groups.json`. Neither holdout is touched.
+Nothing below α = 0.10 is attempted and no prediction is adjusted after a
+result.
