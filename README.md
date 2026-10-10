@@ -24,12 +24,14 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; twenty-seven pre-registered predictions that missed; four claims
+it was; twenty-seven pre-registered predictions that missed; five claims
 published here and then retracted — one inside a numbered claim in
 [`theory.md`](docs/theory.md), resting on evidence no script could regenerate
-and no test ever read, and one in the docstring that justified a *parameter*
-of the method, citing a figure that reproduces and does not support it; and
-one result that changes what the method is for.**
+and no test ever read; one in the docstring that justified a *parameter* of
+the method, citing a figure that reproduces and does not support it; and one
+that lasted **hours**, an explanation of my own result built on an unchecked
+assumption about where my own threshold sits; and one result that changes what
+the method is for.**
 
 The central claim has been attacked three levels deep, and every level moved
 it:
@@ -45,7 +47,7 @@ it:
 
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
-fix, all four retractions are left visible rather than edited away, and **[all
+fix, all five retractions are left visible rather than edited away, and **[all
 eighty-three predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
@@ -643,30 +645,48 @@ injecting a group-correlated score shift into the arm that does *not* have
 the defect, and **it did not manage to.**
 
 `s → s^(1/(1+k))` applied to `well-below` and nothing else. Four properties
-verified over the whole state population before the run: identity at `k = 0`,
-outside the band untouched exactly, monotone inside so `k` cannot be mistaken
-for noise, bounded in [0, 1]. All four hold. The property I did not check is
-the one that mattered:
+verified over the whole state population before the run — identity at
+`k = 0`, outside the band untouched exactly, monotone inside, bounded in
+[0, 1] — and all four hold. The pooled arm came back **identical under `==`**
+at `k` = 0.25, 0.5, 1.0 and 2.0: every band rate, the coverage, the question
+count, across a sevenfold change in mean lift. It moved once, 1.74× → 2.10×,
+and then nothing.
 
-| base score | states | lift at `k = 1` |
-|---|---:|---:|
-| [0.00, 0.10) | 1,152 | +0.081 |
-| **[0.10, 0.50)** | 192 | **+0.242** |
-| [0.70, 0.85) | 96 | +0.100 |
-| **[0.85, 1.01)** | 96 | **+0.043** |
+> **The first explanation I published for that was wrong**, and it was wrong
+> within hours. I attributed the plateau to the injection's lift landing away
+> from where the rule commits, on the assumption that the threshold sat near
+> 0.85. ~~The lift peaks mid-scale and is smallest at the top, and the rule
+> commits at the top.~~ It does not. The calibrated threshold sits at a
+> **median of 0.395**, which is the bin where the lift is *largest* (+0.242 at
+> `k = 1`). The explanation was built on an unchecked assumption about my own
+> rule, which is the same defect as the figures retracted elsewhere in this
+> README, arrived at faster.
 
-The lift peaks mid-scale and is smallest at the top, and **the rule commits at
-the top.** So the pooled arm came back **identical under `==`** at `k` = 0.25,
-0.5, 1.0 and 2.0 — every band rate, the coverage, the question count —
-across a sevenfold change in mean lift. It moved once, 1.74× → 2.10×, and then
-nothing.
+The real mechanism is **compensation**, and it is a property of the
+construction rather than an accident:
 
-> **To change what a threshold-local rule does, the score has to change at the
-> threshold.** A manipulation whose mass sits elsewhere is invisible however
-> large it is in aggregate. [Rounds M and N](#a-fifth-and-the-one-that-should-change-how-these-things-are-measured)
-> found this for a caution term the agent's first question switches off; this
-> found it for an inflation concentrated at low scores. Same statement as the
-> fifth AUC result, from the other side.
+| `k` | median calibrated threshold |
+|---:|---:|
+| 0 | 0.395 |
+| 0.25 | 0.475 |
+| 0.5 | 0.540 |
+| 1.0 | 0.630 |
+| 2.0 | **0.735** |
+
+The threshold is calibrated **on the shifted data**, so it rises to track the
+inflation, and the set of states clearing it barely moves. Because the
+injection is monotone inside the band, for any threshold there is another
+producing the same partition of that band's states — and a 101-point grid is
+fine enough to find it.
+
+> **A conformal rule recalibrated on its own shifted data is self-correcting
+> against a monotone one-group inflation.** Not blind to it — correcting for
+> it. The residual is the one step the global threshold cannot absorb, because
+> the compensation is shared across bands while the shift was not, and that
+> residual is where the 1.74× → 2.10× went.
+
+Which also explains why the by-band arm is **exactly** invariant: each band's
+own threshold tracks its own inflation, so there is nothing left over.
 
 Group conditioning held the worst band under α at every `k` — bit-identical at
 **8.6%**, 191 feasible, 95.7% coverage, for all five values. **That is not the

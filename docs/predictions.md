@@ -149,34 +149,40 @@ is the fourth instance of the deepest recurring lesson here.**
 
 The design was right: inject a group-correlated score shift into the one arm
 that does **not** have the defect, and see whether the stated consequence
-follows and the stated remedy works. The instrument was wrong, and
-pre-registering three of its properties while missing the fourth is exactly how.
-
-`s → s^(1/(1+k))` applied to `well-below` only. Verified before the run, over
-the whole state population: identity at `k = 0`, outside the band untouched,
-monotone inside, bounded. All four true. What was never checked is **where on
-the score scale the lift lands**:
-
-| base score | states | lift at `k = 1` |
-|---|---:|---:|
-| [0.00, 0.10) | 1,152 | +0.081 |
-| **[0.10, 0.50)** | 192 | **+0.242** |
-| [0.70, 0.85) | 96 | +0.100 |
-| **[0.85, 1.01)** | 96 | **+0.043** |
-
-The lift peaks in the middle of the scale and is smallest at the top. **The
-rule commits at the top.** So the injection is strongest exactly where the rule
-does not decide, and the consequence is stark: the pooled arm is **identical
+follows and the stated remedy works. The pooled arm came back **identical
 under `==`** at `k` = 0.25, 0.5, 1.0 and 2.0 — every band rate, the coverage,
-the question count — across a sevenfold change in mean lift. It moved once, at
-the first step away from zero, and then nothing.
+the question count — across a sevenfold change in mean lift. It moved once,
+1.74x -> 2.10x, and then nothing.
 
-> **To change what a threshold-local rule does, the score has to change at the
-> threshold.** A manipulation whose mass sits elsewhere is invisible, however
-> large it is in aggregate. Rounds M and N found this for a caution term that
-> the agent's first question switches off. Round S found it for an inflation
-> concentrated at low scores. It is the same statement as the fifth AUC result
-> seen from the other side.
+**The first explanation published for that was wrong, and it lasted hours.**
+It read: the lift peaks mid-scale and the rule commits at the top, so the
+injection is strongest where the rule does not decide. That rested on an
+unchecked assumption about where the threshold sits. It sits at a **median of
+0.395** — the bin where the lift is *largest*, +0.242 at `k = 1`. The same
+defect as the figures retracted elsewhere in this ledger: a number assumed
+rather than measured, this time about my own rule.
+
+The real mechanism is **compensation**:
+
+| `k` | median calibrated threshold |
+|---:|---:|
+| 0 | 0.395 |
+| 0.25 | 0.475 |
+| 1.0 | 0.630 |
+| 2.0 | **0.735** |
+
+The threshold is calibrated on the shifted data and rises to track the
+inflation, so the set of states clearing it barely moves. This is structural:
+the injection is monotone inside the band, so for any threshold there is
+another producing the same partition of that band's states, and a 101-point
+grid finds it.
+
+> **A conformal rule recalibrated on its own shifted data is self-correcting
+> against a monotone one-group inflation** — not blind to it. The residual is
+> the one step a *global* threshold cannot absorb, because the compensation is
+> shared across bands while the shift was not. The by-band arm is exactly
+> invariant for the same reason from the other side: each band's threshold
+> tracks its own inflation and nothing is left over.
 
 **So S4 should not be read as a win.** Group conditioning held the worst band
 under α at every `k` — bit-identical at 8.6%, 191 feasible trials, 95.7%

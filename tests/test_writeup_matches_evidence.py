@@ -2687,18 +2687,35 @@ def test_the_pooled_arm_is_identical_across_the_sweep(readme, injected):
     assert "identical under `==`" in readme
 
 
-def test_the_lift_lands_away_from_where_the_rule_commits(readme):
+def test_the_threshold_compensates_for_the_injection(readme, injected):
     """
-    The round's explanation, and the property the pre-registration did not
-    check. The README must carry the distribution, not just the conclusion.
+    The round's real explanation, and the retraction of its first one.
+
+    The first version of this test pinned the wrong account — that the
+    injection's lift landed away from where the rule commits — which rested
+    on an unchecked assumption that the threshold sat near 0.85. It sits at
+    a median of 0.395. The threshold *rises* with the injection, tracking
+    it, which is why the deployed behaviour does not move.
+
+    Pinned on the measured thresholds so the corrected account cannot drift
+    the way the first one did.
     """
-    # `squash`, not a raw whitespace join: the sentence sits in a blockquote
-    # and a bare `>` marker splits it. Same trap `squash` was widened for.
+    taus = injected.get("threshold_compensation")
+    if not taus:
+        pytest.skip("this run predates the threshold measurement")
+
+    by_k = {r["k"]: r["median_threshold"] for r in taus}
+    ks = sorted(by_k)
+    values = [by_k[k] for k in ks]
+    assert values == sorted(values), ("the threshold must rise with k", values)
+    assert by_k[ks[-1]] - by_k[ks[0]] > 0.2, by_k
+
     text = squash("README.md")
-    assert "+0.242" in text and "+0.043" in text, \
-        "the lift-by-score-level table is the explanation"
-    assert "the rule commits at" in text
-    assert "has to change at the threshold" in text
+    for k in (ks[0], ks[-1]):
+        assert f"{by_k[k]:.3f}" in text, (k, by_k[k])
+    assert "self-correcting" in text
+    assert "was wrong" in text, \
+        "the first explanation has to be retracted, not replaced"
 
 
 def test_the_readme_does_not_claim_s4_as_a_win(readme, injected):

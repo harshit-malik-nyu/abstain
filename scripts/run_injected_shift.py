@@ -126,6 +126,48 @@ def injection_properties(cases: list[dict]) -> list[dict]:
     return out
 
 
+def threshold_compensation(cases: list[dict]) -> list[dict]:
+    """
+    Where the calibrated threshold goes as the injection grows.
+
+    This is the measurement that explains the result, and it was not in the
+    first version of this script. Its absence let a wrong explanation get
+    published: I attributed the pooled arm's plateau to the injection's lift
+    landing away from where the rule commits, having assumed the threshold
+    sat near 0.85. It sits at a **median of 0.395**, which is the bin where
+    the injection's lift is *largest*.
+
+    The real mechanism is compensation. The threshold is calibrated on the
+    shifted data, so it rises to track the inflation — 0.395 to 0.735 as k
+    goes 0 to 2 — and the set of states clearing it is almost unchanged.
+
+    That is a property of the construction rather than an accident: the
+    injection is monotone within the band, so for any threshold there
+    exists another producing the same partition of that band's states, and
+    the 101-point grid is fine enough to find it. A conformal rule
+    recalibrated on its own shifted data is **self-correcting against a
+    monotone one-group inflation.**
+    """
+    print("\n  where the threshold goes — the explanation")
+    print(f"  {'k':>6} {'feasible':>9} {'median tau':>11} {'min':>7} "
+          f"{'max':>7}")
+    import statistics
+    out = []
+    for k in KS:
+        v = validate(cases, None, alpha=ALPHA, trials=40, seed=SEED,
+                     calibration_share=CALIBRATION_SHARE, refit=refit_for(k))
+        taus = [t.threshold for t in v.results if t.feasible]
+        row = {"k": k, "trials": 40, "feasible": len(taus),
+               "median_threshold": statistics.median(taus) if taus else None,
+               "min_threshold": min(taus) if taus else None,
+               "max_threshold": max(taus) if taus else None}
+        out.append(row)
+        print(f"  {k:>6.2f} {len(taus):>9} "
+              f"{row['median_threshold']:>11.3f} "
+              f"{row['min_threshold']:>7.3f} {row['max_threshold']:>7.3f}")
+    return out
+
+
 def sweep(cases: list[dict]) -> list[dict]:
     """
     The sweep, checkpointed per `k`.
@@ -267,6 +309,7 @@ def main() -> int:
 
     t0 = time.time()
     props = injection_properties(cases)
+    taus = threshold_compensation(cases)
     rows = sweep(cases)
     scored = score(rows)
 
@@ -275,6 +318,7 @@ def main() -> int:
                "calibration_share": CALIBRATION_SHARE,
                "no_distance_excludes": list(NO_DISTANCE),
                "injection_properties": props,
+               "threshold_compensation": taus,
                "rows": rows, "predictions": scored,
                "elapsed_seconds": round(time.time() - t0, 1)}
     dest = ROOT / "evidence" / "injected_shift.json"

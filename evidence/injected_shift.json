@@ -415,5 +415,48 @@
  ],
  "seed": 61,
  "set": "fine_dev",
+ "threshold_compensation": [
+  {
+   "feasible": 40,
+   "k": 0.0,
+   "max_threshold": 0.46,
+   "median_threshold": 0.395,
+   "min_threshold": 0.33,
+   "trials": 40
+  },
+  {
+   "feasible": 40,
+   "k": 0.25,
+   "max_threshold": 0.54,
+   "median_threshold": 0.475,
+   "min_threshold": 0.41,
+   "trials": 40
+  },
+  {
+   "feasible": 40,
+   "k": 0.5,
+   "max_threshold": 0.59,
+   "median_threshold": 0.54,
+   "min_threshold": 0.47,
+   "trials": 40
+  },
+  {
+   "feasible": 40,
+   "k": 1.0,
+   "max_threshold": 0.68,
+   "median_threshold": 0.63,
+   "min_threshold": 0.57,
+   "trials": 40
+  },
+  {
+   "feasible": 40,
+   "k": 2.0,
+   "max_threshold": 0.77,
+   "median_threshold": 0.735,
+   "min_threshold": 0.69,
+   "trials": 40
+  }
+ ],
+ "threshold_compensation_note": "measured after the sweep, at 40 trials rather than 200, to explain the plateau; the sweep itself was not re-run",
  "trials": 200
 }
