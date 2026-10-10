@@ -2627,3 +2627,111 @@ def test_both_docstrings_retract_the_empirical_justification():
 
     assert "35.8%" in g and "retracted" in g, \
         "the second docstring must point at the retraction, not repeat it"
+
+
+# ---------------------------------------------------------------------------
+# Round S: the injection that missed the threshold
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def injected():
+    p = ROOT / "evidence" / "injected_shift.json"
+    if not p.exists():
+        pytest.skip("round S has not been run in this checkout")
+    return json.loads(p.read_text())
+
+
+def test_the_injection_has_the_four_verified_properties(injected):
+    """
+    Identity at k = 0, outside untouched, monotone inside, bounded — all
+    checked before the run and all true. The round's failure is not an
+    instrument that misbehaved.
+    """
+    props = {r["k"]: r for r in injected["injection_properties"]}
+    zero = props[0.0]
+    assert zero["is_identity"] is True
+    assert zero["mean_lift"] == 0.0 and zero["max_lift"] == 0.0
+
+    for k, r in props.items():
+        assert r["outside_untouched"] is True, k
+        assert r["monotone_inside"] is True, k
+        if k > 0:
+            assert r["is_identity"] is False, k
+            assert r["mean_lift"] > 0, k
+
+    lifts = [props[k]["mean_lift"] for k in sorted(props)]
+    assert lifts == sorted(lifts), lifts
+
+
+def test_the_pooled_arm_is_identical_across_the_sweep(readme, injected):
+    """
+    The result: a sevenfold change in mean lift and not one float moved.
+
+    Checked under `==` over the whole reported structure, because a table at
+    one decimal place cannot support a claim this strong — the same reason
+    rounds M and N needed it.
+    """
+    pooled = {r["k"]: r for r in injected["rows"] if r["scheme"] == "pooled"}
+    ks = sorted(k for k in pooled if k > 0)
+    assert len(ks) >= 3, ks
+
+    def strip(r):
+        return {k: v for k, v in r.items() if k != "k"}
+
+    first = strip(pooled[ks[0]])
+    for k in ks[1:]:
+        assert strip(pooled[k]) == first, k
+
+    assert pooled[0.0] != pooled[ks[0]], \
+        "it moved once, away from the control; that step is the finding"
+    assert "identical under `==`" in readme
+
+
+def test_the_lift_lands_away_from_where_the_rule_commits(readme):
+    """
+    The round's explanation, and the property the pre-registration did not
+    check. The README must carry the distribution, not just the conclusion.
+    """
+    # `squash`, not a raw whitespace join: the sentence sits in a blockquote
+    # and a bare `>` marker splits it. Same trap `squash` was widened for.
+    text = squash("README.md")
+    assert "+0.242" in text and "+0.043" in text, \
+        "the lift-by-score-level table is the explanation"
+    assert "the rule commits at" in text
+    assert "has to change at the threshold" in text
+
+
+def test_the_readme_does_not_claim_s4_as_a_win(readme, injected):
+    """
+    Conditioning held at every k, and the pooled rule mostly absorbed the
+    injection too, so that is weak evidence. A round that failed at its own
+    purpose must not read as a confirmation.
+    """
+    byband = {r["k"]: r for r in injected["rows"]
+              if r["scheme"] == "by-band"}
+    rates = {r["mean_worst_group_rate"] for r in byband.values()}
+    assert len(rates) == 1, ("identical at every k", sorted(rates))
+    assert next(iter(rates)) < injected["alpha"]
+
+    text = " ".join((ROOT / "README.md").read_text().split())
+    assert "not the win it looks like" in text
+    assert "does not establish" in text
+    assert "observationally rather than causally" in text
+
+
+def test_the_control_arm_reproduces_round_o(injected, ndg):
+    """
+    k = 0 is the no-distance scorer at a fresh seed. If it did not match
+    round O, the sweep would be measuring something else.
+    """
+    s_ctl = next(r for r in injected["rows"]
+                 if r["k"] == 0.0 and r["scheme"] == "pooled")
+    o_ctl = nd_scheme(ndg, "fitted-no-distance", 0.20, "pooled")
+    assert abs(s_ctl["mean_coverage"] - o_ctl["mean_coverage"]) < 0.01, \
+        (s_ctl["mean_coverage"], o_ctl["mean_coverage"])
+    # The script renamed these fields to `pooled_*` after this evidence was
+    # written, to stop a reader reading the pooled breakdown as the by-band
+    # arm's own. Accept either spelling rather than re-run ninety minutes
+    # for a field name.
+    conc = s_ctl.get("pooled_concentration") or s_ctl["concentration"]
+    assert abs(conc["well-below"] - 1.72) < 0.1, conc

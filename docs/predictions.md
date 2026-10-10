@@ -1,6 +1,6 @@
 # Every prediction, and what happened
 
-Seventy-eight predictions across ten pre-registrations, each written before the
+Eighty-three predictions across eleven pre-registrations, each written before the
 code that tested it. This table is the whole record: no prediction is omitted,
 and the outcome column is the one that was true at the time, not the one that
 would read best.
@@ -94,6 +94,11 @@ there were ten — so the number is derived from here rather than written twice.
 | **R3** | the two do not overlap | 11.1% against 94.0% | held |
 | **R4** | resampling cases widens the interval | **1.11× both arms** | held |
 | **R5** | by-band feasibility varies across resampled pools | 66 to 100 of 100 | held |
+| **S1** | the injected band's concentration rises in `k` | 1.74 → 2.10, then **flat** | held *(one step, then nothing)* |
+| **S2** | pooled group-violation above 50% at `k = 1.0` | **6.0%** | **missed** |
+| **S3** | the injected band is worst at every `k ≥ 0.5` | `well-below` throughout | held |
+| **S4** | conditioning holds the worst band under α at every `k` | 8.6%, **identical at every `k`** | held *(see below)* |
+| **S5** | the pooled-versus-conditioned gap widens with `k` | 4.6 → 8.1 points | held |
 
 ---
 
@@ -138,6 +143,58 @@ rule commits on the **high-scoring** ones, and there it is **72%**. I walked
 into the same selection effect that `calibrate_on_trajectories` exists to
 handle. The corrected mechanism is in the README and the original reasoning is
 kept, annotated, in `scripts/diagnose_mechanism.py`.
+
+**Round S set out to cause the mechanism and did not manage to, and the reason
+is the fourth instance of the deepest recurring lesson here.**
+
+The design was right: inject a group-correlated score shift into the one arm
+that does **not** have the defect, and see whether the stated consequence
+follows and the stated remedy works. The instrument was wrong, and
+pre-registering three of its properties while missing the fourth is exactly how.
+
+`s → s^(1/(1+k))` applied to `well-below` only. Verified before the run, over
+the whole state population: identity at `k = 0`, outside the band untouched,
+monotone inside, bounded. All four true. What was never checked is **where on
+the score scale the lift lands**:
+
+| base score | states | lift at `k = 1` |
+|---|---:|---:|
+| [0.00, 0.10) | 1,152 | +0.081 |
+| **[0.10, 0.50)** | 192 | **+0.242** |
+| [0.70, 0.85) | 96 | +0.100 |
+| **[0.85, 1.01)** | 96 | **+0.043** |
+
+The lift peaks in the middle of the scale and is smallest at the top. **The
+rule commits at the top.** So the injection is strongest exactly where the rule
+does not decide, and the consequence is stark: the pooled arm is **identical
+under `==`** at `k` = 0.25, 0.5, 1.0 and 2.0 — every band rate, the coverage,
+the question count — across a sevenfold change in mean lift. It moved once, at
+the first step away from zero, and then nothing.
+
+> **To change what a threshold-local rule does, the score has to change at the
+> threshold.** A manipulation whose mass sits elsewhere is invisible, however
+> large it is in aggregate. Rounds M and N found this for a caution term that
+> the agent's first question switches off. Round S found it for an inflation
+> concentrated at low scores. It is the same statement as the fifth AUC result
+> seen from the other side.
+
+**So S4 should not be read as a win.** Group conditioning held the worst band
+under α at every `k` — bit-identical at 8.6%, 191 feasible trials, 95.7%
+coverage, for all five values — but the pooled rule mostly absorbed the
+injection too. Conditioning absorbing a perturbation the pooled rule barely
+felt is weak evidence that conditioning absorbs group-correlated shifts. **The
+round does not establish sufficiency**, which is what it was for.
+
+What it does establish: the control arm reproduces round O at a fresh seed
+(1.74× against 1.72×, 92.7% coverage against 92.75%), the injection behaves
+exactly as specified, and the one step it did produce moved the concentration
+in the predicted direction and left the worst band where predicted.
+
+The instrument a follow-up needs is **threshold-local** — a lift concentrated
+near where commits happen, rather than one maximised at mid-scale. That goes
+in its own pre-registered round. Quietly redesigning the instrument until S2
+passes and presenting it as round S is the move this whole repository is
+against.
 
 **Round R is the only clean round in this ledger, and the thing worth taking
 from it is a comparison rather than the five passes.**

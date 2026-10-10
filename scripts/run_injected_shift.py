@@ -156,7 +156,7 @@ def sweep(cases: list[dict]) -> list[dict]:
         if k in done and len(done[k]) == 2:
             for r in done[k]:
                 out.append(r)
-                w = r["worst_band"]
+                w = r["pooled_worst_band"]
                 gv = r["group_violation_rate_when_feasible"]
                 lo, hi = r["group_violation_interval"]
                 print(f"  {k:>6.2f} {r['scheme']:>8} "
@@ -189,11 +189,18 @@ def sweep(cases: list[dict]) -> list[dict]:
                    "group_violation_interval": [lo, hi],
                    "mean_worst_group_rate": d["mean_worst_group_rate"],
                    "mean_coverage": d["mean_coverage"],
-                   "worst_band": brk["worst_band"],
-                   "concentration": brk["concentration"],
-                   "hides_a_subgroup": brk["hides_a_subgroup"],
-                   "band_rates": {b["band"]: b["unsafe_rate"]
-                                  for b in brk["bands"]}}
+                   # These four come from the UNCONDITIONAL `validate`
+                   # pass above, computed once per k, so they describe the
+                   # pooled rule and are attached to both scheme rows for
+                   # convenience. They are not the by-band arm's own
+                   # breakdown; that arm's figures are the four fields
+                   # above this comment. Named with the `pooled_` prefix
+                   # so a reader cannot mistake them.
+                   "pooled_worst_band": brk["worst_band"],
+                   "pooled_concentration": brk["concentration"],
+                   "pooled_hides_a_subgroup": brk["hides_a_subgroup"],
+                   "pooled_band_rates": {b["band"]: b["unsafe_rate"]
+                                         for b in brk["bands"]}}
             out.append(row)
             with ckpt.open("a") as fh:
                 fh.write(json.dumps(row, sort_keys=True) + "\n")
@@ -211,12 +218,12 @@ def score(rows: list[dict]) -> dict:
     byband = {r["k"]: r for r in rows if r["scheme"] == "by-band"}
 
     def conc(r):
-        return r["concentration"].get(BAND, 0.0)
+        return r["pooled_concentration"].get(BAND, 0.0)
 
     series = [(k, conc(pooled[k])) for k in KS]
     rising = all(b >= a - 1e-9 for (_, a), (_, b) in zip(series, series[1:]))
 
-    worst_ok = all(pooled[k]["worst_band"] == BAND for k in KS if k >= 0.5)
+    worst_ok = all(pooled[k]["pooled_worst_band"] == BAND for k in KS if k >= 0.5)
 
     big = pooled[1.0]["group_violation_rate_when_feasible"] or 0.0
     base = pooled[0.0]["group_violation_rate_when_feasible"] or 0.0

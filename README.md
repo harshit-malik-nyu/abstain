@@ -24,7 +24,7 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; twenty-six pre-registered predictions that missed; four claims
+it was; twenty-seven pre-registered predictions that missed; four claims
 published here and then retracted — one inside a numbered claim in
 [`theory.md`](docs/theory.md), resting on evidence no script could regenerate
 and no test ever read, and one in the docstring that justified a *parameter*
@@ -46,7 +46,7 @@ it:
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
 fix, all four retractions are left visible rather than edited away, and **[all
-seventy-eight predictions are listed with their
+eighty-three predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
 wrong.
@@ -632,6 +632,57 @@ did so vacuously** — every one was a cost prediction, and a no-op has no cost.
 `docs/predictions.md` labels them that way and a test requires the label,
 because four of nine holding is otherwise a round that reads like a partial
 success and was not one.
+
+### And when I tried to cause it, the instrument missed the threshold
+
+Everything above is **observational**: one scorer measured, a group-correlated
+defect found, a remedy measured. Round J showed the defect and the mechanism
+are confounded — remove the one feature and the concentration falls to 1.72 —
+so the mechanism had never been isolated. Round S set out to isolate it by
+injecting a group-correlated score shift into the arm that does *not* have
+the defect, and **it did not manage to.**
+
+`s → s^(1/(1+k))` applied to `well-below` and nothing else. Four properties
+verified over the whole state population before the run: identity at `k = 0`,
+outside the band untouched exactly, monotone inside so `k` cannot be mistaken
+for noise, bounded in [0, 1]. All four hold. The property I did not check is
+the one that mattered:
+
+| base score | states | lift at `k = 1` |
+|---|---:|---:|
+| [0.00, 0.10) | 1,152 | +0.081 |
+| **[0.10, 0.50)** | 192 | **+0.242** |
+| [0.70, 0.85) | 96 | +0.100 |
+| **[0.85, 1.01)** | 96 | **+0.043** |
+
+The lift peaks mid-scale and is smallest at the top, and **the rule commits at
+the top.** So the pooled arm came back **identical under `==`** at `k` = 0.25,
+0.5, 1.0 and 2.0 — every band rate, the coverage, the question count —
+across a sevenfold change in mean lift. It moved once, 1.74× → 2.10×, and then
+nothing.
+
+> **To change what a threshold-local rule does, the score has to change at the
+> threshold.** A manipulation whose mass sits elsewhere is invisible however
+> large it is in aggregate. [Rounds M and N](#a-fifth-and-the-one-that-should-change-how-these-things-are-measured)
+> found this for a caution term the agent's first question switches off; this
+> found it for an inflation concentrated at low scores. Same statement as the
+> fifth AUC result, from the other side.
+
+Group conditioning held the worst band under α at every `k` — bit-identical at
+**8.6%**, 191 feasible, 95.7% coverage, for all five values. **That is not the
+win it looks like.** The pooled rule mostly absorbed the injection too, so
+conditioning absorbing a perturbation the pooled rule barely felt is weak
+evidence. **The round does not establish that a group-correlated level shift
+is sufficient to cause the subgroup failure**, which is what it was for, and
+the central claim therefore remains supported observationally rather than
+causally.
+
+What it does establish: the control arm reproduces round O at a fresh seed
+(1.74× against 1.72×), the instrument behaves exactly as specified, and the one
+step it produced moved in the predicted direction. The follow-up needs a
+**threshold-local** instrument, and that goes in its own pre-registered round —
+redesigning this one until it passes and presenting it as round S is the move
+this repository exists to argue against.
 
 ### It is the stopping rule, not the asking rule
 

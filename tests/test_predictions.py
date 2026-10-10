@@ -108,7 +108,8 @@ def test_the_ledger_covers_every_preregistration(ledger):
     for prefix, count in (("P", 8), ("A", 4), ("B", 4), ("C", 3),
                           ("E", 8), ("F", 5), ("G", 3), ("H", 4), ("J", 4),
                           ("K", 4), ("L", 4), ("M", 5), ("N", 4),
-                          ("O", 5), ("Q", 7), ("R", 5)):
+                          ("O", 5), ("Q", 7), ("R", 5),
+                          ("S", 5)):
         found = {x for x in labels if x.startswith(prefix)
                  and x[1:].isdigit()}
         assert len(found) == count, (prefix, sorted(found))

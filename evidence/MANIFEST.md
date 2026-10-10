@@ -53,6 +53,7 @@ from one can contain a vacuous zero, and two did.
 | `no_distance_groups.json` | `run_no_distance_groups.py` | O1–O5 |
 | `partition_sweep.json` | `run_partition_sweep.py` | Q1–Q7 |
 | `pool_bootstrap.json` | `run_pool_bootstrap.py` | R1–R5, pool-level uncertainty |
+| `injected_shift.json` | `run_injected_shift.py` | S1–S5, the mechanism injected rather than observed |
 | `uncertainty.json` | `run_uncertainty.py` | the cluster bootstrap, ±9.5 against ±0.6 |
 | `confounds.json` | `check_confounds.py` | the question-policy control |
 | `allocation.json` | `run_allocation.py` | the question-allocation result |
