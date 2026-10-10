@@ -340,7 +340,10 @@ class TestTheSecondaryResultIsReported:
 
         # Each result is pinned to the figure that makes it a result, so the
         # list cannot be padded to raise the count.
-        assert "0.9976" in t, "the per-band AUC range is one of them"
+        # Was "0.9976", which is the 79-case `dev` set and was in no
+        # evidence file. The current figure is `fine_dev` over the states
+        # the rule visits, where the failing band ranks best of any band.
+        assert "0.9960" in t, "the per-band AUC figure is one of them"
         assert "4.1" in t, "the concentration it is set against"
         assert "0.8888" in t, "the worst-AUC scorer that wins on both axes"
         assert "0.9604" in t, "the arm whose AUC moved while nothing did"

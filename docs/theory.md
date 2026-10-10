@@ -240,8 +240,13 @@ and `evidence/pool_bootstrap.json`.
 
 ### The mechanism, and the version of it that was refuted
 
-Per-band AUC is 0.9345 to **0.9976** — the scorer orders states almost
-perfectly *inside the band it fails on*. What differs is the score **level**,
+Per-band AUC on `fine_dev` is 0.9702 to **0.9989** over all states, and
+0.9027 to **0.9960** over the states the rule actually visits — where
+`well-below`, the band it fails on, is the band it ranks **best** in by a wide
+margin. (The figures this section used to quote, 0.9345 to 0.9976, are the
+79-case `dev` set and were in no evidence file.) So the scorer orders states
+almost perfectly inside the band it fails on, and more so in the population
+that counts. What differs is the score **level**,
 and the figures below are the second set this section has carried. The first
 were averages over **every** state in the benchmark — the population §2 of
 this document argues is the wrong one, because the rule meets a selected

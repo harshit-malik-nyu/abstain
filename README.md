@@ -289,21 +289,31 @@ not have passed.
 Not bad ranking. The scorer orders states *almost perfectly* inside the band it
 fails on:
 
-| band | AUC | undetermined states: all | **states the rule visits** |
-|---|---:|---:|---:|
-| **well-below** | **0.9976** | 0.2130 | **0.5417** |
-| near-threshold | 0.9345 | 0.1398 | 0.4012 |
-| above | 0.9822 | 0.0607 | 0.2796 |
-| well-above | 0.9833 | 0.0813 | 0.3891 |
+All four figures below are `fine_dev`, over two populations — every state, and
+the states the rule actually walks:
 
-**The third column was missing for sixteen rounds**, and the second was the
-only one quoted. That is a level measured over *every* state — the population
+| band | AUC, all | **AUC, visited** | undet. level, all | **level, visited** |
+|---|---:|---:|---:|---:|
+| **well-below** | 0.9989 | **0.9960** | 0.2130 | **0.5417** |
+| near-threshold | 0.9702 | 0.9216 | 0.1398 | 0.4012 |
+| above | 0.9771 | 0.9060 | 0.0607 | 0.2796 |
+| well-above | 0.9717 | 0.9027 | 0.0813 | 0.3891 |
+
+**Only the "all" columns were published for sixteen rounds, and they were
+from the 79-case `dev` set while every other figure here is `fine_dev`** — two
+benchmarks quoted in one table without saying which, and a level measured over
+the population
 [claim 2](#validation-found-two-failures-before-the-holdout-was-opened) says
 is the wrong one, because the rule meets a selected subset. The mechanism's
-evidence had the defect the same README warns about elsewhere. The ordering is
-unchanged and the correct column is the stronger one: in the population that
-matters the levels sit much closer to a threshold that must serve all four
-bands.
+own evidence had the defect this README warns about elsewhere, and none of it
+was in an evidence file.
+
+The correction makes the claim **stronger**, which is why it is worth having.
+Among the states the rule visits, `well-below` keeps an AUC of **0.9960**
+while every other band falls to 0.90–0.92: **the band the rule fails on is the
+band it ranks best in**, by a wide margin, in exactly the population where the
+rule decides. Ranking is not the differentiator and this is the version of
+that claim that survives scrutiny.
 
 What differs is where the score **levels** sit. Undetermined states score about
 a third higher in `well-below` than in `near-threshold` among the states the
@@ -1217,23 +1227,36 @@ needs no fitting fold. Measured on holdout, refit per trial on a disjoint fold:
 | **Fitted** | 0.10 | **1.0%** | **97.7%** |
 
 **The judgement was wrong**, and the pre-registration is what preserves the
-evidence that it was made in advance. One detail worth more than the result:
-the two score almost identically on ordering — **AUC 0.9644 against 0.9631.** A
-one-point AUC difference producing twenty-three points of coverage means the
-ordering that matters is entirely local to the threshold.
+evidence that it was made in advance. The violations and coverage above are
+`evidence/fitted_secondary.json`.
+
+One detail used to be stated here and is **not recorded**: that the two score
+almost identically on ordering, "AUC 0.9644 against 0.9631". Those two numbers
+are in no evidence file and were computed ad hoc on the holdout, like the
+retracted 2.78% and 11%. They are left visible as what they were and are not
+the basis for anything below.
+
+The same point, on the current benchmark and recorded: on `fine_dev` the
+handcrafted scorer scores **0.9555** and the fitted one **0.9252** — a
+three-point AUC gap — while their coverage differs by **twelve** points, 76.0%
+against 88.1% ([`fitted_conditional.json`](evidence/fitted_conditional.json)).
+The ordering that matters is local to the threshold, and that is the version
+of the claim with a file behind it.
 
 **That is one of five independent results here saying AUC cannot see what this
 method does.** Any one is a curiosity; together they are a claim about the
 metric, so all five are listed in one place:
 
-1. **A one-point AUC gap producing twenty-three points of coverage** — 0.9644
-   against 0.9631, the table immediately above. The ordering that matters is
-   local to the threshold.
+1. **A three-point AUC gap producing twelve points of coverage** — 0.9555
+   against 0.9252 on `fine_dev`, 76.0% coverage against 88.1%. The ordering
+   that matters is local to the threshold. (The unrecorded holdout figures
+   this item used to cite are noted immediately above.)
 2. **A corruption that leaves AUC identical to the floating-point bit** —
    `sharpen` is strictly monotone, so AUC and Kendall's τ are unchanged, and
    the deployed threshold and coverage are not.
-3. **Per-band AUC of 0.9345 to 0.9976 while one band absorbs 4.1× its share of
-   the budget** — near-perfect ranking *inside* the group the rule fails on.
+3. **Per-band AUC of 0.9027 to 0.9960 while one band absorbs 4.1× its share of
+   the budget** — and the band it fails on ranks **best**, among the states it
+   visits.
 4. **The scorer with the worst AUC of three has the best pooled safety and the
    best coverage** — 0.8888, and it wins on both axes the rule optimises. The
    first of these that points backwards rather than merely failing to
@@ -1535,15 +1558,25 @@ and K1/K2 showing the plug-in never holds δ at any calibration size tested.
 Without the prediction written down first, each of those is a result that
 quietly becomes a confirmation.
 
-**Figure-coupling caught the numbers.** Four published figures were wrong and
-none was found by reading:
+**Figure-coupling caught the numbers.** Seven published figures were wrong or
+unsourced and none was found by reading:
 
 | what | how it was found |
 |---|---|
 | `314 states / 57.0%` in claim 2's table | every published percentage checked against every evidence number; this one matched nothing |
 | `9.9%` for a Clopper–Pearson floor of 9.81% | the same audit, then a test requiring each cell to equal the library call |
 | two cells of a band table, off by tenths | the same audit |
-| `11%` and `0%`, claim 2's headline pair | an audit of which evidence files had a producing script and a reading test; these had neither |
+| `11%` and `0%`, claim 2's headline pair | auditing which evidence files had a producing script and a reading test; these had neither |
+| `35.8%`, the case for the `refit` parameter | extending that audit to module docstrings, which the first version skipped |
+| `0.9345` to `0.9976`, the per-band AUC range | extending it again to bare decimals, which only matched percentages; in no evidence file, and from a different benchmark than the figures beside it |
+| `0.9644` against `0.9631`, an AUC comparison | the same extension |
+
+Each extension was prompted by the previous one failing to catch something,
+and each found more. The audit's power is also measured rather than claimed:
+`evidence/` renders to 4,538 distinct three- and four-place decimals, so a
+fabricated one collides by coincidence **17.5%** of the time. It catches about
+five figures in six that have no source at all, and nothing about a figure
+attached to the wrong source.
 
 **Metric-level guards caught the worst of it.** The last row above is the one
 that matters: the `0%` was zero violations over **zero certified trials** — the
@@ -1564,9 +1597,15 @@ One of the tests pinning a stale count **was the reason it stayed stale**,
 which is the same shape as the passing test that held the refusal-threshold
 bug in place.
 
-The honest summary: **scrutiny found four bugs and four wrong figures, and
-review found none of them.** That is the case for the machinery, and it is
-measured rather than argued.
+**And five retractions, two of them the same day.** The claim-2 pair; the
+`refit` justification; an explanation of my own result that lasted hours and
+rested on an unchecked assumption about where my own threshold sits; and the
+per-band AUC figures. The fifth was caught by continuing to examine a result
+after publishing it, which is the only thing that catches that class.
+
+The honest summary: **scrutiny found four bugs, seven wrong or unsourced
+figures and five retractions, and reading found none of them.** That is the
+case for the machinery, and it is measured rather than argued.
 
 ## Status
 

@@ -20,14 +20,23 @@ checking it against every number in `evidence/`. This makes that audit
 permanent. A figure that drifts, or one invented outright, now fails here
 even if no targeted test covers it.
 
-What this audit does not catch
-------------------------------
-It is one-sided. With a few thousand distinct numbers across `evidence/`,
-each rendered at five precisions, a two- or three-digit percentage can match
-some unrelated number by coincidence — so this catches a figure with **no
-source anywhere**, not a figure attached to the wrong source. The targeted
-coupling tests in `test_writeup_matches_evidence.py` do the second job, table
-by table. Neither subsumes the other and the overlap is deliberate.
+What this audit does not catch, measured rather than guessed
+------------------------------------------------------------
+It is one-sided, and its power is quantifiable. `evidence/` renders to
+**4,538 distinct three- and four-place decimals**, so a fabricated
+four-place decimal in [0, 1] collides with one by coincidence **17.5% of the
+time** — measured, not estimated. Two of the three values tried while
+verifying this guard collided, which is how the number came to be measured.
+
+So it catches roughly five figures in six that have **no source anywhere**,
+and it says nothing at all about a figure attached to the **wrong** source.
+The targeted coupling tests in `test_writeup_matches_evidence.py` do the
+second job, table by table, by comparing each published figure to the
+specific evidence row it claims to come from. Neither subsumes the other and
+the overlap is deliberate.
+
+Quoting "every figure is checked" without that caveat would be the same
+overstatement this repository keeps finding in its own prose.
 
 How the allow-list works, and why it is small
 ---------------------------------------------
@@ -79,6 +88,35 @@ ALLOWED: dict[str, str] = {
     "4.65%": "retracted: the reachable-state flip rate in the retraction",
     # The superseded middle row, kept visible as what was superseded.
     "57.0%": "retracted: the unreproducible 314-state row",
+}
+
+# Bare decimals -- AUCs, Kendall taus, concentrations -- were not audited at
+# all until the per-band AUC range turned out to be in no evidence file, from
+# the wrong benchmark, and quoted in four documents. Three decimal places is
+# the floor: tolerances (0.20, 0.05) and the delta are design parameters, not
+# measurements, and matching them would make the audit about parameters.
+ALLOWED_DECIMALS: dict[str, str] = {
+    # A property of `handcrafted_scorer`, verified against the function.
+    "0.9718": "computed: max(handcrafted_scorer) over the benchmark",
+    # Round one and round three figures, in pre-registrations that are not
+    # edited after the fact. Each is on the 79-case `dev` set and each is
+    # labelled as such where it appears.
+    "0.9976": "retracted: the dev per-band AUC, superseded by fine_dev",
+    "0.9345": "retracted: the dev per-band AUC, superseded by fine_dev",
+    "0.9833": "retracted: the dev per-band AUC, superseded by fine_dev",
+    "0.9822": "retracted: the dev per-band AUC, superseded by fine_dev",
+    "0.2106": "retracted: the dev undetermined level, superseded",
+    "0.1131": "retracted: the dev undetermined level, superseded",
+    "0.0499": "retracted: the dev undetermined level, superseded",
+    "0.0593": "retracted: the dev undetermined level, superseded",
+    # Computed ad hoc on the holdout and never recorded. Left visible and
+    # explicitly not the basis for any claim -- see the README.
+    "0.9644": "retracted: an unrecorded holdout AUC",
+    "0.9631": "retracted: an unrecorded holdout AUC",
+    # Pre-registration figures from rounds one and five, not edited.
+    "0.9489": "parameter: a pre-registration figure, not edited after the run",
+    "0.934": "parameter: a round-one pre-registration figure, not edited",
+    "0.958": "parameter: a round-one pre-registration figure, not edited",
 }
 
 
@@ -261,12 +299,15 @@ def test_the_yield_section_reports_what_the_guards_found():
     decay into a general endorsement of its own method.
     """
     text = " ".join((ROOT / "README.md").read_text().split())
-    for figure in ("314 states / 57.0%", "9.9%", "11%"):
+    for figure in ("314 states / 57.0%", "9.9%", "11%", "35.8%", "0.9644"):
         assert figure in text, figure
-    for word in ("vacuous zero", "seven commits", "sixteen rounds"):
+    for word in ("vacuous zero", "seven commits", "sixteen rounds", "17.5%"):
         assert word in text, word
-    assert "review found none of them" in text, \
+    assert "reading found none of them" in text, \
         "the comparison is the point: scrutiny found them, reading did not"
+    assert "five figures in six" in text, \
+        "the audit's power is measured, so state it rather than imply the " \
+        "audit catches everything"
 
 
 @pytest.mark.parametrize("src_file", SOURCES)
@@ -298,3 +339,80 @@ def test_every_percentage_in_a_module_docstring_is_sourced(
     assert not unmatched, (
         f"{src_file}: docstring percentages matching no number in evidence/ "
         f"and not in ALLOWED: {unmatched}")
+
+
+def decimals_in_evidence() -> set[str]:
+    """Every three- and four-place rendering of an evidence number."""
+    def walk(o):
+        if isinstance(o, dict):
+            for v in o.values():
+                yield from walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                yield from walk(v)
+        elif isinstance(o, (int, float)) and not isinstance(o, bool):
+            yield o
+
+    vals: set[float] = set()
+    for p in (ROOT / "evidence").glob("*.json"):
+        if p.stat().st_size > 400_000:
+            continue
+        try:
+            vals |= set(walk(json.loads(p.read_text())))
+        except Exception:
+            continue
+    return {f"{v:.{n}f}" for v in vals for n in (3, 4)}
+
+
+@pytest.fixture(scope="module")
+def evidence_decimals():
+    d = decimals_in_evidence()
+    if len(d) < 500:
+        pytest.skip("evidence/ is not populated in this checkout")
+    return d
+
+
+@pytest.mark.parametrize("doc", DOCS + SOURCES)
+def test_every_bare_decimal_is_sourced(doc, evidence_decimals):
+    """
+    The gap that let the per-band AUC range go unchecked.
+
+    The percentage audit above matches percentages only, so AUCs, Kendall
+    taus and concentrations — written as bare decimals — were never audited.
+    One of them, 0.9976, was quoted in four documents, was in no evidence
+    file, and was from the 79-case `dev` set while every other figure
+    around it was `fine_dev`.
+    """
+    text = (ROOT / doc).read_text()
+    found = set(re.findall(r"(?<![\d.])\d\.\d{3,4}(?![\d])", text))
+    unmatched = sorted(f for f in found
+                       if f not in evidence_decimals
+                       and f not in ALLOWED_DECIMALS)
+    assert not unmatched, (
+        f"{doc}: bare decimals matching no number in evidence/ and not in "
+        f"ALLOWED_DECIMALS with a reason: {unmatched}")
+
+
+def test_the_decimal_allow_list_is_reasoned_and_bounded():
+    assert len(ALLOWED_DECIMALS) <= 20, sorted(ALLOWED_DECIMALS)
+    for figure, reason in ALLOWED_DECIMALS.items():
+        code = reason.split(":")[0]
+        assert code in ("computed", "parameter", "retracted"), (figure, reason)
+        assert len(reason) > len(code) + 3, figure
+
+
+def test_the_computed_decimal_is_really_the_scorers_maximum():
+    """
+    `rule.py` argues the refusal sentinel was unreachable because
+    `handcrafted_scorer` tops out at 0.9718. That is part of the first
+    bug's account, so it is checked against the function rather than
+    trusted.
+    """
+    import json as _json
+    from abstain.scorer import handcrafted_scorer
+    from abstain.validate import states_of
+
+    cases = _json.loads((ROOT / "evidence" / "dev.json").read_text())
+    top = max(handcrafted_scorer(c, k) for c, k, _ in states_of(cases))
+    assert f"{top:.4f}" == "0.9718", top
+    assert "0.9718" in (ROOT / "src" / "abstain" / "rule.py").read_text()

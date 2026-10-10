@@ -55,6 +55,45 @@
     "n": 1356
    }
   },
+  "per_band_auc": {
+   "all_states": {
+    "above": {
+     "auc": 0.9770881122877076,
+     "n": 2048
+    },
+    "near-threshold": {
+     "auc": 0.97015299970965,
+     "n": 3072
+    },
+    "well-above": {
+     "auc": 0.9716865164298965,
+     "n": 4096
+    },
+    "well-below": {
+     "auc": 0.9989286299573911,
+     "n": 1536
+    }
+   },
+   "states_visited": {
+    "above": {
+     "auc": 0.906013580683752,
+     "n": 490
+    },
+    "near-threshold": {
+     "auc": 0.9215740863493747,
+     "n": 682
+    },
+    "well-above": {
+     "auc": 0.9027471918671487,
+     "n": 833
+    },
+    "well-below": {
+     "auc": 0.9959959231217239,
+     "n": 305
+    }
+   }
+  },
+  "set": "fine_dev",
   "states_committed_at": {
    "above": {
     "mean_score": 0.8243450091183072,

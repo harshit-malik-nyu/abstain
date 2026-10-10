@@ -80,7 +80,7 @@ That is a defect in how this project selected its scorer.
 Two later results say the same thing from different directions, which turns a
 curiosity into a claim about the metric. The `sharpen` corruption is strictly
 monotone, so it leaves AUC identical to the floating-point bit while moving
-coverage by up to 3.8 points. And per-band AUC runs from 0.9345 to 0.9976 —
+coverage by up to 3.8 points. And per-band AUC on `fine_dev` runs from 0.9702 to 0.9989, and from 0.9027 to 0.9960 over the states the rule visits —
 every band well ordered — while one band absorbs **4.12×** its share of the
 error budget. **AUC is a ranking measure and every decision this method makes
 is threshold-local; three independent results here show it cannot see the
@@ -234,7 +234,7 @@ with this objection attached.
   go stale — which this line did, saying "the other four" while the ledger had
   grown past twenty.
 - **The subgroup result, narrowed by its own test.** It does not depend on the
-  scorer ranking well — the scorer ranks at 0.9976 inside the band it fails on
+  scorer ranking well — it ranks at 0.9960 inside the band it fails on, among the states it visits, the best of any band
   — nor on the hand-built functional form, since a learned scorer over the same
   features still concentrates at 3.31x. It **does** depend substantially on
   the score carrying a feature that is directionally wrong for a group:

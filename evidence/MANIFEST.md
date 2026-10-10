@@ -61,6 +61,18 @@ from one can contain a vacuous zero, and two did.
 | `refit_rationale.json` | `rerun_unit_and_leakage.py` | the 35.8% that justifies `refit` in two module docstrings |
 | `validation_dev.json` | *(no script — superseded by `refit_rationale.json`)* | the original source of that 35.8%; kept because two docstrings quoted it |
 
+## Live, and not regenerable
+
+A third category, added when the figure audit moved a file here out of
+"superseded". These back published claims and **cannot be regenerated without
+re-opening a holdout**, which is not a thing to do for a provenance tidy-up.
+So they get a reading test and no producing script, and that is stated rather
+than left as an apparent omission.
+
+| file | backs | why no script |
+|---|---|---|
+| `fitted_secondary.json` | the "scorer I excluded was better" table — handcrafted 2.0% / 74.8% against fitted 1.0% / 97.7% at α = 0.10 | a 100-trial run on the **holdout**; regenerating it would open the holdout a second time |
+
 ## Pre-correction — kept as the record of a defect
 
 Not regenerated, by design. Each still carries the unconditional metric and
@@ -96,7 +108,6 @@ reader mistakes one for a current result. All carry the **pre-fix metric**.
 | file | what it was |
 |---|---|
 | `search_correction.json` | the union-bound comparison; its figures are in `theory.md` §3 and the vacuous zeros there are now marked |
-| `fitted_secondary.json` | the first fitted-scorer run, superseded by `fitted_conditional.json` |
 | `dev_final.json` | a per-α summary superseded by `round4_dev.json` |
 | `casefile_cases.json`, `oracle_table.json` | 16-case samples from building the oracle, kept as a worked example |
 | `prediction_check.json` | the first automated P1–P8 scoring, superseded by `docs/predictions.md` |

@@ -105,6 +105,38 @@ def test_every_evidence_file_is_listed():
     assert not unlisted, sorted(unlisted)
 
 
+def test_unregenerable_files_are_declared_and_read():
+    """
+    The third category: backs a claim, has no script, and says why.
+
+    Added when the figure audit found `fitted_secondary.json` backing the
+    excluded-scorer table from the superseded table. It is a holdout run, so
+    regenerating it would open the holdout a second time — which is not a
+    thing to do for a provenance tidy-up. The honest handling is a declared
+    exception with a reading test, not a silent one.
+    """
+    text = manifest_text()
+    try:
+        sect = section("Live, and not regenerable")
+    except StopIteration:
+        pytest.skip("no unregenerable section in this manifest")
+
+    declared = listed_files(sect)
+    assert declared, "the section exists but classifies nothing"
+    assert "holdout" in sect, \
+        "the reason has to be in the table, not implied"
+
+    tests = {p.name: p.read_text() for p in (ROOT / "tests").glob("*.py")}
+    for name in sorted(declared):
+        stem = name[:-5]
+        assert any(stem in t for t in tests.values()), \
+            (name, "an unregenerable file still needs a reading test")
+        # And it must NOT also be listed as live, or the exception is
+        # being claimed twice.
+        assert name not in listed_files(section("Live —")), name
+    del text
+
+
 def test_every_live_file_has_a_producing_script():
     """
     The first half of the defect: a file nothing writes cannot be

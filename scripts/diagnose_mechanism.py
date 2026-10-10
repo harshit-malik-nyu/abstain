@@ -211,12 +211,43 @@ def level_by_population(cases: list[dict], tau: float = 0.82) -> dict:
                 pops["states_committed_at"][b].append(
                     handcrafted_scorer(c, seq[-1]))
 
-    out = {"threshold": tau}
+    out = {"threshold": tau, "set": "fine_dev"}
     for name, by_band in pops.items():
         out[name] = {
             b: {"n": len(v),
                 "mean_score": statistics.mean(v) if v else None}
             for b, v in by_band.items()}
+
+    # Per-band AUC over the same two populations, because the published
+    # range (0.9345 to 0.9976) is in no evidence file and is from the
+    # 79-case `dev` set while every current result uses `fine_dev` -- the
+    # two were being quoted in one table without saying which.
+    from abstain.scorer import auc
+
+    scored: dict[str, dict] = {"all_states": {}, "states_visited": {}}
+    for b in BANDS:
+        rows = [(handcrafted_scorer(c, k), d) for c, k, d in states_of(cases)
+                if hardness(c) == b]
+        scored["all_states"][b] = {"auc": auc(rows), "n": len(rows)}
+    for b in BANDS:
+        rows = []
+        for c in cases:
+            if hardness(c) != b:
+                continue
+            t = run_case(c, handcrafted_scorer, tau)
+            known = set(OPENING)
+            seq = [frozenset(known)]
+            for f in t.asked:
+                known.add(f)
+                seq.append(frozenset(known))
+            for kk in seq:
+                st = c["states"]["|".join(sorted(kk))]
+                rows.append((handcrafted_scorer(c, kk),
+                             st["label"] == "determinable"))
+        labels = {d for _, d in rows}
+        scored["states_visited"][b] = {
+            "auc": auc(rows) if len(labels) > 1 else None, "n": len(rows)}
+    out["per_band_auc"] = scored
     return out
 
 
