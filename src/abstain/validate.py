@@ -231,15 +231,46 @@ def validate(cases: list[dict], scorer, *, alpha: float = 0.05,
     trial trains a fresh one on a fold disjoint from both calibration and
     deployment.
 
-    Without it, a *fitted* scorer evaluated here has already seen the
-    deployment cases during training, and the guarantee does not survive it:
-    measured on this benchmark, a logistic scorer fit on the whole pool
-    violated a 5% target in **35.8%** of trials, while a handcrafted scorer
-    with no training step violated none.
+    Why: the conformal argument requires the score to be **fixed** with
+    respect to the calibration and deployment data. A score fit on them is
+    not, so the exchangeability the bound needs does not hold. That is a
+    requirement of the construction, not an empirical finding, and it is
+    what justifies this parameter.
 
-    That is not a defect of the bound. The conformal argument requires the
-    score to be fixed with respect to the calibration and deployment data,
-    and a score fit on them is not. The failure is worth keeping visible
+    The empirical justification this docstring used to give is retracted
+    ------------------------------------------------------------------
+    It read: "a logistic scorer fit on the whole pool violated a 5% target
+    in **35.8%** of trials, while a handcrafted scorer with no training step
+    violated none." The figure is real and reproduces — 36.7% at a fresh
+    fit — and it does **not** support the claim built on it. The full cross,
+    on dev at α = 0.05, 120 trials (`evidence/refit_rationale.json`):
+
+        scorer           unit        certified   violated when certified
+        handcrafted      state          101       0.0%  [0.0, 3.6]
+        fitted, leaked   state          120      36.7%  [28.1, 45.9]
+        fitted, refit    state           19      68.4%  [43.4, 87.4]
+        every arm        trajectory       0       --
+
+    Three things that reading made clear and the original sentence hid:
+
+    **The comparison was against the wrong control.** `handcrafted` differs
+    from the fitted arms in being a fixed hand-written function, not only in
+    leakage, so 35.8% against 0% is not a leakage contrast.
+
+    **Refitting does not fix what the figure shows.** The same-family
+    comparison is leaked against refit, and refit is **worse** — 68.4%
+    against 36.7%, though on 19 trials against 120 and with intervals that
+    touch, so read it as "not better" rather than "worse".
+
+    **It was measured at a calibration unit this repository argues is the
+    wrong one.** All of it is the `state` unit. Under the `trajectory` unit
+    the rule actually uses, α = 0.05 is infeasible for every arm on dev, so
+    the effect cannot be measured there at all.
+
+    What does support `refit` empirically is round J, where the fitted and
+    no-distance arms are refit per trial and hold their tolerances at
+    feasible α (`evidence/fitted_conditional.json`). The failure is worth
+    keeping visible
     because it is silent: the threshold looks reasonable, the calibration
     reports its bound, and the deployed rate is seven times the target.
 

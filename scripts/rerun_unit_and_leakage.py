@@ -51,7 +51,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
-from abstain.scorer import FittedScorer  # noqa: E402
+from abstain.scorer import FittedScorer, handcrafted_scorer  # noqa: E402
 from abstain.validate import states_of, validate  # noqa: E402
 
 # Read off the files being replaced, not chosen now.
@@ -151,6 +151,88 @@ def band_undetermined(cases: list[dict]) -> dict:
     return undetermined_share(cases)
 
 
+def leakage_sweep(cases: list[dict]) -> list[dict]:
+    """
+    The three-scorer comparison behind the `refit` parameter's rationale.
+
+    `validate.refit` and `group.validate_groups` both justify themselves in
+    their docstrings with **"a logistic scorer fit on the whole pool
+    violated a 5% target in 35.8% of trials, while a handcrafted scorer with
+    no training step violated none."** That figure comes from
+    `evidence/validation_dev.json`, which had no producing script and no
+    reading test — the same gap that let claim 2's figures stay wrong.
+
+    This one checks out: the 35.8% row has `infeasible_rate` 0.000, so the
+    unconditional rate it reports equals the feasibility-conditioned one and
+    the figure is sound. But it was sound by luck rather than by check, and
+    the manifest had the file listed as referenced by nothing because the
+    reference is in a module docstring rather than the write-up.
+
+    Arms, tolerances and trial count read off the file being replaced.
+    """
+    from abstain.robustness import constant
+
+    print("\n  the `refit` rationale — three scorers, leaked where fitted")
+    print(f"  {'scorer':>12} {'alpha':>6} {'feas':>5} {'viol|feas':>10} "
+          f"{'cov':>7}")
+    leaked = leaked_scorer(cases)
+    arms = (("handcrafted", handcrafted_scorer),
+            ("fitted", leaked),
+            ("constant", constant(0.5)))
+    out = []
+    for label, scorer in arms:
+        for alpha in (0.20, 0.10, 0.05, 0.02):
+            v = validate(cases, scorer, alpha=alpha, delta=DELTA,
+                         trials=120, seed=SEED)
+            r = row(v, alpha=alpha, trials=120, scorer=label)
+            out.append(r)
+            vf = r["violation_rate_when_feasible"]
+            print(f"  {label:>12} {alpha:>6.2f} {r['feasible_trials']:>5} "
+                  f"{'n/a' if vf is None else f'{vf:>9.1%}'} "
+                  f"{r['mean_coverage']:>6.1%}")
+    return out
+
+
+def unit_by_leakage(cases: list[dict]) -> list[dict]:
+    """
+    The cross that shows what the 35.8% actually measures.
+
+    `validate.refit` and `group.validate_groups` justify themselves with
+    "a logistic scorer fit on the whole pool violated a 5% target in 35.8%
+    of trials, while a handcrafted scorer with no training step violated
+    none." The figure reproduces — 36.7% at a fresh fit — but only under
+    **state-unit** calibration, which is the unit claim 2 of
+    `docs/theory.md` argues is the wrong one.
+
+    Under the trajectory unit the method actually uses, alpha = 0.05 is
+    infeasible for every arm on dev, so the leakage effect cannot be
+    measured there at all. Both facts need to be visible together, so this
+    runs the full cross.
+    """
+    from abstain.robustness import constant
+
+    leaked = leaked_scorer(cases)
+    print("\n  what the 35.8% measures — unit x leakage, alpha = 0.05")
+    print(f"  {'scorer':>14} {'unit':>11} {'feas':>5} {'viol|feas':>10} "
+          f"{'cov':>7}")
+    out = []
+    arms = (("handcrafted", handcrafted_scorer, None),
+            ("fitted-leaked", leaked, None),
+            ("fitted-refit", None, refit),
+            ("constant", constant(0.5), None))
+    for label, scorer, fn in arms:
+        for unit in ("state", "trajectory"):
+            v = validate(cases, scorer, alpha=0.05, delta=DELTA, trials=120,
+                         seed=SEED, unit=unit, refit=fn)
+            r = row(v, alpha=0.05, trials=120, scorer=label, unit=unit)
+            out.append(r)
+            vf = r["violation_rate_when_feasible"]
+            print(f"  {label:>14} {unit:>11} {r['feasible_trials']:>5} "
+                  f"{'n/a' if vf is None else f'{vf:>9.1%}'} "
+                  f"{r['mean_coverage']:>6.1%}")
+    return out
+
+
 def row(v, *, alpha: float, trials: int, **extra) -> dict:
     d = v.as_dict()
     feasible = sum(t.feasible for t in v.results)
@@ -246,8 +328,12 @@ def main() -> int:
 
     units = unit_comparison(cases)
     leaks = leakage(cases)
+    rationale = leakage_sweep(cases)
+    cross = unit_by_leakage(cases)
 
     for name, payload in (("unit_comparison", units), ("leakage", leaks),
+                          ("refit_rationale",
+                           {"sweep": rationale, "unit_by_leakage": cross}),
                           ("unit_populations",
                            {"threshold": pop["threshold"],
                             "definition": pop["definition"],

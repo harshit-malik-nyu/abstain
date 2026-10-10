@@ -52,6 +52,15 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ["README.md"] + sorted(
     str(p.relative_to(ROOT)) for p in (ROOT / "docs").glob("*.md"))
 
+# The module docstrings carry substantive claims too, and the first version of
+# this audit did not look at them. That gap let `35.8%` — the figure that
+# justifies the `refit` parameter in two docstrings — go unaudited, and the
+# evidence manifest list it as "referenced by nothing" because the reference
+# was in source rather than in the write-up. The figure turned out to be
+# sound. It was sound by luck rather than by check.
+SOURCES = sorted(str(p.relative_to(ROOT))
+                 for p in (ROOT / "src" / "abstain").glob("*.py"))
+
 # Reason codes: computed | parameter | retracted
 ALLOWED: dict[str, str] = {
     # Clopper-Pearson floors, from group.reachable_alpha. Computed in closed
@@ -258,3 +267,34 @@ def test_the_yield_section_reports_what_the_guards_found():
         assert word in text, word
     assert "review found none of them" in text, \
         "the comparison is the point: scrutiny found them, reading did not"
+
+
+@pytest.mark.parametrize("src_file", SOURCES)
+def test_every_percentage_in_a_module_docstring_is_sourced(
+        src_file, evidence_renderings):
+    """
+    The same audit, over the source.
+
+    A module docstring that justifies a parameter with a measurement is
+    making a published claim — `validate.refit` and
+    `group.validate_groups` both do — and nothing checked those numbers
+    until this test existed.
+    """
+    import ast
+    tree = ast.parse((ROOT / src_file).read_text())
+    texts = []
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef,
+                             ast.AsyncFunctionDef)):
+            doc = ast.get_docstring(node)
+            if doc:
+                texts.append(doc)
+    found = set()
+    for t in texts:
+        found |= set(re.findall(r"(?<![\d.])\d{1,3}\.\d{1,2}%", t))
+
+    unmatched = sorted(f for f in found
+                       if f not in evidence_renderings and f not in ALLOWED)
+    assert not unmatched, (
+        f"{src_file}: docstring percentages matching no number in evidence/ "
+        f"and not in ALLOWED: {unmatched}")

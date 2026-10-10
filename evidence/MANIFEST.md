@@ -57,6 +57,8 @@ from one can contain a vacuous zero, and two did.
 | `confounds.json` | `check_confounds.py` | the question-policy control |
 | `allocation.json` | `run_allocation.py` | the question-allocation result |
 | `unit_comparison.json`, `leakage.json`, `unit_populations.json` | `rerun_unit_and_leakage.py` | claim 2, **after its retraction**, and the three-populations table |
+| `refit_rationale.json` | `rerun_unit_and_leakage.py` | the 35.8% that justifies `refit` in two module docstrings |
+| `validation_dev.json` | *(no script — superseded by `refit_rationale.json`)* | the original source of that 35.8%; kept because two docstrings quoted it |
 
 ## Pre-correction — kept as the record of a defect
 
@@ -80,14 +82,18 @@ re-run or a relaunch is checkable rather than asserted.
 
 ## Superseded — pre-fix metric, referenced by nothing
 
-These are from the first six commits and **nothing in the repository reads
-them** — not the README, the docs, a script or a test. They are kept because
+These are from the first six commits and nothing reads them — not the README,
+the docs, a script, a test, **or a module docstring.** That last one was
+missing from the first version of this list, and it mattered:
+`validation_dev.json` was listed here while two docstrings quoted its 35.8%,
+because the check that enforced the claim only looked at the write-up. It has
+moved to the live table and `refit_rationale.json` now reproduces the figure
+with a script and a test. They are kept because
 deleting evidence is not this repository's habit, and listed here so no future
 reader mistakes one for a current result. All carry the **pre-fix metric**.
 
 | file | what it was |
 |---|---|
-| `validation_dev.json` | the first dev validation sweep, superseded by `round4_dev.json` |
 | `search_correction.json` | the union-bound comparison; its figures are in `theory.md` §3 and the vacuous zeros there are now marked |
 | `fitted_secondary.json` | the first fitted-scorer run, superseded by `fitted_conditional.json` |
 | `dev_final.json` | a per-α summary superseded by `round4_dev.json` |

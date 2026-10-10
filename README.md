@@ -24,10 +24,12 @@ benchmark eight times larger.
 
 The useful part of this repository is what came out of attacking it
 afterwards: **four bugs, every one of which made the method look better than
-it was; twenty-six pre-registered predictions that missed; three claims
-published here and then retracted — one of them inside a numbered claim in
+it was; twenty-six pre-registered predictions that missed; four claims
+published here and then retracted — one inside a numbered claim in
 [`theory.md`](docs/theory.md), resting on evidence no script could regenerate
-and no test ever read; and one result that changes what the method is for.**
+and no test ever read, and one in the docstring that justified a *parameter*
+of the method, citing a figure that reproduces and does not support it; and
+one result that changes what the method is for.**
 
 The central claim has been attacked three levels deep, and every level moved
 it:
@@ -43,7 +45,7 @@ it:
 
 Everything below is measured. Every figure is checked against the file that
 produced it by a test, every pre-fix run is kept in `evidence/` beside the
-fix, all three retractions are left visible rather than edited away, and **[all
+fix, all four retractions are left visible rather than edited away, and **[all
 seventy-eight predictions are listed with their
 outcomes](docs/predictions.md)** — a test parses that table and requires the
 count above to match it, because the opening said "five" for a while and was
@@ -1408,6 +1410,8 @@ python scripts/run_materiality.py       # how much rides on the $50 parameter?
 python scripts/run_award_aware.py       # round M: add the missing feature
 python scripts/run_signed.py            # round N: add its sign too
 python scripts/measure_opening_state.py # why both are no-ops in deployment
+python scripts/run_injected_shift.py    # round S: inject the mechanism into
+                                        # the scorer that does not have it
 
 # Uncertainty, and the claims that needed correcting
 python scripts/run_uncertainty.py       # cluster bootstrap over cases

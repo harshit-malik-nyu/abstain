@@ -26,10 +26,38 @@
             refit on a disjoint fold   0.05     0 n/a        0.0%   0.0%
             refit on a disjoint fold   0.02     0 n/a        0.0%   0.0%
 
+  the `refit` rationale — three scorers, leaked where fitted
+        scorer  alpha  feas  viol|feas     cov
+   handcrafted   0.20   120      1.7%  72.5%
+   handcrafted   0.10   118      2.5%  69.7%
+   handcrafted   0.05     0 n/a   0.0%
+   handcrafted   0.02     0 n/a   0.0%
+        fitted   0.20   120      5.0%  92.4%
+        fitted   0.10   120      4.2%  95.2%
+        fitted   0.05     0 n/a   0.0%
+        fitted   0.02     0 n/a   0.0%
+      constant   0.20     0 n/a   0.0%
+      constant   0.10     0 n/a   0.0%
+      constant   0.05     0 n/a   0.0%
+      constant   0.02     0 n/a   0.0%
+
+  what the 35.8% measures — unit x leakage, alpha = 0.05
+          scorer        unit  feas  viol|feas     cov
+     handcrafted       state   101      0.0%  68.2%
+     handcrafted  trajectory     0 n/a   0.0%
+   fitted-leaked       state   120     36.7%  95.6%
+   fitted-leaked  trajectory     0 n/a   0.0%
+    fitted-refit       state    19     68.4%  92.1%
+    fitted-refit  trajectory     0 n/a   0.0%
+        constant       state     0 n/a   0.0%
+        constant  trajectory     0 n/a   0.0%
+
   wrote evidence/unit_comparison.json
 
   wrote evidence/leakage.json
 
+  wrote evidence/refit_rationale.json
+
   wrote evidence/unit_populations.json
 
-  289.5s
+  458.5s

@@ -589,8 +589,12 @@ def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
     Pass a callable taking the fitting cases and returning a scorer, and each
     trial trains a fresh one on a fold disjoint from both calibration and
     deployment — the same three-fold protocol `validate.refit` enforces, for
-    the same reason: a scorer fit on the calibration or deployment data
-    violated a 5% target in 35.8% of trials when this project measured it.
+    the same reason: the conformal argument requires the score to be fixed
+    with respect to the calibration and deployment data, and a score fit on
+    them is not. (This sentence used to cite "35.8% of trials" as the
+    empirical case for it. That figure reproduces and does not support the
+    claim — see `validate.refit`, where it is retracted and the cross is
+    given.)
 
     This did not exist until an experiment needed it, and its absence was not
     an inconvenience but a wrong answer. Addendum two asked whether group

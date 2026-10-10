@@ -458,9 +458,9 @@ def test_both_retractions_stay_in_the_opening():
     it.
     """
     readme = " ".join((ROOT / "README.md").read_text().split())
-    assert "three claims published here and then retracted" in \
+    assert "four claims published here and then retracted" in \
         readme.lower(), "the opening must say how many were withdrawn"
-    assert "all three retractions are left visible" in readme.lower()
+    assert "all four retractions are left visible" in readme.lower()
 
     prereg = " ".join(
         (ROOT / "docs" / "preregistration-5.md").read_text().split())

@@ -2531,3 +2531,99 @@ def test_the_band_undetermined_shares_are_recorded(populations):
     for band in ("near-threshold", "well-above"):
         assert any(f in doc for f in pct_forms(fine[band], 1)), \
             (band, fine[band])
+
+
+# ---------------------------------------------------------------------------
+# The `refit` rationale, retracted
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def refit_rationale():
+    p = ROOT / "evidence" / "refit_rationale.json"
+    if not p.exists():
+        pytest.skip("refit_rationale.json not present")
+    return json.loads(p.read_text())
+
+
+def cross_row(payload: dict, scorer: str, unit: str) -> dict:
+    return next(r for r in payload["unit_by_leakage"]
+                if r["scorer"] == scorer and r["unit"] == unit)
+
+
+def test_the_35_8_percent_reproduces(refit_rationale):
+    """
+    The figure two module docstrings cited for the `refit` parameter.
+
+    It is real: a logistic scorer fit on the pool it is scored on violates
+    a 5% target in a third of trials, under state-unit calibration. The
+    retraction is about what it supports, not about whether it happened.
+    """
+    leaked = cross_row(refit_rationale, "fitted-leaked", "state")
+    assert leaked["feasible_trials"] == 120, leaked
+    v = leaked["violation_rate_when_feasible"]
+    assert 0.30 < v < 0.45, v
+
+
+def test_refitting_does_not_fix_what_that_figure_shows(refit_rationale):
+    """
+    The same-family comparison the original sentence did not make.
+
+    Leaked against refit, same scorer family, same unit: refit is not
+    better. On 19 trials against 120 with touching intervals, so the honest
+    reading is "not better" rather than "worse" — and either way it is not
+    the improvement the docstring implied.
+    """
+    from abstain.group import trial_rate_interval
+
+    leaked = cross_row(refit_rationale, "fitted-leaked", "state")
+    refit = cross_row(refit_rationale, "fitted-refit", "state")
+    assert refit["violation_rate_when_feasible"] >= \
+        leaked["violation_rate_when_feasible"], (leaked, refit)
+
+    # And the softness is real, so the write-up must not overclaim it.
+    n = refit["feasible_trials"]
+    lo, _ = trial_rate_interval(
+        round(refit["violation_rate_when_feasible"] * n), n)
+    _, hi = trial_rate_interval(
+        round(leaked["violation_rate_when_feasible"]
+              * leaked["feasible_trials"]), leaked["feasible_trials"])
+    assert lo < hi, ("the intervals touch; the docstring says so", lo, hi)
+
+    doc = " ".join((ROOT / "src" / "abstain" / "validate.py").read_text()
+                   .split())
+    assert "not better" in doc, \
+        "the softness of this comparison has to be stated"
+
+
+def test_the_figure_is_unmeasurable_at_the_unit_the_rule_uses(
+        refit_rationale):
+    """
+    The third thing the original sentence hid: all of it is the `state`
+    unit, which claim 2 argues is the wrong one. Under `trajectory`,
+    α = 0.05 is infeasible for every arm on dev.
+    """
+    for scorer in ("handcrafted", "fitted-leaked", "fitted-refit",
+                   "constant"):
+        r = cross_row(refit_rationale, scorer, "trajectory")
+        assert r["feasible_trials"] == 0, (scorer, r)
+        assert r["violation_rate_when_feasible"] is None, (scorer, r)
+
+
+def test_both_docstrings_retract_the_empirical_justification():
+    """
+    `refit` is justified by the conformal argument, which is a requirement
+    rather than a finding. Two docstrings cited a measurement instead, and
+    quietly swapping the justification would be the fourth silent
+    correction in this repository.
+    """
+    v = " ".join((ROOT / "src" / "abstain" / "validate.py").read_text()
+                 .split())
+    g = " ".join((ROOT / "src" / "abstain" / "group.py").read_text().split())
+
+    assert "retracted" in v
+    assert "35.8%" in v, "the retracted figure stays visible"
+    assert "wrong control" in v, "say why the comparison did not hold"
+    assert "requirement of the construction, not an empirical finding" in v
+
+    assert "35.8%" in g and "retracted" in g, \
+        "the second docstring must point at the retraction, not repeat it"

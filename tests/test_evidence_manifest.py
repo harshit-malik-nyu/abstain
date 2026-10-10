@@ -192,8 +192,12 @@ def test_superseded_files_are_referenced_by_nothing():
     live table and acquire a script and a test, because it carries the
     pre-fix metric and a table built from it can hold a vacuous zero.
     """
+    # Source docstrings count. Leaving them out is how
+    # `validation_dev.json` sat in the superseded table while two module
+    # docstrings quoted its 35.8%.
     looked_at = [ROOT / "README.md"]
     looked_at += sorted((ROOT / "docs").glob("*.md"))
+    looked_at += sorted((ROOT / "src" / "abstain").glob("*.py"))
     corpus = "\n".join(p.read_text() for p in looked_at)
 
     for name in sorted(listed_files(section("Superseded"))):
