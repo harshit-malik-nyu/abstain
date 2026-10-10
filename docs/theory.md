@@ -241,10 +241,28 @@ and `evidence/pool_bootstrap.json`.
 ### The mechanism, and the version of it that was refuted
 
 Per-band AUC is 0.9345 to **0.9976** — the scorer orders states almost
-perfectly *inside the band it fails on*. What differs is the score **level**:
-undecidable states average 0.2106 in `well-below` against 0.1131 in
-`near-threshold`. One global threshold is a single horizontal line across four
-vertically shifted distributions, so it cuts each at a different quantile.
+perfectly *inside the band it fails on*. What differs is the score **level**,
+and the figures below are the second set this section has carried. The first
+were averages over **every** state in the benchmark — the population §2 of
+this document argues is the wrong one, because the rule meets a selected
+subset. The mechanism's own evidence had the defect the document warns about
+two sections earlier.
+
+The conclusion survives and strengthens. Undecidable states, by population:
+
+| band | all states | **states the rule visits** |
+|---|---:|---:|
+| **well-below** | 0.2130 | **0.5417** |
+| near-threshold | 0.1398 | 0.4012 |
+| above | 0.0607 | 0.2796 |
+| well-above | 0.0813 | 0.3891 |
+
+Same ordering, and in the population that matters the levels sit much closer
+to a threshold that has to serve all four. (The commit population is smaller
+still and at τ = 0.82 holds single-digit counts per band, so it is reported in
+`evidence/mechanism.json` and not used here.) One global threshold is a single
+horizontal line across four vertically shifted distributions, so it cuts each
+at a different quantile.
 
 > Good ranking within every subgroup does not give a threshold that is safe
 > within every subgroup. Conditional validity needs conditional

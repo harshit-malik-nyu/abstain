@@ -36,4 +36,11 @@
   maximal for households far BELOW the limit -- while eligibility
   still flips for 69% of their undetermined states.
 
+  undecidable-state score level, by population
+              band       all   visited   committed
+        well-below    0.2130    0.5417      0.8359
+    near-threshold    0.1398    0.4012          --
+             above    0.0607    0.2796      0.8243
+        well-above    0.0813    0.3891      0.8366
+
   wrote evidence/mechanism.json

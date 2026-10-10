@@ -36,6 +36,63 @@
    "flip": 331
   }
  },
+ "level_by_population": {
+  "all_states": {
+   "above": {
+    "mean_score": 0.0606548045977396,
+    "n": 1687
+   },
+   "near-threshold": {
+    "mean_score": 0.13984272082675647,
+    "n": 2695
+   },
+   "well-above": {
+    "mean_score": 0.0812523061080634,
+    "n": 2715
+   },
+   "well-below": {
+    "mean_score": 0.21295132674335504,
+    "n": 1356
+   }
+  },
+  "states_committed_at": {
+   "above": {
+    "mean_score": 0.8243450091183072,
+    "n": 1
+   },
+   "near-threshold": {
+    "mean_score": null,
+    "n": 0
+   },
+   "well-above": {
+    "mean_score": 0.8365987126614538,
+    "n": 5
+   },
+   "well-below": {
+    "mean_score": 0.8358742763578659,
+    "n": 4
+   }
+  },
+  "states_visited": {
+   "above": {
+    "mean_score": 0.2796496444628644,
+    "n": 219
+   },
+   "near-threshold": {
+    "mean_score": 0.4012442672004525,
+    "n": 397
+   },
+   "well-above": {
+    "mean_score": 0.38906134571098155,
+    "n": 246
+   },
+   "well-below": {
+    "mean_score": 0.5417154969331583,
+    "n": 204
+   }
+  },
+  "threshold": 0.82
+ },
  "score_profile": {
   "above": {
    "mean_log_distance": 0.1849380905017457,

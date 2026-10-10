@@ -2752,3 +2752,60 @@ def test_the_control_arm_reproduces_round_o(injected, ndg):
     # for a field name.
     conc = s_ctl.get("pooled_concentration") or s_ctl["concentration"]
     assert abs(conc["well-below"] - 1.72) < 0.1, conc
+
+
+def test_the_level_evidence_uses_the_population_the_rule_meets(readme, theory,
+                                                               mechanism):
+    """
+    Section 4's own evidence had the defect section 2 warns about.
+
+    The level figures were averages over *every* state in the benchmark,
+    which is the population claim 2 says is wrong because the rule meets a
+    selected subset. Both populations are now measured and both are in the
+    write-up, so a reader can see which is which.
+
+    The ordering must survive the change — if it did not, the mechanism
+    would be an artefact of the wrong population and section 4 would need
+    rewriting rather than re-citing.
+    """
+    levels = mechanism.get("level_by_population")
+    if not levels:
+        pytest.skip("this run predates the population measurement")
+
+    all_st = {b: v["mean_score"] for b, v in levels["all_states"].items()}
+    visited = {b: v["mean_score"]
+               for b, v in levels["states_visited"].items()}
+
+    order_all = sorted(all_st, key=lambda b: -all_st[b])
+    order_vis = sorted(visited, key=lambda b: -visited[b])
+    assert order_all[0] == order_vis[0] == "well-below", (order_all,
+                                                          order_vis)
+    assert visited["well-below"] > visited["near-threshold"] > \
+        visited["above"], visited
+
+    # Both columns in both documents, so the correction is legible.
+    for payload in (readme, theory):
+        for b in ("well-below", "near-threshold"):
+            assert f"{all_st[b]:.4f}" in payload, (b, all_st[b])
+            assert f"{visited[b]:.4f}" in payload, (b, visited[b])
+
+    assert "population" in readme and "selected subset" in readme
+
+
+def test_the_commit_population_is_reported_as_unusable(mechanism):
+    """
+    It is the population the rule actually decides in, and at tau = 0.82 it
+    holds single-digit counts per band. Reporting it without that caveat
+    would invite exactly the inference the counts cannot support — the C3
+    lesson, which this repository has already paid for once.
+    """
+    levels = mechanism.get("level_by_population")
+    if not levels:
+        pytest.skip("this run predates the population measurement")
+
+    counts = [v["n"] for v in levels["states_committed_at"].values()]
+    assert max(counts) < 20, counts
+
+    t = " ".join((ROOT / "docs" / "theory.md").read_text().split())
+    assert "single-digit counts per band" in t
+    assert "not used here" in t

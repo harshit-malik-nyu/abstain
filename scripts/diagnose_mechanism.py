@@ -161,6 +161,65 @@ def score_profile(cases: list[dict]) -> dict:
     return out
 
 
+def level_by_population(cases: list[dict], tau: float = 0.82) -> dict:
+    """
+    The score level of undecidable states, over the populations that differ.
+
+    `docs/theory.md` §4 argues the subgroup failure comes from score levels
+    differing between groups, and cites **0.2106 in `well-below` against
+    0.1131 in `near-threshold`**. Those are averages over **every** state in
+    the benchmark — and claim 2 of the same document is that the full state
+    population is the wrong one, because the rule meets a selected subset.
+
+    So the mechanism's own evidence had the defect the document warns about
+    two sections earlier. The conclusion survives and strengthens: over the
+    states the rule actually **visits**, the gap is 0.5417 against 0.4012,
+    and the ordering across all four bands is unchanged.
+
+    The commit population is reported too and is not usable — at tau = 0.82
+    it holds single-digit counts per band — which is worth printing rather
+    than leaving a reader to wonder why it was omitted.
+    """
+    import statistics
+    from abstain.rule import run_case
+
+    pops: dict[str, dict[str, list[float]]] = {
+        "all_states": {b: [] for b in BANDS},
+        "states_visited": {b: [] for b in BANDS},
+        "states_committed_at": {b: [] for b in BANDS},
+    }
+
+    for c, k, determinable in states_of(cases):
+        if not determinable:
+            pops["all_states"][hardness(c)].append(handcrafted_scorer(c, k))
+
+    for c in cases:
+        b = hardness(c)
+        t = run_case(c, handcrafted_scorer, tau)
+        known = set(OPENING)
+        seq = [frozenset(known)]
+        for f in t.asked:
+            known.add(f)
+            seq.append(frozenset(known))
+        for kk in seq:
+            st = c["states"]["|".join(sorted(kk))]
+            if st["label"] != "determinable":
+                pops["states_visited"][b].append(handcrafted_scorer(c, kk))
+        if t.committed:
+            st = c["states"]["|".join(sorted(seq[-1]))]
+            if st["label"] != "determinable":
+                pops["states_committed_at"][b].append(
+                    handcrafted_scorer(c, seq[-1]))
+
+    out = {"threshold": tau}
+    for name, by_band in pops.items():
+        out[name] = {
+            b: {"n": len(v),
+                "mean_score": statistics.mean(v) if v else None}
+            for b, v in by_band.items()}
+    return out
+
+
 def commits_by_criterion(dev: list[dict], full_space: list[dict], *,
                          alpha: float = 0.20, trials: int = 40,
                          seed: int = 71) -> dict:
@@ -261,7 +320,29 @@ def main() -> int:
     print("  maximal for households far BELOW the limit -- while eligibility")
     print(f"  still flips for {flip_share:.0%} of their undetermined states.")
 
+    levels = level_by_population(dev)
+
+    print("\n  undecidable-state score level, by population")
+
+    print(f"  {'band':>16} {'all':>9} {'visited':>9} {'committed':>11}")
+
+    for b in BANDS:
+
+        def _f(key):
+
+            v = levels[key][b]['mean_score']
+
+            return '--' if v is None else f'{v:.4f}'
+
+        print(f"  {b:>16} {_f('all_states'):>9} "
+
+              f"{_f('states_visited'):>9} "
+
+              f"{_f('states_committed_at'):>11}")
+
+
     payload = {
+        "level_by_population": levels,
         "criterion_split": crit,
         "criterion_split_of_commits": commits,
         "score_profile": prof,

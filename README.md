@@ -289,15 +289,25 @@ not have passed.
 Not bad ranking. The scorer orders states *almost perfectly* inside the band it
 fails on:
 
-| band | AUC | mean score, undetermined states |
-|---|---:|---:|
-| **well-below** | **0.9976** | **0.2106** |
-| near-threshold | 0.9345 | 0.1131 |
-| above | 0.9822 | 0.0499 |
-| well-above | 0.9833 | 0.0593 |
+| band | AUC | undetermined states: all | **states the rule visits** |
+|---|---:|---:|---:|
+| **well-below** | **0.9976** | 0.2130 | **0.5417** |
+| near-threshold | 0.9345 | 0.1398 | 0.4012 |
+| above | 0.9822 | 0.0607 | 0.2796 |
+| well-above | 0.9833 | 0.0813 | 0.3891 |
+
+**The third column was missing for sixteen rounds**, and the second was the
+only one quoted. That is a level measured over *every* state — the population
+[claim 2](#validation-found-two-failures-before-the-holdout-was-opened) says
+is the wrong one, because the rule meets a selected subset. The mechanism's
+evidence had the defect the same README warns about elsewhere. The ordering is
+unchanged and the correct column is the stronger one: in the population that
+matters the levels sit much closer to a threshold that must serve all four
+bands.
 
 What differs is where the score **levels** sit. Undetermined states score about
-twice as high in `well-below` as in `near-threshold`. One global threshold is a
+a third higher in `well-below` than in `near-threshold` among the states the
+rule actually walks. One global threshold is a
 single horizontal line drawn across four vertically shifted distributions, so
 it cuts each band at a different quantile.
 
