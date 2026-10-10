@@ -174,6 +174,58 @@ def inverted(base: Scorer = handcrafted_scorer) -> Scorer:
     return sc
 
 
+def band_shifted(base: Scorer, band: str, k: float) -> Scorer:
+    """
+    s -> s**(1/(1+k)) for cases in one income band, identity elsewhere.
+
+    The instrument for round S, which causes the subgroup mechanism instead
+    of observing it. Every other corruption above is applied to every case;
+    this one is applied to one group, which is the whole point.
+
+    Why this shape
+    --------------
+    `theory.md` §4 claims the subgroup failure comes from score **levels**
+    differing between groups while the **ranking inside** each group is
+    fine. Three properties make this transform a test of exactly that, and
+    each is checkable before any run:
+
+    **Monotone inside the band.** s**(1/(1+k)) is strictly increasing on
+    [0, 1] for k > -1, so the order of the shifted band's states is
+    untouched. Whatever the sweep produces cannot be added noise.
+
+    **Not monotone across bands.** A state in the shifted band and one
+    outside it can swap places, so the levels move between groups. That is
+    the property under test and the only one that changes.
+
+    **Identity at k = 0, and bounded.** `band_shifted(base, b, 0)` returns
+    `base` exactly, giving a true control arm, and the image stays in
+    [0, 1] for every k >= 0 so no score leaves its range.
+
+    The direction matters: the exponent is below 1 for k > 0, which pushes
+    scores **up**. The rule commits when the score clears the threshold, so
+    inflating one band's scores makes it commit more often there —
+    including on states it cannot decide. Overconfidence in one group is
+    what is being injected.
+
+    `band` is matched with `conditional.hardness`, which reads only
+    `employment_income` — a field the agent knows at the opening state. A
+    corruption keyed on something the rule cannot observe would be a
+    different and less interesting experiment.
+    """
+    if k < 0:
+        raise ValueError(f"k must be non-negative, got {k}")
+    from .conditional import hardness
+
+    power = 1.0 / (1.0 + k)
+
+    def sc(case, known):
+        s = base(case, known)
+        if hardness(case) != band:
+            return s
+        return s ** power
+    return sc
+
+
 # ---------------------------------------------------------------------------
 # The suite
 # ---------------------------------------------------------------------------
