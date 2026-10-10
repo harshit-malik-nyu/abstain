@@ -1060,3 +1060,115 @@ One run on `fine_dev`, B = 40, 100 trials per draw, α = 0.20, root seed 101,
 written to `evidence/pool_bootstrap.json`. Neither holdout is touched. B, the
 trial count, α and the seed are fixed here and none is adjusted after seeing a
 result.
+
+---
+
+# Addendum eleven — the mechanism, caused rather than observed
+
+Written before `robustness.band_shifted` and
+`scripts/run_injected_shift.py` exist. The git history shows it.
+
+## Why this round exists
+
+Every subgroup result in this repository is **observational.** I measured one
+scorer, found that its error budget concentrates on the lowest-income band,
+traced that to a feature which reads distance-from-boundary as safety, and
+measured what fixes it. Three rounds then attacked the result from outside —
+a learned scorer (H), a scorer without the feature (J), nine partitions (Q) —
+and the finding survived every one in narrowed form.
+
+What no round has done is **cause** the mechanism. The claim in
+[`theory.md`](theory.md) §4 is:
+
+> Good ranking within every subgroup does not give a threshold that is safe
+> within every subgroup. Conditional validity needs conditional
+> **calibration**, not conditional ranking.
+
+That is a statement about any score whose *levels* differ between groups while
+its *ranking* inside each group is fine. It has only ever been tested on a
+score that happens to have that property for one hand-written reason, and J1
+established that the reason and the mechanism are confounded: remove the
+feature and the concentration falls to 1.72.
+
+So the mechanism has never been isolated. This round isolates it.
+
+## What is added
+
+`band_shifted(base, band, k)`: a corruption that applies the monotone
+transform **s → s^(1/(1+k))** to cases in one income band and leaves every
+other case untouched.
+
+Three properties make it the right instrument, and all three are checkable
+before the run:
+
+1. **Monotone inside the band**, so the ranking within the shifted group is
+   unchanged and `k` cannot be confused with added noise.
+2. **Not monotone across bands**, so the score *levels* move between groups.
+   That is exactly the property §4's claim is about, and nothing else
+   changes.
+3. **Identity at k = 0** and bounded in [0, 1] for all k ≥ 0, so the sweep
+   has a true control arm and never leaves the score's range.
+
+Applied **identically in calibration and deployment**, as every corruption in
+round two was, so exchangeability is held fixed and only the group structure
+of the score varies. This is not a shift experiment; round five already
+priced that.
+
+The base scorer is the **no-distance fitted scorer** — the arm from round J
+with concentration **1.72** and no hidden subgroup. Starting from the scorer
+that does *not* have the defect is the point: anything the sweep produces was
+injected rather than found.
+
+## Predictions
+
+**S1.** The shifted band's concentration rises **monotonically** in `k`
+across the sweep.
+
+**S2.** At `k = 1.0` the pooled rule's per-trial group-violation rate will
+exceed **50%**, from a baseline of 2.5% at `k = 0`.
+
+**S3.** The shifted band will **become the worst band** at every `k ≥ 0.5`.
+This is the causal claim: the injection chooses which group is harmed.
+
+**S4.** Group-conditional calibration will hold the worst band **under α** in
+the feasible trials at **every** `k`, including the largest. This is the one
+that matters.
+
+**S5.** The gap between the pooled and group-conditional arms will **widen**
+with `k`.
+
+## What would falsify what
+
+**S4 fails.** Group-conditional calibration does not absorb a
+group-correlated level shift. Then the remedy section of
+[`theory.md`](theory.md) §4 is wrong about *why* conditioning works — it would
+be working on this benchmark for some reason other than the one given, and
+every recommendation resting on that reason comes out.
+
+**S1 or S3 fails.** A group-correlated level shift is **not sufficient** to
+produce the subgroup failure, so the stated mechanism is incomplete and
+something else in the observed result is doing the work. The mechanism
+section would be rewritten as a description of one scorer rather than a
+property of one threshold.
+
+**S2 or S5 missing** is uninformative. Both are magnitude predictions about
+an injection whose scale I chose.
+
+## What this cannot show
+
+That any real score has this property. The round establishes sufficiency —
+*if* a score's levels differ by group, this is what happens and this is what
+fixes it — and says nothing about whether a language model's confidence does.
+Objection 1 in [`against.md`](against.md) is untouched.
+
+It also cannot separate "group conditioning absorbs a level shift" from
+"group conditioning absorbs anything that varies only between groups," which
+is a stronger and more interesting claim this design does not test.
+
+## Analysis plan
+
+One run on `fine_dev`, `k ∈ {0, 0.25, 0.5, 1.0, 2.0}`, band `well-below`,
+α = 0.20, 200 trials, seed 61, pooled and by-band, the scorer refit per trial
+on a fold disjoint from calibration and deployment. Written to
+`evidence/injected_shift.json`. Neither holdout is touched. `k`, the band, the
+tolerance and the seed are fixed here and none is adjusted after a result.
