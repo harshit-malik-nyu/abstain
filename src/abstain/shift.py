@@ -307,9 +307,9 @@ def sweep_shift(cases: list[dict], scorer, *, band: str = "well-below",
                     pt.distinct_sum += len({c["id"] for c in shifted})
                     pt.deployed_sum += len(shifted)
                     for name, g in res.by_group.items():
-                        t = pt.tally(name)
-                        t["deployed"] += g["deployed"]
-                        t["unsafe"] += g["unsafe"]
+                        group_tally = pt.tally(name)
+                        group_tally["deployed"] += g["deployed"]
+                        group_tally["unsafe"] += g["unsafe"]
 
                 sweep.points.append(pt)
 

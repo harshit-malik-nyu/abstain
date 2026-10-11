@@ -270,12 +270,12 @@ def calibrate_by_group(cases: list[dict], scorer, *, scheme: str = "by-band",
         # this module and keeping it that way means the dependency runs one
         # direction only.
         from .rule import calibrate_on_trajectories
-        c = calibrate_on_trajectories(
+        group_cal = calibrate_on_trajectories(
             group_cases, scorer,
             lambda cs, sc, tau: run_case(cs, sc, tau, budget=budget),
             alpha=alpha, delta=delta, grid=grid)
-        cal.thresholds[group] = c.threshold
-        cal.per_group[group] = c.as_dict() | {
+        cal.thresholds[group] = group_cal.threshold
+        cal.per_group[group] = group_cal.as_dict() | {
             "n_cases": len(group_cases),
             "minimum_needed": minimum_calibration_size(alpha, delta),
             "enough_data": len(group_cases) >= minimum_calibration_size(
@@ -656,10 +656,10 @@ def validate_groups(cases: list[dict], scorer, *, scheme: str = "by-band",
         # each band rather than pooled. Accumulated only on feasible trials,
         # matching every other figure in this object.
         for band, g in res.by_group.items():
-            t = v.tally(band)
+            band_tally = v.tally(band)
             for k in ("deployed", "unsafe", "resolved", "abstained",
                       "decidable", "questions"):
-                t[k] += g[k]
+                band_tally[k] += g[k]
 
     return v
 

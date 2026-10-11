@@ -6,3 +6,6 @@ __pycache__/
 # Round R's per-draw checkpoint. An intermediate, not evidence: the
 # completed run writes evidence/pool_bootstrap.json and deletes this.
 evidence/*.partial.jsonl
+
+*.pyc
+.mypy_cache/

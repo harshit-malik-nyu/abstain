@@ -73,6 +73,7 @@ a human reviewer routes on the score.
 
 from __future__ import annotations
 
+from functools import lru_cache
 import math
 from dataclasses import dataclass, field
 from typing import Callable, Protocol
@@ -146,6 +147,7 @@ def _log_binom_tail(k: int, n: int, p: float) -> float:
     return top + math.log(sum(math.exp(t - top) for t in terms))
 
 
+@lru_cache(maxsize=32768)
 def clopper_pearson_upper(k: int, n: int, delta: float = 0.05) -> float:
     """
     Upper confidence bound on a binomial rate.
@@ -159,6 +161,8 @@ def clopper_pearson_upper(k: int, n: int, delta: float = 0.05) -> float:
         return 1.0
     if k >= n:
         return 1.0
+    if k == 0:
+        return -math.expm1(math.log(delta) / n)
     target = math.log(delta)
     lo, hi = 0.0, 1.0
     for _ in range(80):
@@ -468,3 +472,15 @@ def _default_choice(case: dict, known: frozenset[str], remaining: list[str],
         if gain > best_gain:
             best, best_gain = f, gain
     return best
+
+
+def certify_trajectories(cases, scorer, run, *, alpha=0.05, delta=0.05, grid=101):
+    """Simultaneous grid certificate for iid cases and a fixed scorer/policy.
+
+    Archived experiments use the explicitly empirical uncorrected API.
+    This entry point never silently disables multiplicity correction.
+    """
+    if not 0 < alpha < 1 or not 0 < delta < 1 or grid < 2:
+        raise ValueError("invalid risk level or grid")
+    return calibrate_on_trajectories(cases, scorer, run, alpha=alpha,
+                                    delta=delta, grid=grid, correct_for_search=True)

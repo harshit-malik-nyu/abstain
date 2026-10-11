@@ -605,7 +605,7 @@ def test_the_resampling_limitation_is_reported(readme, shift):
 # The figure
 # ---------------------------------------------------------------------------
 
-def test_the_figure_is_not_older_than_its_source():
+def test_the_figure_is_not_older_than_its_source(tmp_path):
     """
     A figure is the part of a write-up a reader trusts most and checks least.
 
@@ -618,8 +618,19 @@ def test_the_figure_is_not_older_than_its_source():
     src = ROOT / "evidence" / "round5_shift.json"
     if not svg.exists() or not src.exists():
         pytest.skip("figure or its source not present in this checkout")
-    assert svg.stat().st_mtime >= src.stat().st_mtime, \
+    import importlib.util
+    import shutil
+    spec = importlib.util.spec_from_file_location("figure_review", ROOT / "scripts/make_figure.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    (tmp_path / "evidence").mkdir()
+    (tmp_path / "docs").mkdir()
+    shutil.copy2(src, tmp_path / "evidence/round5_shift.json")
+    module.ROOT = tmp_path
+    assert module.main() == 0
+    assert svg.read_bytes() == (tmp_path / "docs/shift.svg").read_bytes(), \
         "regenerate with scripts/make_figure.py"
+
 
 
 def test_the_figure_carries_the_numbers_it_claims(shift):

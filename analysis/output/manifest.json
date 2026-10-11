@@ -1,0 +1,19 @@
+{
+  "external_services_required": false,
+  "input_sha256": {
+    "evidence/fine_dev.json": "e857bb2d3f84815955dd281ba21c9868b287886161b1fa10e544b64f226d35b1"
+  },
+  "outputs": {
+    "query_1.csv": "49588c57628f2c29599c6cee2d43faee5c34a9a42305cc21c6932fd7970a9df4",
+    "query_2.csv": "ecfb2795f0c06f5a9fa627c078d509a1019be5da00f01f0e25f0c28173184238"
+  },
+  "project": "abstain",
+  "quality_checks": [
+    "SQL type and domain constraints",
+    "row-count reconciliation",
+    "SQLite integrity"
+  ],
+  "query_sha256": "d6593bcfc76c7c0c5a8bf46ac2557c185d492f17b2243d90380ba39bc14de60b",
+  "rows": 10752,
+  "scope": "Frozen oracle-derived household states. States from the same household are dependent; no clinical or benefits production claim."
+}

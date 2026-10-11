@@ -1,0 +1,9 @@
+known_fields,label,states,households,mean_spread
+0,underdetermined,672,672,11757.0
+1,determinable,97,97,0.0
+1,underdetermined,2591,672,8965.836356619066
+2,determinable,478,245,0.0
+2,underdetermined,3554,672,6512.162633652223
+3,determinable,1052,636,0.008555133079847909
+3,underdetermined,1636,672,4723.2402200489
+4,determinable,672,672,0.0

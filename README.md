@@ -1,5 +1,8 @@
 # A selection rule that bounds how often an agent answers blind
 
+> **Validation update (2026-10-10):** certify_trajectories uses a fixed grid and simultaneous binomial bounds. Historical uncorrected thresholds remain exploratory. See the [current decision brief](docs/decision-brief.md) and [reproducible analysis](analysis/README.md). Historical evidence and figures retain their original run context; this update supersedes conflicting claims below.
+
+
 An agent conducting a benefits intake can ask for a field or commit to a
 verdict. Committing while the case is still undecidable is the failure that
 matters, because downstream it becomes a filed claim built on a guess.
