@@ -62,7 +62,7 @@ wrong.
 
 ## Contents
 
-Fourteen sections and a license. The three worth reading if you read
+Fifteen sections and a license. The three worth reading if you read
 nothing else are **what is new here**, **the finding that matters
 most**, and **the case against** — in that order, because the first
 says what is mine, the second is the result, and the third is why it
@@ -84,6 +84,7 @@ time I was wrong about any of it.
 - [Reproducing any of it](#reproducing-any-of-it)
 - [Status](#status)
 - [License](#license)
+- [Decision robustness and domain measurement](#decision-robustness-and-domain-measurement)
 
 ---
 
