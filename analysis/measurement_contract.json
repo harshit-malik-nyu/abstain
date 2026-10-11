@@ -1,0 +1,23 @@
+{
+  "decision": "Choose when to stop questioning, continue, or send a case to specialist review.",
+  "primary_outcome": "Wrong definitive eligibility decisions divided by all definitive decisions, reported jointly with definitive-decision coverage.",
+  "denominator": "All eligible assigned households for coverage; all definitive decisions for selective risk. Never mix these denominators.",
+  "independence_unit": "Household; multiple states and questions from one household are dependent.",
+  "quality_guardrail": "Simultaneous upper risk bound over the fixed candidate threshold grid; subgroup coverage and review load reported separately.",
+  "minimum_data": "Household ID, frozen policy and threshold-grid version, question history, definitive/abstain result, oracle or adjudicated label and provenance, review time.",
+  "failure_handling": "Abstentions remain in the coverage denominator. Unknown truth prevents certification for the affected outcome; missing labels are not correct answers.",
+  "release_rule": "Only certify when the documented calibration assumptions and prespecified risk ceiling hold; otherwise abstain. Synthetic activation cannot satisfy this gate.",
+  "reversal": "Changed question policy, shifted eligible population, or inadequate calibration support requires recertification.",
+  "project": "abstain",
+  "status": "PROPOSED MEASUREMENT CONTRACT; NOT AN EXECUTED DOMAIN EXPERIMENT",
+  "defense": [
+    [
+      "Why not maximize coverage?",
+      "More definitive answers can conceal more harmful errors. I constrain risk first and then compare coverage and reviewer effort."
+    ],
+    [
+      "What does the oracle establish?",
+      "It establishes answers within the modeled household rules. It does not establish real applicant behavior or deployment exchangeability."
+    ]
+  ]
+}
