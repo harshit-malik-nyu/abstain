@@ -1,0 +1,5 @@
+segment,arm,assigned,activated,activation_itt,incidents,incident_itt
+fully_documented_intake,control,640,303,0.4734375,0,0.0
+fully_documented_intake,treatment,640,398,0.621875,3,0.0046875
+incomplete_intake,control,640,219,0.3421875,3,0.0046875
+incomplete_intake,treatment,640,188,0.29375,16,0.025

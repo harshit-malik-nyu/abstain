@@ -1,0 +1,120 @@
+{
+  "project": "abstain",
+  "title": "Use calibrated stopping only within intake safety and reviewer capacity",
+  "decision_owner": "Benefits intake operations lead",
+  "observed_evidence": "Oracle household states share household-level dependence. The corrected certification API applies simultaneous binomial bounds over a fixed threshold grid and abstains when infeasible.",
+  "executive_recommendation": "Test calibrated questioning as an intake aid with mandatory escalation. Do not monetize an unsafe benefits commitment away: its maximum rate is a separate feasibility constraint.",
+  "priorities": [
+    "Hold out entire households and freeze the stopping grid before calibration.",
+    "Budget escalation work and question burden together.",
+    "Choose a policy only when the safety gate and staffed queue capacity both hold."
+  ],
+  "reversal": "If no threshold is certifiable or escalations exceed capacity, the result is hold/increase staffing, not forced automation.",
+  "uncertainty": "Oracle states are not observed applicant conversations. Zero monetized harm in this model means harm is governed by a hard gate, not that harm has no value.",
+  "economics": {
+    "evidence_status": "ILLUSTRATIVE ASSUMPTIONS, NOT MEASURED COSTS OR RISK",
+    "period": "one planning year",
+    "volume": 12000,
+    "review_capacity_hours": 1800,
+    "loss_per_incident_usd": 0,
+    "max_incident_rate": 0.002,
+    "options": [
+      {
+        "name": "Specialist review of every intake",
+        "fixed_usd": 0,
+        "incident_rate": 0.001,
+        "activities": [
+          {
+            "name": "Specialist intake",
+            "unit": "reviewer_hour",
+            "units_per_case": 0.2,
+            "usd_per_unit": 65,
+            "cash": false
+          }
+        ]
+      },
+      {
+        "name": "Calibrated questioning and escalation",
+        "fixed_usd": 18000,
+        "incident_rate": 0.0015,
+        "activities": [
+          {
+            "name": "Escalations: 30% at 15 minutes",
+            "unit": "reviewer_hour",
+            "units_per_case": 0.075,
+            "usd_per_unit": 65,
+            "cash": false
+          },
+          {
+            "name": "Assistant turns",
+            "unit": "turn",
+            "units_per_case": 4,
+            "usd_per_unit": 0.025,
+            "cash": true
+          }
+        ]
+      },
+      {
+        "name": "Fixed short intake without calibration",
+        "fixed_usd": 6000,
+        "incident_rate": 0.012,
+        "activities": [
+          {
+            "name": "Escalations: 10% at 12 minutes",
+            "unit": "reviewer_hour",
+            "units_per_case": 0.020000000000000004,
+            "usd_per_unit": 65,
+            "cash": false
+          },
+          {
+            "name": "Assistant turns",
+            "unit": "turn",
+            "units_per_case": 2,
+            "usd_per_unit": 0.025,
+            "cash": true
+          }
+        ]
+      }
+    ]
+  },
+  "product": {
+    "seed": 735,
+    "randomization_unit": "caseworker account; all households handled by an account share assignment",
+    "stages": [
+      "intake_started",
+      "evidence_check_completed",
+      "safe_resolution_or_escalation_saved"
+    ],
+    "incident_definition": "unsafe commitment",
+    "retention_interpretation": "caseworker uses the workflow for another eligible household",
+    "observation_day": 56,
+    "minimum_activation_lift": 0.02,
+    "maximum_incident_increase": 0.005,
+    "planning_baseline": 0.45,
+    "minimum_detectable_effect": 0.05,
+    "segments": [
+      {
+        "name": "fully_documented_intake",
+        "start_probability": 0.9,
+        "control_activation": 0.64,
+        "treatment_delta": 0.12,
+        "apply_probability": 0.88,
+        "control_incident": 0.004,
+        "treatment_incident": 0.004,
+        "return7": 0.55,
+        "return28": 0.35
+      },
+      {
+        "name": "incomplete_intake",
+        "start_probability": 0.8200000000000001,
+        "control_activation": 0.52,
+        "treatment_delta": -0.07,
+        "apply_probability": 0.8,
+        "control_incident": 0.01,
+        "treatment_incident": 0.064,
+        "return7": 0.43000000000000005,
+        "return28": 0.24999999999999997
+      }
+    ]
+  }
+}

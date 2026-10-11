@@ -1,0 +1,2403 @@
+{
+  "base_case": {
+    "cost_factor": 1.0,
+    "options": [
+      {
+        "capacity_gate_pass": false,
+        "cash_outlay_usd": 0.0,
+        "components": [
+          {
+            "activity": "Specialist intake",
+            "cash_outlay_usd": 0.0,
+            "economic_cost_usd": 156000.0,
+            "quantity": 2400.0,
+            "unit": "reviewer_hour"
+          }
+        ],
+        "economic_cost_usd": 156000.0,
+        "expected_incidents": 12.0,
+        "feasible": false,
+        "option": "Specialist review of every intake",
+        "reviewer_hours": 2400.0,
+        "risk_gate_pass": true,
+        "scenario_loss_usd": 0.0,
+        "volume": 12000.0
+      },
+      {
+        "capacity_gate_pass": true,
+        "cash_outlay_usd": 19200.0,
+        "components": [
+          {
+            "activity": "Escalations: 30% at 15 minutes",
+            "cash_outlay_usd": 0.0,
+            "economic_cost_usd": 58500.0,
+            "quantity": 900.0,
+            "unit": "reviewer_hour"
+          },
+          {
+            "activity": "Assistant turns",
+            "cash_outlay_usd": 1200.0,
+            "economic_cost_usd": 1200.0,
+            "quantity": 48000.0,
+            "unit": "turn"
+          }
+        ],
+        "economic_cost_usd": 77700.0,
+        "expected_incidents": 18.0,
+        "feasible": true,
+        "option": "Calibrated questioning and escalation",
+        "reviewer_hours": 900.0,
+        "risk_gate_pass": true,
+        "scenario_loss_usd": 0.0,
+        "volume": 12000.0
+      },
+      {
+        "capacity_gate_pass": true,
+        "cash_outlay_usd": 6600.0,
+        "components": [
+          {
+            "activity": "Escalations: 10% at 12 minutes",
+            "cash_outlay_usd": 0.0,
+            "economic_cost_usd": 15600.000000000004,
+            "quantity": 240.00000000000006,
+            "unit": "reviewer_hour"
+          },
+          {
+            "activity": "Assistant turns",
+            "cash_outlay_usd": 600.0,
+            "economic_cost_usd": 600.0,
+            "quantity": 24000.0,
+            "unit": "turn"
+          }
+        ],
+        "economic_cost_usd": 22200.0,
+        "expected_incidents": 144.0,
+        "feasible": false,
+        "option": "Fixed short intake without calibration",
+        "reviewer_hours": 240.0,
+        "risk_gate_pass": false,
+        "scenario_loss_usd": 0.0,
+        "volume": 12000.0
+      }
+    ],
+    "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+    "risk_factor": 1.0,
+    "volume_factor": 1.0
+  },
+  "break_even": [
+    {
+      "additional_fixed_usd": 18000,
+      "minimum_integer_volume_to_break_even": 2243,
+      "option": "Calibrated questioning and escalation",
+      "qualification": "Positive unit advantage required; risk and capacity gates still apply.",
+      "relative_to": "Specialist review of every intake",
+      "unit_economic_advantage_usd": 8.025
+    },
+    {
+      "additional_fixed_usd": 6000,
+      "minimum_integer_volume_to_break_even": 516,
+      "option": "Fixed short intake without calibration",
+      "qualification": "Positive unit advantage required; risk and capacity gates still apply.",
+      "relative_to": "Specialist review of every intake",
+      "unit_economic_advantage_usd": 11.65
+    }
+  ],
+  "evidence_status": "ILLUSTRATIVE PLANNING ASSUMPTIONS; NOT OBSERVED ROI",
+  "scenarios": [
+    {
+      "cost_factor": 0.75,
+      "options": [
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 58500.0,
+              "quantity": 1200.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 58500.0,
+          "expected_incidents": 6.0,
+          "feasible": true,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 1200.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18450.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 21937.5,
+              "quantity": 450.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 450.0,
+              "economic_cost_usd": 450.0,
+              "quantity": 24000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 40387.5,
+          "expected_incidents": 9.0,
+          "feasible": true,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 450.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6225.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 5850.000000000002,
+              "quantity": 120.00000000000003,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 225.0,
+              "economic_cost_usd": 225.0,
+              "quantity": 12000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 12075.0,
+          "expected_incidents": 72.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 120.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        }
+      ],
+      "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+      "risk_factor": 1,
+      "volume_factor": 0.5
+    },
+    {
+      "cost_factor": 0.75,
+      "options": [
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 58500.0,
+              "quantity": 1200.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 58500.0,
+          "expected_incidents": 12.0,
+          "feasible": true,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 1200.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18450.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 21937.5,
+              "quantity": 450.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 450.0,
+              "economic_cost_usd": 450.0,
+              "quantity": 24000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 40387.5,
+          "expected_incidents": 18.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 450.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6225.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 5850.000000000002,
+              "quantity": 120.00000000000003,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 225.0,
+              "economic_cost_usd": 225.0,
+              "quantity": 12000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 12075.0,
+          "expected_incidents": 144.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 120.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        }
+      ],
+      "recommended_if_assumptions_hold": "Specialist review of every intake",
+      "risk_factor": 2,
+      "volume_factor": 0.5
+    },
+    {
+      "cost_factor": 0.75,
+      "options": [
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 58500.0,
+              "quantity": 1200.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 58500.0,
+          "expected_incidents": 24.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 1200.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18450.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 21937.5,
+              "quantity": 450.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 450.0,
+              "economic_cost_usd": 450.0,
+              "quantity": 24000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 40387.5,
+          "expected_incidents": 36.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 450.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6225.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 5850.000000000002,
+              "quantity": 120.00000000000003,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 225.0,
+              "economic_cost_usd": 225.0,
+              "quantity": 12000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 12075.0,
+          "expected_incidents": 288.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 120.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 4,
+      "volume_factor": 0.5
+    },
+    {
+      "cost_factor": 1,
+      "options": [
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 78000.0,
+              "quantity": 1200.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 78000.0,
+          "expected_incidents": 6.0,
+          "feasible": true,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 1200.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18600.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 29250.0,
+              "quantity": 450.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 600.0,
+              "economic_cost_usd": 600.0,
+              "quantity": 24000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 47850.0,
+          "expected_incidents": 9.0,
+          "feasible": true,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 450.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6300.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 7800.000000000002,
+              "quantity": 120.00000000000003,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 300.0,
+              "economic_cost_usd": 300.0,
+              "quantity": 12000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 14100.0,
+          "expected_incidents": 72.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 120.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        }
+      ],
+      "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+      "risk_factor": 1,
+      "volume_factor": 0.5
+    },
+    {
+      "cost_factor": 1,
+      "options": [
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 78000.0,
+              "quantity": 1200.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 78000.0,
+          "expected_incidents": 12.0,
+          "feasible": true,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 1200.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18600.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 29250.0,
+              "quantity": 450.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 600.0,
+              "economic_cost_usd": 600.0,
+              "quantity": 24000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 47850.0,
+          "expected_incidents": 18.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 450.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6300.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 7800.000000000002,
+              "quantity": 120.00000000000003,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 300.0,
+              "economic_cost_usd": 300.0,
+              "quantity": 12000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 14100.0,
+          "expected_incidents": 144.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 120.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        }
+      ],
+      "recommended_if_assumptions_hold": "Specialist review of every intake",
+      "risk_factor": 2,
+      "volume_factor": 0.5
+    },
+    {
+      "cost_factor": 1,
+      "options": [
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 78000.0,
+              "quantity": 1200.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 78000.0,
+          "expected_incidents": 24.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 1200.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18600.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 29250.0,
+              "quantity": 450.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 600.0,
+              "economic_cost_usd": 600.0,
+              "quantity": 24000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 47850.0,
+          "expected_incidents": 36.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 450.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6300.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 7800.000000000002,
+              "quantity": 120.00000000000003,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 300.0,
+              "economic_cost_usd": 300.0,
+              "quantity": 12000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 14100.0,
+          "expected_incidents": 288.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 120.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 4,
+      "volume_factor": 0.5
+    },
+    {
+      "cost_factor": 1.5,
+      "options": [
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 117000.0,
+              "quantity": 1200.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 117000.0,
+          "expected_incidents": 6.0,
+          "feasible": true,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 1200.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18900.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 43875.0,
+              "quantity": 450.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 24000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 62775.0,
+          "expected_incidents": 9.0,
+          "feasible": true,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 450.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6450.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 11700.000000000004,
+              "quantity": 120.00000000000003,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 450.0,
+              "economic_cost_usd": 450.0,
+              "quantity": 12000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 18150.0,
+          "expected_incidents": 72.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 120.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        }
+      ],
+      "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+      "risk_factor": 1,
+      "volume_factor": 0.5
+    },
+    {
+      "cost_factor": 1.5,
+      "options": [
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 117000.0,
+              "quantity": 1200.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 117000.0,
+          "expected_incidents": 12.0,
+          "feasible": true,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 1200.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18900.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 43875.0,
+              "quantity": 450.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 24000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 62775.0,
+          "expected_incidents": 18.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 450.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6450.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 11700.000000000004,
+              "quantity": 120.00000000000003,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 450.0,
+              "economic_cost_usd": 450.0,
+              "quantity": 12000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 18150.0,
+          "expected_incidents": 144.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 120.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        }
+      ],
+      "recommended_if_assumptions_hold": "Specialist review of every intake",
+      "risk_factor": 2,
+      "volume_factor": 0.5
+    },
+    {
+      "cost_factor": 1.5,
+      "options": [
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 117000.0,
+              "quantity": 1200.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 117000.0,
+          "expected_incidents": 24.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 1200.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18900.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 43875.0,
+              "quantity": 450.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 24000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 62775.0,
+          "expected_incidents": 36.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 450.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6450.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 11700.000000000004,
+              "quantity": 120.00000000000003,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 450.0,
+              "economic_cost_usd": 450.0,
+              "quantity": 12000.0,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 18150.0,
+          "expected_incidents": 288.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 120.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 6000.0
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 4,
+      "volume_factor": 0.5
+    },
+    {
+      "cost_factor": 0.75,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 117000.0,
+              "quantity": 2400.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 117000.0,
+          "expected_incidents": 12.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 2400.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18900.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 43875.0,
+              "quantity": 900.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 62775.0,
+          "expected_incidents": 18.0,
+          "feasible": true,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 900.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6450.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 11700.000000000004,
+              "quantity": 240.00000000000006,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 450.0,
+              "economic_cost_usd": 450.0,
+              "quantity": 24000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 18150.0,
+          "expected_incidents": 144.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 240.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        }
+      ],
+      "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+      "risk_factor": 1,
+      "volume_factor": 1
+    },
+    {
+      "cost_factor": 0.75,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 117000.0,
+              "quantity": 2400.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 117000.0,
+          "expected_incidents": 24.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 2400.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18900.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 43875.0,
+              "quantity": 900.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 62775.0,
+          "expected_incidents": 36.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 900.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6450.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 11700.000000000004,
+              "quantity": 240.00000000000006,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 450.0,
+              "economic_cost_usd": 450.0,
+              "quantity": 24000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 18150.0,
+          "expected_incidents": 288.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 240.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 2,
+      "volume_factor": 1
+    },
+    {
+      "cost_factor": 0.75,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 117000.0,
+              "quantity": 2400.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 117000.0,
+          "expected_incidents": 48.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 2400.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 18900.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 43875.0,
+              "quantity": 900.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 62775.0,
+          "expected_incidents": 72.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 900.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6450.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 11700.000000000004,
+              "quantity": 240.00000000000006,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 450.0,
+              "economic_cost_usd": 450.0,
+              "quantity": 24000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 18150.0,
+          "expected_incidents": 576.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 240.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 4,
+      "volume_factor": 1
+    },
+    {
+      "cost_factor": 1,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 156000.0,
+              "quantity": 2400.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 156000.0,
+          "expected_incidents": 12.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 2400.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 19200.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 58500.0,
+              "quantity": 900.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1200.0,
+              "economic_cost_usd": 1200.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 77700.0,
+          "expected_incidents": 18.0,
+          "feasible": true,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 900.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6600.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 15600.000000000004,
+              "quantity": 240.00000000000006,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 600.0,
+              "economic_cost_usd": 600.0,
+              "quantity": 24000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 22200.0,
+          "expected_incidents": 144.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 240.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        }
+      ],
+      "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+      "risk_factor": 1,
+      "volume_factor": 1
+    },
+    {
+      "cost_factor": 1,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 156000.0,
+              "quantity": 2400.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 156000.0,
+          "expected_incidents": 24.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 2400.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 19200.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 58500.0,
+              "quantity": 900.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1200.0,
+              "economic_cost_usd": 1200.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 77700.0,
+          "expected_incidents": 36.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 900.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6600.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 15600.000000000004,
+              "quantity": 240.00000000000006,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 600.0,
+              "economic_cost_usd": 600.0,
+              "quantity": 24000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 22200.0,
+          "expected_incidents": 288.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 240.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 2,
+      "volume_factor": 1
+    },
+    {
+      "cost_factor": 1,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 156000.0,
+              "quantity": 2400.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 156000.0,
+          "expected_incidents": 48.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 2400.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 19200.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 58500.0,
+              "quantity": 900.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1200.0,
+              "economic_cost_usd": 1200.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 77700.0,
+          "expected_incidents": 72.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 900.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6600.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 15600.000000000004,
+              "quantity": 240.00000000000006,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 600.0,
+              "economic_cost_usd": 600.0,
+              "quantity": 24000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 22200.0,
+          "expected_incidents": 576.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 240.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 4,
+      "volume_factor": 1
+    },
+    {
+      "cost_factor": 1.5,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 234000.0,
+              "quantity": 2400.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 234000.0,
+          "expected_incidents": 12.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 2400.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 19800.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 87750.0,
+              "quantity": 900.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1800.0,
+              "economic_cost_usd": 1800.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 107550.0,
+          "expected_incidents": 18.0,
+          "feasible": true,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 900.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6900.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 23400.000000000007,
+              "quantity": 240.00000000000006,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 24000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 30300.0,
+          "expected_incidents": 144.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 240.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        }
+      ],
+      "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+      "risk_factor": 1,
+      "volume_factor": 1
+    },
+    {
+      "cost_factor": 1.5,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 234000.0,
+              "quantity": 2400.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 234000.0,
+          "expected_incidents": 24.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 2400.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 19800.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 87750.0,
+              "quantity": 900.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1800.0,
+              "economic_cost_usd": 1800.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 107550.0,
+          "expected_incidents": 36.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 900.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6900.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 23400.000000000007,
+              "quantity": 240.00000000000006,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 24000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 30300.0,
+          "expected_incidents": 288.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 240.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 2,
+      "volume_factor": 1
+    },
+    {
+      "cost_factor": 1.5,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 234000.0,
+              "quantity": 2400.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 234000.0,
+          "expected_incidents": 48.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 2400.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 19800.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 87750.0,
+              "quantity": 900.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1800.0,
+              "economic_cost_usd": 1800.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 107550.0,
+          "expected_incidents": 72.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 900.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6900.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 23400.000000000007,
+              "quantity": 240.00000000000006,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 24000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 30300.0,
+          "expected_incidents": 576.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 240.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 12000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 4,
+      "volume_factor": 1
+    },
+    {
+      "cost_factor": 0.75,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 234000.0,
+              "quantity": 4800.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 234000.0,
+          "expected_incidents": 24.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 4800.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 19800.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 87750.0,
+              "quantity": 1800.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1800.0,
+              "economic_cost_usd": 1800.0,
+              "quantity": 96000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 107550.0,
+          "expected_incidents": 36.0,
+          "feasible": true,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 1800.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6900.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 23400.000000000007,
+              "quantity": 480.0000000000001,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 30300.0,
+          "expected_incidents": 288.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 480.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        }
+      ],
+      "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+      "risk_factor": 1,
+      "volume_factor": 2
+    },
+    {
+      "cost_factor": 0.75,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 234000.0,
+              "quantity": 4800.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 234000.0,
+          "expected_incidents": 48.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 4800.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 19800.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 87750.0,
+              "quantity": 1800.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1800.0,
+              "economic_cost_usd": 1800.0,
+              "quantity": 96000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 107550.0,
+          "expected_incidents": 72.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 1800.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6900.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 23400.000000000007,
+              "quantity": 480.0000000000001,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 30300.0,
+          "expected_incidents": 576.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 480.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 2,
+      "volume_factor": 2
+    },
+    {
+      "cost_factor": 0.75,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 234000.0,
+              "quantity": 4800.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 234000.0,
+          "expected_incidents": 96.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 4800.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 19800.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 87750.0,
+              "quantity": 1800.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1800.0,
+              "economic_cost_usd": 1800.0,
+              "quantity": 96000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 107550.0,
+          "expected_incidents": 144.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 1800.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 6900.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 23400.000000000007,
+              "quantity": 480.0000000000001,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 900.0,
+              "economic_cost_usd": 900.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 30300.0,
+          "expected_incidents": 1152.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 480.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 4,
+      "volume_factor": 2
+    },
+    {
+      "cost_factor": 1,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 312000.0,
+              "quantity": 4800.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 312000.0,
+          "expected_incidents": 24.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 4800.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 20400.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 117000.0,
+              "quantity": 1800.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 2400.0,
+              "economic_cost_usd": 2400.0,
+              "quantity": 96000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 137400.0,
+          "expected_incidents": 36.0,
+          "feasible": true,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 1800.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 7200.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 31200.000000000007,
+              "quantity": 480.0000000000001,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1200.0,
+              "economic_cost_usd": 1200.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 38400.0,
+          "expected_incidents": 288.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 480.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        }
+      ],
+      "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+      "risk_factor": 1,
+      "volume_factor": 2
+    },
+    {
+      "cost_factor": 1,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 312000.0,
+              "quantity": 4800.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 312000.0,
+          "expected_incidents": 48.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 4800.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 20400.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 117000.0,
+              "quantity": 1800.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 2400.0,
+              "economic_cost_usd": 2400.0,
+              "quantity": 96000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 137400.0,
+          "expected_incidents": 72.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 1800.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 7200.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 31200.000000000007,
+              "quantity": 480.0000000000001,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1200.0,
+              "economic_cost_usd": 1200.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 38400.0,
+          "expected_incidents": 576.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 480.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 2,
+      "volume_factor": 2
+    },
+    {
+      "cost_factor": 1,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 312000.0,
+              "quantity": 4800.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 312000.0,
+          "expected_incidents": 96.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 4800.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 20400.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 117000.0,
+              "quantity": 1800.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 2400.0,
+              "economic_cost_usd": 2400.0,
+              "quantity": 96000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 137400.0,
+          "expected_incidents": 144.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 1800.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 7200.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 31200.000000000007,
+              "quantity": 480.0000000000001,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1200.0,
+              "economic_cost_usd": 1200.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 38400.0,
+          "expected_incidents": 1152.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 480.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 4,
+      "volume_factor": 2
+    },
+    {
+      "cost_factor": 1.5,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 468000.0,
+              "quantity": 4800.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 468000.0,
+          "expected_incidents": 24.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 4800.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 21600.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 175500.0,
+              "quantity": 1800.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 3600.0,
+              "economic_cost_usd": 3600.0,
+              "quantity": 96000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 197100.0,
+          "expected_incidents": 36.0,
+          "feasible": true,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 1800.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 7800.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 46800.000000000015,
+              "quantity": 480.0000000000001,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1800.0,
+              "economic_cost_usd": 1800.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 54600.0,
+          "expected_incidents": 288.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 480.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        }
+      ],
+      "recommended_if_assumptions_hold": "Calibrated questioning and escalation",
+      "risk_factor": 1,
+      "volume_factor": 2
+    },
+    {
+      "cost_factor": 1.5,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 468000.0,
+              "quantity": 4800.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 468000.0,
+          "expected_incidents": 48.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 4800.0,
+          "risk_gate_pass": true,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 21600.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 175500.0,
+              "quantity": 1800.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 3600.0,
+              "economic_cost_usd": 3600.0,
+              "quantity": 96000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 197100.0,
+          "expected_incidents": 72.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 1800.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 7800.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 46800.000000000015,
+              "quantity": 480.0000000000001,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1800.0,
+              "economic_cost_usd": 1800.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 54600.0,
+          "expected_incidents": 576.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 480.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 2,
+      "volume_factor": 2
+    },
+    {
+      "cost_factor": 1.5,
+      "options": [
+        {
+          "capacity_gate_pass": false,
+          "cash_outlay_usd": 0.0,
+          "components": [
+            {
+              "activity": "Specialist intake",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 468000.0,
+              "quantity": 4800.0,
+              "unit": "reviewer_hour"
+            }
+          ],
+          "economic_cost_usd": 468000.0,
+          "expected_incidents": 96.0,
+          "feasible": false,
+          "option": "Specialist review of every intake",
+          "reviewer_hours": 4800.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 21600.0,
+          "components": [
+            {
+              "activity": "Escalations: 30% at 15 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 175500.0,
+              "quantity": 1800.0,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 3600.0,
+              "economic_cost_usd": 3600.0,
+              "quantity": 96000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 197100.0,
+          "expected_incidents": 144.0,
+          "feasible": false,
+          "option": "Calibrated questioning and escalation",
+          "reviewer_hours": 1800.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        },
+        {
+          "capacity_gate_pass": true,
+          "cash_outlay_usd": 7800.0,
+          "components": [
+            {
+              "activity": "Escalations: 10% at 12 minutes",
+              "cash_outlay_usd": 0.0,
+              "economic_cost_usd": 46800.000000000015,
+              "quantity": 480.0000000000001,
+              "unit": "reviewer_hour"
+            },
+            {
+              "activity": "Assistant turns",
+              "cash_outlay_usd": 1800.0,
+              "economic_cost_usd": 1800.0,
+              "quantity": 48000,
+              "unit": "turn"
+            }
+          ],
+          "economic_cost_usd": 54600.0,
+          "expected_incidents": 1152.0,
+          "feasible": false,
+          "option": "Fixed short intake without calibration",
+          "reviewer_hours": 480.0,
+          "risk_gate_pass": false,
+          "scenario_loss_usd": 0.0,
+          "volume": 24000
+        }
+      ],
+      "recommended_if_assumptions_hold": null,
+      "risk_factor": 4,
+      "volume_factor": 2
+    }
+  ]
+}
